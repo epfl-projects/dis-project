@@ -15,7 +15,7 @@ Team members
 Reference
 ---------
 
-This project was based on the following research articles:
+This project is based on the following research articles:
 
 - Nembrini J, Winfield A and Melhuish C, Minimalist Coherent Swarming of Wireless Connected Autonomous Mobile Robots, in Proc. Simulation of Artificial Behaviour '02, Edinburgh, August 2002.- Winfield AFT, Liu W, Nembrini J and Martinoli A, Modelling a Wireless Connected Swarm of Mobile Robots, Swarm Intelligence, 2 (2-4), 241-266, 2008.
 
