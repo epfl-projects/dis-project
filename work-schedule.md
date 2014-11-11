@@ -14,7 +14,9 @@ Week 9
 - Read and understand the two research articles
 - Read and understand the codebase
 - Add wireless communication to the robots
-  - Read Webot's documentation
+  - Read Webot's documentation about communication
+- Start implementation of 𝛂 algorithm in Webots
+  - State machine architecture
 
 Week 10
 -------
@@ -33,8 +35,7 @@ Week 11
 -------
 
 - Collect performance measures from the simulations
-  - Vary swarm size
-  - Vary algorithm parameter 𝛂
+  - Follow the parameter values of (Winfield et al, 2008)
 - Tune the macroscopic model parameters from the experiments
 - Compare and analyse the results of submicroscopic and macroscopic models
 - Implement the β algorithm
@@ -44,14 +45,20 @@ Week 11
 Week 12
 -------
 
-- Finish up the report (LaTeX)
-- Written report due
+- Finalize code
+- Finalize measurements
+- Write up analysis of results in the report (LaTeX)
 
 Week 13
 -------
 
+- Finish up the report (LaTeX)
+  - Abstract, introduction, conclusion
+  - References, acknowledgements
+  - Pretty figures
 - Prepare the oral defence (slides, synthesize the results)
 - Review another team's report
+- Written report due
 
 Week 14
 -------
