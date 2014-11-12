@@ -26,8 +26,7 @@ WbFieldRef locfield[NUM_ROBOTS];
 
 float finaltime;
 
-void waitaux(long num)
-{
+void waitaux(long num) {
 	long i;
 	for(i=0;i<num;i++);
 }
@@ -45,7 +44,7 @@ void change_robot_positions(){
   double newrotation[4]={0.0, 1.0, 0.0, 0.0};
 
   for(i=0;i<NUM_ROBOTS;i++){
-  
+
     nooverlap=0;
     while(nooverlap==0){
 
@@ -76,31 +75,29 @@ void change_robot_positions(){
   }
 }
 
-void reset(void)
-{
+void reset(void) {
   int i;
   char stringaux[20];
-  
+
   for(i=0;i<NUM_ROBOTS;i++){
     sprintf(stringaux,"E_PUCK_%d",i+1);
     epucks[i]=wb_supervisor_node_get_from_def(stringaux);
     locfield[i]=wb_supervisor_node_get_field(epucks[i],"translation");
   }
-  
+
   srand(time(NULL));
   change_robot_positions();
-  
-  finaltime=wb_robot_get_time()+EXP_TIME; // 15 MIN == 900
+
+  finaltime = wb_robot_get_time() + EXP_TIME; // 15 MIN == 900
 }
 
-void run()
-{
-  
-  if(wb_robot_get_time()>finaltime){
+void run() {
+
+  if(wb_robot_get_time() > finaltime){
 
     wb_supervisor_simulation_revert();
   }
-  
+
 }
 
 
@@ -108,22 +105,21 @@ int main(int argc, char *argv[]) {
 
   /* initialize Webots */
   wb_robot_init();
-  
+
   reset();
-  
+
   /* perform a simulation step */
   wb_robot_step(TIME_STEP);
-  
+
   /* main loop */
   for (;;) {
-  
-  run();
-  
-  /* perform a simulation step */
-  wb_robot_step(TIME_STEP);
-  
+
+    run();
+
+    /* perform a simulation step */
+    wb_robot_step(TIME_STEP);
+
   }
-  
 
   return 0;
 }
