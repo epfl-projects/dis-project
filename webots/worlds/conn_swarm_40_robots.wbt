@@ -1,0 +1,288 @@
+#VRML_SIM V8.0.0 utf8
+WorldInfo {
+  info [
+    "The model of the EPuck robot"
+    "Author: Simon Blanchoud"
+    "Date: 01 SEP 2006"
+  ]
+  title "EPuck"
+}
+Viewpoint {
+  orientation 0.00266546 0.706707 0.707502 3.14084
+  position 0.0414974 8.24621 0.0178252
+}
+PointLight {
+  intensity 0.5
+  location 0.14 0.6 -0.55
+}
+PointLight {
+  intensity 0.5
+  location -0.43 0.6 0.5
+}
+Background {
+  skyColor [
+    0.4 0.7 1
+  ]
+}
+DEF ground Solid {
+  translation 0.0108903 -0.0001 0.0108139
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          ambientIntensity 1
+          diffuseColor 1 1 1
+          emissiveColor 0.823529 0.6 0.34902
+          shininess 0
+          specularColor 0.196078 0.196078 0
+        }
+        texture ImageTexture {
+          url [
+            "textures/lightwood.png"
+          ]
+        }
+        textureTransform TextureTransform {
+          center 0.46 0
+          rotation -0.32
+          translation -1.01 0
+        }
+      }
+      geometry DEF ground_geo IndexedFaceSet {
+        coord Coordinate {
+          point [
+            -100 0 -100
+            -100 0 100
+            100 0 100
+            100 0 -100
+          ]
+        }
+        texCoord TextureCoordinate {
+          point [
+            0 0
+            0 5
+            5 5
+            5 0
+          ]
+        }
+        coordIndex [
+          0, 1, 2, 3, -1
+        ]
+        texCoordIndex [
+          0, 1, 2, 3, -1
+        ]
+      }
+    }
+  ]
+  boundingObject Transform {
+    translation 0 -0.01 0
+    children [
+      Box {
+        size 200 0.02 200
+      }
+    ]
+  }
+}
+Supervisor {
+  controller "conn_supervisor"
+}
+DEF E_PUCK_1 EPuck {
+  controller "conn_swarm_original"
+  name "001"
+  camera_pixelSize 0
+}
+DEF E_PUCK_2 EPuck {
+  controller "conn_swarm_original"
+  name "002"
+  camera_pixelSize 0
+}
+DEF E_PUCK_3 EPuck {
+  controller "conn_swarm_original"
+  name "003"
+  camera_pixelSize 0
+}
+DEF E_PUCK_4 EPuck {
+  controller "conn_swarm_original"
+  name "004"
+  camera_pixelSize 0
+}
+DEF E_PUCK_5 EPuck {
+  controller "conn_swarm_original"
+  name "005"
+  camera_pixelSize 0
+}
+DEF E_PUCK_6 EPuck {
+  controller "conn_swarm_original"
+  name "006"
+  camera_pixelSize 0
+}
+DEF E_PUCK_7 EPuck {
+  controller "conn_swarm_original"
+  name "007"
+  camera_pixelSize 0
+}
+DEF E_PUCK_8 EPuck {
+  controller "conn_swarm_original"
+  name "008"
+  camera_pixelSize 0
+}
+DEF E_PUCK_9 EPuck {
+  controller "conn_swarm_original"
+  name "009"
+  camera_pixelSize 0
+}
+DEF E_PUCK_10 EPuck {
+  controller "conn_swarm_original"
+  name "010"
+  camera_pixelSize 0
+}
+DEF E_PUCK_11 EPuck {
+  controller "conn_swarm_original"
+  name "011"
+  camera_pixelSize 0
+}
+DEF E_PUCK_12 EPuck {
+  controller "conn_swarm_original"
+  name "012"
+  camera_pixelSize 0
+}
+DEF E_PUCK_13 EPuck {
+  controller "conn_swarm_original"
+  name "013"
+  camera_pixelSize 0
+}
+DEF E_PUCK_14 EPuck {
+  controller "conn_swarm_original"
+  name "014"
+  camera_pixelSize 0
+}
+DEF E_PUCK_15 EPuck {
+  controller "conn_swarm_original"
+  name "015"
+  camera_pixelSize 0
+}
+DEF E_PUCK_16 EPuck {
+  controller "conn_swarm_original"
+  name "016"
+  camera_pixelSize 0
+}
+DEF E_PUCK_17 EPuck {
+  controller "conn_swarm_original"
+  name "017"
+  camera_pixelSize 0
+}
+DEF E_PUCK_18 EPuck {
+  controller "conn_swarm_original"
+  name "018"
+  camera_pixelSize 0
+}
+DEF E_PUCK_19 EPuck {
+  controller "conn_swarm_original"
+  name "019"
+  camera_pixelSize 0
+}
+DEF E_PUCK_20 EPuck {
+  controller "conn_swarm_original"
+  name "020"
+  camera_pixelSize 0
+}
+DEF E_PUCK_21 EPuck {
+  controller "conn_swarm_original"
+  name "021"
+  camera_pixelSize 0
+}
+DEF E_PUCK_22 EPuck {
+  controller "conn_swarm_original"
+  name "022"
+  camera_pixelSize 0
+}
+DEF E_PUCK_23 EPuck {
+  controller "conn_swarm_original"
+  name "023"
+  camera_pixelSize 0
+}
+DEF E_PUCK_24 EPuck {
+  controller "conn_swarm_original"
+  name "024"
+  camera_pixelSize 0
+}
+DEF E_PUCK_25 EPuck {
+  controller "conn_swarm_original"
+  name "025"
+  camera_pixelSize 0
+}
+DEF E_PUCK_26 EPuck {
+  controller "conn_swarm_original"
+  name "026"
+  camera_pixelSize 0
+}
+DEF E_PUCK_27 EPuck {
+  controller "conn_swarm_original"
+  name "027"
+  camera_pixelSize 0
+}
+DEF E_PUCK_28 EPuck {
+  controller "conn_swarm_original"
+  name "028"
+  camera_pixelSize 0
+}
+DEF E_PUCK_29 EPuck {
+  controller "conn_swarm_original"
+  name "029"
+  camera_pixelSize 0
+}
+DEF E_PUCK_30 EPuck {
+  controller "conn_swarm_original"
+  name "030"
+  camera_pixelSize 0
+}
+DEF E_PUCK_31 EPuck {
+  controller "conn_swarm_original"
+  name "031"
+  camera_pixelSize 0
+}
+DEF E_PUCK_32 EPuck {
+  controller "conn_swarm_original"
+  name "032"
+  camera_pixelSize 0
+}
+DEF E_PUCK_33 EPuck {
+  controller "conn_swarm_original"
+  name "033"
+  camera_pixelSize 0
+}
+DEF E_PUCK_34 EPuck {
+  controller "conn_swarm_original"
+  name "034"
+  camera_pixelSize 0
+}
+DEF E_PUCK_35 EPuck {
+  controller "conn_swarm_original"
+  name "035"
+  camera_pixelSize 0
+}
+DEF E_PUCK_36 EPuck {
+  controller "conn_swarm_original"
+  name "036"
+  camera_pixelSize 0
+}
+DEF E_PUCK_37 EPuck {
+  controller "conn_swarm_original"
+  name "037"
+  camera_pixelSize 0
+}
+DEF E_PUCK_38 EPuck {
+  controller "conn_swarm_original"
+  name "038"
+  camera_pixelSize 0
+}
+DEF E_PUCK_39 EPuck {
+  controller "conn_swarm_original"
+  name "039"
+  camera_pixelSize 0
+}
+DEF E_PUCK_40 EPuck {
+  controller "conn_swarm_original"
+  name "040"
+  camera_pixelSize 0
+}
+
