@@ -2,9 +2,12 @@
 work-schedule.pdf
 
 **/build
+**/*.c~
 
-# Webots world files
+# Webots artifacts
 *.wbt~1~
 *.wbproj
 webots/controllers/conn_supervisor/conn_supervisor
 webots/controllers/conn_swarm_original/conn_swarm_original
+webots/worlds/.*
+
