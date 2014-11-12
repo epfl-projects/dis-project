@@ -85,102 +85,102 @@ DEF ground Solid {
 Supervisor {
   controller "conn_supervisor"
 }
-DEF E_PUCK_1 EPuck {
+DEF E_PUCK_1 E-puck {
   controller "conn_swarm_original"
   name "001"
   camera_pixelSize 0
 }
-DEF E_PUCK_2 EPuck {
+DEF E_PUCK_2 E-puck {
   controller "conn_swarm_original"
   name "002"
   camera_pixelSize 0
 }
-DEF E_PUCK_3 EPuck {
+DEF E_PUCK_3 E-puck {
   controller "conn_swarm_original"
   name "003"
   camera_pixelSize 0
 }
-DEF E_PUCK_4 EPuck {
+DEF E_PUCK_4 E-puck {
   controller "conn_swarm_original"
   name "004"
   camera_pixelSize 0
 }
-DEF E_PUCK_5 EPuck {
+DEF E_PUCK_5 E-puck {
   controller "conn_swarm_original"
   name "005"
   camera_pixelSize 0
 }
-DEF E_PUCK_6 EPuck {
+DEF E_PUCK_6 E-puck {
   controller "conn_swarm_original"
   name "006"
   camera_pixelSize 0
 }
-DEF E_PUCK_7 EPuck {
+DEF E_PUCK_7 E-puck {
   controller "conn_swarm_original"
   name "007"
   camera_pixelSize 0
 }
-DEF E_PUCK_8 EPuck {
+DEF E_PUCK_8 E-puck {
   controller "conn_swarm_original"
   name "008"
   camera_pixelSize 0
 }
-DEF E_PUCK_9 EPuck {
+DEF E_PUCK_9 E-puck {
   controller "conn_swarm_original"
   name "009"
   camera_pixelSize 0
 }
-DEF E_PUCK_10 EPuck {
+DEF E_PUCK_10 E-puck {
   controller "conn_swarm_original"
   name "010"
   camera_pixelSize 0
 }
-DEF E_PUCK_11 EPuck {
+DEF E_PUCK_11 E-puck {
   controller "conn_swarm_original"
   name "011"
   camera_pixelSize 0
 }
-DEF E_PUCK_12 EPuck {
+DEF E_PUCK_12 E-puck {
   controller "conn_swarm_original"
   name "012"
   camera_pixelSize 0
 }
-DEF E_PUCK_13 EPuck {
+DEF E_PUCK_13 E-puck {
   controller "conn_swarm_original"
   name "013"
   camera_pixelSize 0
 }
-DEF E_PUCK_14 EPuck {
+DEF E_PUCK_14 E-puck {
   controller "conn_swarm_original"
   name "014"
   camera_pixelSize 0
 }
-DEF E_PUCK_15 EPuck {
+DEF E_PUCK_15 E-puck {
   controller "conn_swarm_original"
   name "015"
   camera_pixelSize 0
 }
-DEF E_PUCK_16 EPuck {
+DEF E_PUCK_16 E-puck {
   controller "conn_swarm_original"
   name "016"
   camera_pixelSize 0
 }
-DEF E_PUCK_17 EPuck {
+DEF E_PUCK_17 E-puck {
   controller "conn_swarm_original"
   name "017"
   camera_pixelSize 0
 }
-DEF E_PUCK_18 EPuck {
+DEF E_PUCK_18 E-puck {
   controller "conn_swarm_original"
   name "018"
   camera_pixelSize 0
 }
-DEF E_PUCK_19 EPuck {
+DEF E_PUCK_19 E-puck {
   controller "conn_swarm_original"
   name "019"
   camera_pixelSize 0
 }
-DEF E_PUCK_20 EPuck {
+DEF E_PUCK_20 E-puck {
   controller "conn_swarm_original"
   name "020"
   camera_pixelSize 0

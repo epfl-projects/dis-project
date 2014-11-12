@@ -1,11 +1,11 @@
 #VRML_SIM V8.0.0 utf8
 WorldInfo {
   info [
-    "The model of the EPuck robot"
+    "The model of the E-puck robot"
     "Author: Simon Blanchoud"
     "Date: 01 SEP 2006"
   ]
-  title "EPuck"
+  title "E-puck"
 }
 Viewpoint {
   orientation 0.00266546 0.706707 0.707502 3.14084
@@ -85,54 +85,53 @@ DEF ground Solid {
 Supervisor {
   controller "conn_supervisor"
 }
-DEF E_PUCK_1 EPuck {
+DEF E_PUCK_1 E-puck {
   controller "conn_swarm_original"
   name "001"
   camera_pixelSize 0
 }
-DEF E_PUCK_2 EPuck {
+DEF E_PUCK_2 E-puck {
   controller "conn_swarm_original"
   name "002"
   camera_pixelSize 0
 }
-DEF E_PUCK_3 EPuck {
+DEF E_PUCK_3 E-puck {
   controller "conn_swarm_original"
   name "003"
   camera_pixelSize 0
 }
-DEF E_PUCK_4 EPuck {
+DEF E_PUCK_4 E-puck {
   controller "conn_swarm_original"
   name "004"
   camera_pixelSize 0
 }
-DEF E_PUCK_5 EPuck {
+DEF E_PUCK_5 E-puck {
   controller "conn_swarm_original"
   name "005"
   camera_pixelSize 0
 }
-DEF E_PUCK_6 EPuck {
+DEF E_PUCK_6 E-puck {
   controller "conn_swarm_original"
   name "006"
   camera_pixelSize 0
 }
-DEF E_PUCK_7 EPuck {
+DEF E_PUCK_7 E-puck {
   controller "conn_swarm_original"
   name "007"
   camera_pixelSize 0
 }
-DEF E_PUCK_8 EPuck {
+DEF E_PUCK_8 E-puck {
   controller "conn_swarm_original"
   name "008"
   camera_pixelSize 0
 }
-DEF E_PUCK_9 EPuck {
+DEF E_PUCK_9 E-puck {
   controller "conn_swarm_original"
   name "009"
   camera_pixelSize 0
 }
-DEF E_PUCK_10 EPuck {
+DEF E_PUCK_10 E-puck {
   controller "conn_swarm_original"
   name "010"
   camera_pixelSize 0
 }
-
