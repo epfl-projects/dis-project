@@ -20,7 +20,7 @@
 #define BIAS_SPEED        400 // robot bias speed
 #define MAXSPEED          800 // maximum robot speed
 #define COMM_RADIUS       0.7 // radius of radio communication
-#define RANGE		1000 // normalisation of the IR sensors for obstacle avoidance
+#define RANGE		  100 // normalisation of the IR sensors for obstacle avoidance
 /*
   **
   **  Auxiliary
@@ -109,19 +109,19 @@ void run(){
 }
 
 
-/***************BRAITENBERG : AVOIDANCE OBSTACLES*********************/
+/***************OBSTACLE AVOIDANCE (Braitenberg)*********************/
 
-void avoid_obstacle(int* speed,const int* ds_value){
+void avoid_obstacle(int* speed, const int* ds_value){
   
-  int brait_coef[8][2]=
+  int brait_coef[8][2] =
   {{140, -35}, {110, -15}, {80,-10},{-10, -10},
      {-15, -10}, {-5, 80}, {-30, 90}, {-20, 160} };
 
-  unsigned int i,j;
-  for (i=0; i<2;i++){
-    speed[i]=BIAS_SPEED;
-    for (j=0; j<8 ; j++){
-      speed[i]+= brait_coef[j][i]*(1.0 - (ds_value[j] / RANGE));
+  unsigned int i, j;
+  for (i = 0; i < 2; i++){
+    speed[i] = BIAS_SPEED / 2;
+    for (j = 0; j < 8; j++){
+      speed[i] += brait_coef[j][i] * (1.0 - (ds_value[j] / RANGE));
     }
   }
 }
