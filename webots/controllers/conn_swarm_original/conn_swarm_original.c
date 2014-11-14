@@ -56,7 +56,22 @@ void getSensorValues(int *sensorTable) {
 }
 
 
-/* 
+void sendMessage() {
+  // TODO
+  char message[128];
+  sprintf(message, "hello my name is %s", robot_name);
+  wb_emitter_send(emitterir, message, strlen(message) + 1);
+}
+
+void receiveMessage() {
+  while(wb_receiver_get_queue_length(receiverir) > 0) {
+    //int size = wb_receiver_get_data_size(receiverir);
+    char * contents = (char *)wb_receiver_get_data(receiverir);
+    printf("Robot %s received: %s", robot_name, contents);
+  }
+}
+
+/*
   **
   **  E-Puck
   **
@@ -75,6 +90,14 @@ void reset()
 
   char e_puck_name[] = "ps0";
   char sensors_name[5];
+
+  // Emitter and receiver device tags
+  // TODO
+  //emitterir = wb_robot_get_device("EPUCK_EMITTER");
+  //receiverir = wb_robot_get_device("EPUCK_RECEIVER");
+
+  // Update communication radius to COMM_RADIUS
+  //wb_emitter_set_range(emitterir, COMM_RADIUS);
 
   sprintf(sensors_name, "%s", e_puck_name);
   for (i = 0; i < NB_SENSORS; i++) {
@@ -112,7 +135,7 @@ void run(){
 /***************OBSTACLE AVOIDANCE (Braitenberg)*********************/
 
 void avoid_obstacle(int* speed, const int* ds_value){
-  
+
   int brait_coef[8][2] =
   {{140, -35}, {110, -15}, {80,-10},{-10, -10},
      {-15, -10}, {-5, 80}, {-30, 90}, {-20, 160} };
@@ -131,24 +154,30 @@ void avoid_obstacle(int* speed, const int* ds_value){
 
 int main(int argc, char *argv[]) {
 
-  
   /* initialize Webots */
   wb_robot_init();
-  
+
   reset();
-  
+
+  sendMessage();
+  receiveMessage();
+
   /* main loop */
   for (;;) {
-  
+
     getSensorValues(distances);
     avoid_obstacle(speed,distances);
     setSpeed(speed[0], speed[1]);
     //run();
-  
-  /* perform a simulation step */
-  wb_robot_step(TIME_STEP);
-  
+
+    // TODO: communication
+    // sendMessage();
+    // receiveMessage();
+
+    /* perform a simulation step */
+    wb_robot_step(TIME_STEP);
+
   }
-  
+
   return 0;
 }
