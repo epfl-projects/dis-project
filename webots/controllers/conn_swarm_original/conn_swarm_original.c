@@ -17,7 +17,7 @@
 
 // COMMUNICATION
 #define COMMUNICATION_CHANNEL 1
-#define COMM_RADIUS       0.7 // radius of radio communication
+#define COMM_RADIUS         0.7 // radius of radio communication
 
 // AUXILIARY
 #define NB_SENSORS        8   // number of sensors
@@ -37,7 +37,7 @@ WbDeviceTag receiverir;
 const char *robot_name;
 
 int distances[NB_SENSORS];    // for sensor readings
-int speed[2];		      // for obstacle avoidance
+int speed[2];		              // for obstacle avoidance
 
 void setSpeed(int LeftSpeed, int RightSpeed) {
   if (LeftSpeed < -MAXSPEED) {LeftSpeed = -MAXSPEED;}
@@ -46,10 +46,9 @@ void setSpeed(int LeftSpeed, int RightSpeed) {
   if (RightSpeed >  MAXSPEED) {RightSpeed =  MAXSPEED;}
 
 
-  wb_differential_wheels_set_speed(LeftSpeed,RightSpeed);
+  wb_differential_wheels_set_speed(LeftSpeed, RightSpeed);
 
 }
-
 
 void getSensorValues(int *sensorTable) {
   unsigned int i;
@@ -59,17 +58,37 @@ void getSensorValues(int *sensorTable) {
 }
 
 
-void sendMessage() {
-  // TODO: a useful message
-  char message[128];
-  sprintf(message, "Hello, my name is %s.", robot_name);
-  wb_emitter_send(emitterir, message, strlen(message) + 1);
+/* ****************************** MOVEMENT ****************************** */
+/**
+ * Obstacle avoidance (Braitenberg controller)
+ */
+void avoid_obstacle(int * speed, const int* ds_value){
+
+  int brait_coef[8][2] =
+  {{140, -35}, {110, -15}, {80,-10},{-10, -10},
+     {-15, -10}, {-5, 80}, {-30, 90}, {-20, 160} };
+
+  unsigned int i, j;
+  for (i = 0; i < 2; i++){
+    speed[i] = BIAS_SPEED / 2;
+    for (j = 0; j < 8; j++){
+      speed[i] += brait_coef[j][i] * (1.0 - (ds_value[j] / RANGE));
+    }
+  }
+}
+
+void move() {
+  avoid_obstacle(speed, distances);
+  setSpeed(speed[0], speed[1]);
+}
+/* ************************* COMMUNICATION ****************************** */
+void sendMessage(char * message) {
   int status = wb_emitter_send(emitterir, message, strlen(message) + 1);
-  printf("Robot %s tried to send message (status %d, 0 means fail)\n", robot_name, status);
+  // printf("Robot %s tried to send message (status %d, 0 means fail)\n", robot_name, status);
 }
 
 void receiveMessage() {
-  printf("Queue length is %d\n", wb_receiver_get_queue_length(receiverir));
+  // printf("Queue length is %d\n", wb_receiver_get_queue_length(receiverir));
   while(wb_receiver_get_queue_length(receiverir) > 0) {
     //int size = wb_receiver_get_data_size(receiverir);
     char * contents = (char *)wb_receiver_get_data(receiverir);
@@ -78,16 +97,6 @@ void receiveMessage() {
   }
 }
 
-/*
-  **
-  **  E-Puck
-  **
-  **
-*/
-void move(){
-
-  setSpeed(BIAS_SPEED,BIAS_SPEED);
-}
 /* ****************************** RESET ****************************** */
 
 void reset()
@@ -134,27 +143,28 @@ void reset()
 
 
 /* ****************************** RUN ****************************** */
-
+bool sent = false, received = false;
 void run(){
-
+  // Movement
   move();
-}
 
+  // Periodic communication
+  double t = wb_robot_get_time();
+  int second = (int)t;
+  //printf("Time %f, second %d\n", t, second);
 
-/***************OBSTACLE AVOIDANCE (Braitenberg)*********************/
+  if(!sent && second % 2 == 0) {
+    sent = true;
+    received = false;
 
-void avoid_obstacle(int* speed, const int* ds_value){
-
-  int brait_coef[8][2] =
-  {{140, -35}, {110, -15}, {80,-10},{-10, -10},
-     {-15, -10}, {-5, 80}, {-30, 90}, {-20, 160} };
-
-  unsigned int i, j;
-  for (i = 0; i < 2; i++){
-    speed[i] = BIAS_SPEED / 2;
-    for (j = 0; j < 8; j++){
-      speed[i] += brait_coef[j][i] * (1.0 - (ds_value[j] / RANGE));
-    }
+    char message[128];
+    sprintf(message, "I am %s, this is second %d.", robot_name, second);
+    sendMessage(message);
+  }
+  else if(!received && second % 2 == 1) {
+    received = true;
+    sent = false;
+    receiveMessage();
   }
 }
 
@@ -169,21 +179,12 @@ int main(int argc, char *argv[]) {
   reset();
 
   /* main loop */
-  for (int t = 0; true; ++t) {
-
+  for (;;) {
     getSensorValues(distances);
-    avoid_obstacle(speed,distances);
-    setSpeed(speed[0], speed[1]);
-    //run();
+    run();
 
     /* perform a simulation step */
     wb_robot_step(TIME_STEP);
-
-    // TODO: periodic message sending
-    if(t % 10 == 0)
-      sendMessage();
-    if(t % 10 == 9)
-      receiveMessage();
   }
 
   return 0;
