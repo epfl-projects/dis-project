@@ -15,7 +15,7 @@
 
 // RUN VARIABLES
 
-#define NUM_ROBOTS        10
+#define NUM_ROBOTS        2
 #define INITIAL_BOX_SIDE  80
 #define NEIGHBOURHOOD     10
 #define COMM_RADIUS       0.7
