@@ -15,11 +15,14 @@
 
 #define TIME_STEP         64
 
+// COMMUNICATION
+#define COMMUNICATION_CHANNEL 1
+#define COMM_RADIUS       0.7 // radius of radio communication
+
 // AUXILIARY
 #define NB_SENSORS        8   // number of sensors
 #define BIAS_SPEED        400 // robot bias speed
 #define MAXSPEED          800 // maximum robot speed
-#define COMM_RADIUS       0.7 // radius of radio communication
 #define RANGE		  100 // normalisation of the IR sensors for obstacle avoidance
 /*
   **
@@ -57,17 +60,21 @@ void getSensorValues(int *sensorTable) {
 
 
 void sendMessage() {
-  // TODO
+  // TODO: a useful message
   char message[128];
-  sprintf(message, "hello my name is %s", robot_name);
+  sprintf(message, "Hello, my name is %s.", robot_name);
   wb_emitter_send(emitterir, message, strlen(message) + 1);
+  int status = wb_emitter_send(emitterir, message, strlen(message) + 1);
+  printf("Robot %s tried to send message (status %d, 0 means fail)\n", robot_name, status);
 }
 
 void receiveMessage() {
+  printf("Queue length is %d\n", wb_receiver_get_queue_length(receiverir));
   while(wb_receiver_get_queue_length(receiverir) > 0) {
     //int size = wb_receiver_get_data_size(receiverir);
     char * contents = (char *)wb_receiver_get_data(receiverir);
-    printf("Robot %s received: %s", robot_name, contents);
+    printf("Robot %s received: %s\n", robot_name, contents);
+    wb_receiver_next_packet(receiverir);
   }
 }
 
@@ -92,12 +99,14 @@ void reset()
   char sensors_name[5];
 
   // Emitter and receiver device tags
-  // TODO
-  //emitterir = wb_robot_get_device("EPUCK_EMITTER");
-  //receiverir = wb_robot_get_device("EPUCK_RECEIVER");
+  emitterir = wb_robot_get_device("emitter");
+  receiverir = wb_robot_get_device("receiver");
 
-  // Update communication radius to COMM_RADIUS
-  //wb_emitter_set_range(emitterir, COMM_RADIUS);
+  // Configure communication devices
+  wb_receiver_enable(receiverir, TIME_STEP);
+  wb_emitter_set_range(emitterir, COMM_RADIUS);
+  wb_emitter_set_channel(emitterir, COMMUNICATION_CHANNEL);
+  wb_receiver_set_channel(receiverir, COMMUNICATION_CHANNEL);
 
   sprintf(sensors_name, "%s", e_puck_name);
   for (i = 0; i < NB_SENSORS; i++) {
@@ -159,24 +168,22 @@ int main(int argc, char *argv[]) {
 
   reset();
 
-  sendMessage();
-  receiveMessage();
-
   /* main loop */
-  for (;;) {
+  for (int t = 0; true; ++t) {
 
     getSensorValues(distances);
     avoid_obstacle(speed,distances);
     setSpeed(speed[0], speed[1]);
     //run();
 
-    // TODO: communication
-    // sendMessage();
-    // receiveMessage();
-
     /* perform a simulation step */
     wb_robot_step(TIME_STEP);
 
+    // TODO: periodic message sending
+    if(t % 10 == 0)
+      sendMessage();
+    if(t % 10 == 9)
+      receiveMessage();
   }
 
   return 0;
