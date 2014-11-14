@@ -11,6 +11,11 @@ Viewpoint {
   orientation 0.00266546 0.706707 0.707502 3.14084
   position 0.0414974 8.24621 0.0178252
 }
+Background {
+  skyColor [
+    0.4 0.7 1
+  ]
+}
 PointLight {
   intensity 0.5
   location 0.14 0.6 -0.55
@@ -18,11 +23,6 @@ PointLight {
 PointLight {
   intensity 0.5
   location -0.43 0.6 0.5
-}
-Background {
-  skyColor [
-    0.4 0.7 1
-  ]
 }
 DEF ground Solid {
   translation 0.0108903 -0.0001 0.0108139
