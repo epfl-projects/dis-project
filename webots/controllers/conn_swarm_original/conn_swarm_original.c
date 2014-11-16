@@ -19,7 +19,7 @@
 #define NUM_ROBOTS        3
 
 // ALPHA ALGORITHM
-#define ALPHA             1 // Minimum number of neighbors
+#define ALPHA             2 // Minimum number of neighbors
 
 // COMMUNICATION
 #define COMMUNICATION_CHANNEL 1
@@ -63,7 +63,7 @@ void getSensorValues(int *sensorTable) {
 /**
  * Obstacle avoidance (Braitenberg controller)
  */
-void avoid_obstacle(int * speed, const int* distances){
+void avoidObstacle(int * speed, const int* distances){
   int brait_coef[8][2] = {
     {140, -35}, {110, -15}, {80,-10},{-10, -10},
     {-15, -10}, {-5, 80}, {-30, 90}, {-20, 160}
@@ -78,9 +78,63 @@ void avoid_obstacle(int * speed, const int* distances){
   }
 }
 
+/**
+ * Turn by `angle` degrees in a second or less.
+ * The speeds are chosen so that a 360° turns takes 1 second.
+ * @param angle The rotation angle between 0 and 360 degrees.
+ */
+bool isTurning = false;
+/** Time left to turn in number of TIME_STEP */
+int turningTime = 0;
+void initiateTurn(int angle) {
+  angle = (angle % 360);
+  printf("Robot %s is starting a turn of %d degrees\n", robotName, angle);
+  turningTime = (int)(50 * angle / 360.f);
+  isTurning = true;
+}
+/**
+ * Assuming a turn is in progress
+ * @param speed [OUTPUT] The corresponding speed for each wheel
+ */
+void turn(int * speed) {
+  // TODO: fine-tune
+  speed[0] = -450;
+  speed[1] = 450;
+  //printf("Robot %s has %d turning time left\n", robotName, turningTime);
+  turningTime--;
+  if(turningTime <= 0) {
+    isTurning = false;
+    printf("Robot %s is done turning.\n", robotName);
+  }
+}
+
 void move() {
-  avoid_obstacle(speed, distances);
+  if(isTurning)
+    turn(speed);
+  else
+    avoidObstacle(speed, distances);
   setSpeed(speed[0], speed[1]);
+}
+
+/* ****************************** BEHAVIORS ***************************** */
+typedef enum {RANDOM, SEARCH_SWARM} State;
+State currentState;
+
+void setState(State newState) {
+  if(currentState != newState) {
+    switch(newState) {
+      // Pick a new random orientation
+      case RANDOM:
+        initiateTurn(rand() % 180 + 90);
+        break;
+
+      // Make a 180° turn
+      case SEARCH_SWARM:
+        initiateTurn(180);
+        break;
+    }
+    currentState = newState;
+  }
 }
 
 /* ************************* COMMUNICATION ****************************** */
@@ -103,19 +157,18 @@ int countNeighbors() {
     isPresent[i] = false;
   int n = 0;
 
-  // printf("Queue length is %d\n", wb_receiver_get_queue_length(receiverTag));
   while(wb_receiver_get_queue_length(receiverTag) > 0) {
-    //int size = wb_receiver_get_data_size(receiverTag);
     char * neighborName = (char *)wb_receiver_get_data(receiverTag);
     int id = (int)strtol(neighborName, NULL, 10);
     isPresent[id] = true;
-    printf("Robot %s received: %d present!\n", robotName, id);
+    //printf("Robot %s received: %d present!\n", robotName, id);
+
     wb_receiver_next_packet(receiverTag);
   }
 
   for(int i = 1; i <= NUM_ROBOTS; ++i) {
     if(isPresent[i])
-      n ++;
+      n++;
   }
 
   assert(n <= NUM_ROBOTS - 1);
@@ -126,9 +179,19 @@ int countNeighbors() {
 /**
  * @return Whether or not the adjacency criterion is met
  */
-bool computeAlpha() {
+void alphaAlgorithm() {
   int n = countNeighbors();
-  return (n >= ALPHA);
+
+  // Lost the swarm
+  if(currentState == RANDOM && n < ALPHA) {
+    setState(SEARCH_SWARM);
+    printf("Robot %s is turning back (%d neighbors).\n", robotName, n);
+  }
+  // Found the swarm back
+  else if(currentState == SEARCH_SWARM && n >= ALPHA) {
+    setState(RANDOM);
+    printf("Robot %s found back %d neighbors :)\n", robotName, n);
+  }
 }
 
 long long previousSecond = -1;
@@ -142,12 +205,12 @@ void run(){
   long long second = (long long)t;
   if(second != previousSecond) {
     broadcastMyId();
-    bool isSatisfying = computeAlpha();
-    previousSecond = second;
 
-    if(!isSatisfying) {
-      printf("Robot %s should go back to the swarm!\n", robotName);
-    }
+    // Leave time for first broadcasts to arrive
+    if(second > 1)
+      alphaAlgorithm();
+
+    previousSecond = second;
   }
 }
 
@@ -157,7 +220,10 @@ void reset()
 {
   int i;
   robotName = wb_robot_get_name();
+  currentState = RANDOM;
 
+  // Make sure to initialize the RNG with different values for each thread
+  srand(time(NULL) + (int)&robotName);
 
   char e_puck_name[] = "ps0";
   char sensorsName[5];
@@ -200,7 +266,6 @@ void reset()
 /******************************** MAIN ******************************/
 
 int main(int argc, char *argv[]) {
-
   /* initialize Webots */
   wb_robot_init();
 

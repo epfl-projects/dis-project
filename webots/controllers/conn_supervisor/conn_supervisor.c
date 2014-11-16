@@ -17,8 +17,8 @@
 // @warning Some constants are duplicated in the robot controller,
 // make sure the values are consistent
 #define NUM_ROBOTS        3
-#define INITIAL_BOX_SIDE  80
-#define NEIGHBOURHOOD     10
+#define INITIAL_BOX_SIDE  30
+#define NEIGHBOURHOOD     5
 #define COMM_RADIUS       0.7
 #define EXP_TIME          900
 
