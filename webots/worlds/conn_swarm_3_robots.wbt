@@ -95,3 +95,8 @@ DEF E_PUCK_2 E-puck {
   name "002"
   camera_pixelSize 0
 }
+DEF E_PUCK_3 E-puck {
+  controller "conn_swarm_original"
+  name "003"
+  camera_pixelSize 0
+}
