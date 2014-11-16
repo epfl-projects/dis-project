@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
+#include <assert.h>
 //#include <sys/time.h>
 #include <webots/robot.h>
 #include <webots/differential_wheels.h>
@@ -12,8 +13,13 @@
 #include <webots/receiver.h>
 
 // Global Defines
-
+// @warning Some constants are duplicated in the supervisor code,
+// make sure the values are consistent
 #define TIME_STEP         64
+#define NUM_ROBOTS        3
+
+// ALPHA ALGORITHM
+#define ALPHA             1 // Minimum number of neighbors
 
 // COMMUNICATION
 #define COMMUNICATION_CHANNEL 1
@@ -24,6 +30,7 @@
 #define BIAS_SPEED        400 // robot bias speed
 #define MAXSPEED          800 // maximum robot speed
 #define RANGE		  100 // normalisation of the IR sensors for obstacle avoidance
+
 /*
   **
   **  Auxiliary
@@ -34,6 +41,9 @@
 WbDeviceTag sensors[NB_SENSORS];
 WbDeviceTag emitterir;
 WbDeviceTag receiverir;
+/**
+ * A unique id from 001 to NUM_ROBOTS (included), allowing leading zeros
+ */
 const char *robot_name;
 
 int distances[NB_SENSORS];    // for sensor readings
@@ -45,9 +55,7 @@ void setSpeed(int LeftSpeed, int RightSpeed) {
   if (RightSpeed < -MAXSPEED) {RightSpeed = -MAXSPEED;}
   if (RightSpeed >  MAXSPEED) {RightSpeed =  MAXSPEED;}
 
-
   wb_differential_wheels_set_speed(LeftSpeed, RightSpeed);
-
 }
 
 void getSensorValues(int *sensorTable) {
@@ -64,9 +72,10 @@ void getSensorValues(int *sensorTable) {
  */
 void avoid_obstacle(int * speed, const int* ds_value){
 
-  int brait_coef[8][2] =
-  {{140, -35}, {110, -15}, {80,-10},{-10, -10},
-     {-15, -10}, {-5, 80}, {-30, 90}, {-20, 160} };
+  int brait_coef[8][2] = {
+    {140, -35}, {110, -15}, {80,-10},{-10, -10},
+    {-15, -10}, {-5, 80}, {-30, 90}, {-20, 160}
+  };
 
   unsigned int i, j;
   for (i = 0; i < 2; i++){
@@ -81,19 +90,72 @@ void move() {
   avoid_obstacle(speed, distances);
   setSpeed(speed[0], speed[1]);
 }
+
 /* ************************* COMMUNICATION ****************************** */
-void sendMessage(char * message) {
-  int status = wb_emitter_send(emitterir, message, strlen(message) + 1);
+void sendMessage(char const * message) {
+  wb_emitter_send(emitterir, message, strlen(message) + 1);
   // printf("Robot %s tried to send message (status %d, 0 means fail)\n", robot_name, status);
 }
+void broadcastMyId() {
+  sendMessage(robot_name);
+}
+/**
+ * From the received broadcasts, deduce the number of nearby agents.
+ * Each robot is expected to broadcast its `robot_name`, which is expected
+ * to be parsable as a positive number in 1..NUM_ROBOTS.
+ */
+bool isPresent[NUM_ROBOTS+1];
+int countNeighbors() {
+  // Resent counters
+  for(int i = 1; i <= NUM_ROBOTS; ++i)
+    isPresent[i] = false;
+  int n = 0;
 
-void receiveMessage() {
   // printf("Queue length is %d\n", wb_receiver_get_queue_length(receiverir));
   while(wb_receiver_get_queue_length(receiverir) > 0) {
     //int size = wb_receiver_get_data_size(receiverir);
-    char * contents = (char *)wb_receiver_get_data(receiverir);
-    printf("Robot %s received: %s\n", robot_name, contents);
+    char * neighbor_name = (char *)wb_receiver_get_data(receiverir);
+    int id = (int)strtol(neighbor_name, NULL, 10);
+    isPresent[id] = true;
+    printf("Robot %s received: %d present!\n", robot_name, id);
     wb_receiver_next_packet(receiverir);
+  }
+
+  for(int i = 1; i <= NUM_ROBOTS; ++i) {
+    if(isPresent[i])
+      n ++;
+  }
+
+  assert(n <= NUM_ROBOTS - 1);
+  return n;
+}
+
+/* ****************************** RUN ****************************** */
+/**
+ * @return Whether or not the adjacency criterion is met
+ */
+bool computeAlpha() {
+  int n = countNeighbors();
+  return (n >= ALPHA);
+}
+
+long long previousSecond = -1;
+void run(){
+  // Movement
+  move();
+
+  // Periodically check the current value of alpha
+  // TODO: better rate limiting mechanism
+  double t = wb_robot_get_time();
+  long long second = (long long)t;
+  if(second != previousSecond) {
+    broadcastMyId();
+    bool isSatisfying = computeAlpha();
+    previousSecond = second;
+
+    if(!isSatisfying) {
+      printf("Robot %s should go back to the swarm!\n", robot_name);
+    }
   }
 }
 
@@ -103,6 +165,7 @@ void reset()
 {
   int i;
   robot_name = wb_robot_get_name();
+
 
   char e_puck_name[] = "ps0";
   char sensors_name[5];
@@ -137,35 +200,8 @@ void reset()
 
   wb_differential_wheels_enable_encoders(TIME_STEP);
 
-  printf("Robot %s is reset\n",robot_name);
+  printf("Robot %s is reset\n", robot_name);
   return;
-}
-
-
-/* ****************************** RUN ****************************** */
-bool sent = false, received = false;
-void run(){
-  // Movement
-  move();
-
-  // Periodic communication
-  double t = wb_robot_get_time();
-  int second = (int)t;
-  //printf("Time %f, second %d\n", t, second);
-
-  if(!sent && second % 2 == 0) {
-    sent = true;
-    received = false;
-
-    char message[128];
-    sprintf(message, "I am %s, this is second %d.", robot_name, second);
-    sendMessage(message);
-  }
-  else if(!received && second % 2 == 1) {
-    received = true;
-    sent = false;
-    receiveMessage();
-  }
 }
 
 
