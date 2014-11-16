@@ -31,57 +31,49 @@
 #define MAXSPEED          800 // maximum robot speed
 #define RANGE		  100 // normalisation of the IR sensors for obstacle avoidance
 
-/*
-  **
-  **  Auxiliary
-  **
-  **
-*/
 //robot variables
 WbDeviceTag sensors[NB_SENSORS];
-WbDeviceTag emitterir;
-WbDeviceTag receiverir;
+WbDeviceTag emitterTag;
+WbDeviceTag receiverTag;
 /**
  * A unique id from 001 to NUM_ROBOTS (included), allowing leading zeros
  */
-const char *robot_name;
+const char *robotName;
 
 int distances[NB_SENSORS];    // for sensor readings
 int speed[2];		              // for obstacle avoidance
 
-void setSpeed(int LeftSpeed, int RightSpeed) {
-  if (LeftSpeed < -MAXSPEED) {LeftSpeed = -MAXSPEED;}
-  if (LeftSpeed >  MAXSPEED) {LeftSpeed =  MAXSPEED;}
-  if (RightSpeed < -MAXSPEED) {RightSpeed = -MAXSPEED;}
-  if (RightSpeed >  MAXSPEED) {RightSpeed =  MAXSPEED;}
+/* ****************************** MOVEMENT ****************************** */
+void setSpeed(int leftSpeed, int rightSpeed) {
+  if (leftSpeed < -MAXSPEED) {leftSpeed = -MAXSPEED;}
+  if (leftSpeed >  MAXSPEED) {leftSpeed =  MAXSPEED;}
+  if (rightSpeed < -MAXSPEED) {rightSpeed = -MAXSPEED;}
+  if (rightSpeed >  MAXSPEED) {rightSpeed =  MAXSPEED;}
 
-  wb_differential_wheels_set_speed(LeftSpeed, RightSpeed);
+  wb_differential_wheels_set_speed(leftSpeed, rightSpeed);
 }
 
 void getSensorValues(int *sensorTable) {
   unsigned int i;
-  for (i=0; i < NB_SENSORS; i++) {
+  for(i = 0; i < NB_SENSORS; i++) {
     sensorTable[i] = wb_distance_sensor_get_value(sensors[i]);
   }
 }
 
-
-/* ****************************** MOVEMENT ****************************** */
 /**
  * Obstacle avoidance (Braitenberg controller)
  */
-void avoid_obstacle(int * speed, const int* ds_value){
-
+void avoid_obstacle(int * speed, const int* distances){
   int brait_coef[8][2] = {
     {140, -35}, {110, -15}, {80,-10},{-10, -10},
     {-15, -10}, {-5, 80}, {-30, 90}, {-20, 160}
   };
 
   unsigned int i, j;
-  for (i = 0; i < 2; i++){
+  for(i = 0; i < 2; i++){
     speed[i] = BIAS_SPEED / 2;
     for (j = 0; j < 8; j++){
-      speed[i] += brait_coef[j][i] * (1.0 - (ds_value[j] / RANGE));
+      speed[i] += brait_coef[j][i] * (1.0 - (distances[j] / RANGE));
     }
   }
 }
@@ -93,15 +85,15 @@ void move() {
 
 /* ************************* COMMUNICATION ****************************** */
 void sendMessage(char const * message) {
-  wb_emitter_send(emitterir, message, strlen(message) + 1);
-  // printf("Robot %s tried to send message (status %d, 0 means fail)\n", robot_name, status);
+  wb_emitter_send(emitterTag, message, strlen(message) + 1);
+  // printf("Robot %s tried to send message (status %d, 0 means fail)\n", robotName, status);
 }
 void broadcastMyId() {
-  sendMessage(robot_name);
+  sendMessage(robotName);
 }
 /**
  * From the received broadcasts, deduce the number of nearby agents.
- * Each robot is expected to broadcast its `robot_name`, which is expected
+ * Each robot is expected to broadcast its `robotName`, which is expected
  * to be parsable as a positive number in 1..NUM_ROBOTS.
  */
 bool isPresent[NUM_ROBOTS+1];
@@ -111,14 +103,14 @@ int countNeighbors() {
     isPresent[i] = false;
   int n = 0;
 
-  // printf("Queue length is %d\n", wb_receiver_get_queue_length(receiverir));
-  while(wb_receiver_get_queue_length(receiverir) > 0) {
-    //int size = wb_receiver_get_data_size(receiverir);
-    char * neighbor_name = (char *)wb_receiver_get_data(receiverir);
-    int id = (int)strtol(neighbor_name, NULL, 10);
+  // printf("Queue length is %d\n", wb_receiver_get_queue_length(receiverTag));
+  while(wb_receiver_get_queue_length(receiverTag) > 0) {
+    //int size = wb_receiver_get_data_size(receiverTag);
+    char * neighborName = (char *)wb_receiver_get_data(receiverTag);
+    int id = (int)strtol(neighborName, NULL, 10);
     isPresent[id] = true;
-    printf("Robot %s received: %d present!\n", robot_name, id);
-    wb_receiver_next_packet(receiverir);
+    printf("Robot %s received: %d present!\n", robotName, id);
+    wb_receiver_next_packet(receiverTag);
   }
 
   for(int i = 1; i <= NUM_ROBOTS; ++i) {
@@ -154,7 +146,7 @@ void run(){
     previousSecond = second;
 
     if(!isSatisfying) {
-      printf("Robot %s should go back to the swarm!\n", robot_name);
+      printf("Robot %s should go back to the swarm!\n", robotName);
     }
   }
 }
@@ -164,43 +156,43 @@ void run(){
 void reset()
 {
   int i;
-  robot_name = wb_robot_get_name();
+  robotName = wb_robot_get_name();
 
 
   char e_puck_name[] = "ps0";
-  char sensors_name[5];
+  char sensorsName[5];
 
   // Emitter and receiver device tags
-  emitterir = wb_robot_get_device("emitter");
-  receiverir = wb_robot_get_device("receiver");
+  emitterTag = wb_robot_get_device("emitter");
+  receiverTag = wb_robot_get_device("receiver");
 
   // Configure communication devices
-  wb_receiver_enable(receiverir, TIME_STEP);
-  wb_emitter_set_range(emitterir, COMM_RADIUS);
-  wb_emitter_set_channel(emitterir, COMMUNICATION_CHANNEL);
-  wb_receiver_set_channel(receiverir, COMMUNICATION_CHANNEL);
+  wb_receiver_enable(receiverTag, TIME_STEP);
+  wb_emitter_set_range(emitterTag, COMM_RADIUS);
+  wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL);
+  wb_receiver_set_channel(receiverTag, COMMUNICATION_CHANNEL);
 
-  sprintf(sensors_name, "%s", e_puck_name);
+  sprintf(sensorsName, "%s", e_puck_name);
   for (i = 0; i < NB_SENSORS; i++) {
-    sensors[i] = wb_robot_get_device(sensors_name);
+    sensors[i] = wb_robot_get_device(sensorsName);
     wb_distance_sensor_enable(sensors[i], TIME_STEP);
 
     if ((i + 1) >= 10) {
-      sensors_name[2] = '1';
-      sensors_name[3]++;
+      sensorsName[2] = '1';
+      sensorsName[3]++;
 
       if ((i + 1) == 10) {
-        sensors_name[3] = '0';
-        sensors_name[4] = (char) '\0';
+        sensorsName[3] = '0';
+        sensorsName[4] = (char) '\0';
         }
     } else {
-        sensors_name[2]++;
+        sensorsName[2]++;
     }
   }
 
   wb_differential_wheels_enable_encoders(TIME_STEP);
 
-  printf("Robot %s is reset\n", robot_name);
+  printf("Robot %s is reset\n", robotName);
   return;
 }
 

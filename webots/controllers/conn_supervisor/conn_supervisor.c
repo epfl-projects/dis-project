@@ -14,7 +14,7 @@
 
 
 // RUN VARIABLES
-// @warning Some variables are duplicated in the robot controller,
+// @warning Some constants are duplicated in the robot controller,
 // make sure the values are consistent
 #define NUM_ROBOTS        3
 #define INITIAL_BOX_SIDE  80
@@ -25,7 +25,7 @@
 WbNodeRef epucks[NUM_ROBOTS];
 WbFieldRef locfield[NUM_ROBOTS];
 
-float finaltime;
+float finalTime;
 
 void waitaux(long num) {
 	long i;
@@ -89,12 +89,12 @@ void reset(void) {
   srand(time(NULL));
   change_robot_positions();
 
-  finaltime = wb_robot_get_time() + EXP_TIME; // 15 MIN == 900
+  finalTime = wb_robot_get_time() + EXP_TIME; // 15 MIN == 900
 }
 
 void run() {
 
-  if(wb_robot_get_time() > finaltime){
+  if(wb_robot_get_time() > finalTime){
 
     wb_supervisor_simulation_revert();
   }
@@ -114,7 +114,6 @@ int main(int argc, char *argv[]) {
 
   /* main loop */
   for (;;) {
-
     run();
 
     /* perform a simulation step */
