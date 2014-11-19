@@ -3,16 +3,18 @@
 
 // Simulation parameters
 #define EXP_TIME          900 // Duration of the experiment (in seconds)
-#define TIME_STEP         64 // Simulation time ste
+#define TIME_STEP         64 // Simulation time step (ms)
 #define NUM_ROBOTS        10 // Total number of robots in the scene
 // Alpha algorithm
-#define ALPHA             7 // Minimum number of neighbors to maintain
+#define ALPHA             4 // Minimum number of neighbors to maintain
+#define MAX_RANDOM_TURN  60 // Maximum value of the random turn (in degrees)
+#define MAX_COHERENCE_TIME   10 // Maximum number of timesteps spent in coherence state
 // Communication
-#define COMM_RADIUS       0.7 // Range of radio communication (in meters)
+#define COMM_RADIUS       2.0 // Range of radio communication (in meters)
 #define COMMUNICATION_CHANNEL 1
 
 // Initial agents distribution parameters
-#define INITIAL_BOX_SIDE  30
+#define INITIAL_BOX_SIDE  50
 #define NEIGHBOURHOOD     5
 
 // AUXILIARY

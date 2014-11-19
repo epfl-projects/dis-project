@@ -15,7 +15,7 @@ Week 9
 - [X] Read and understand the codebase
 - [X] Add wireless communication to the robots
   - Read Webot's documentation about communication
-- [ ] Start implementation of 𝛂 algorithm in Webots
+- [X] Start implementation of 𝛂 algorithm in Webots
   - State machine architecture
   - Connection count
 
@@ -41,7 +41,6 @@ Week 11
 - [ ] Compare and analyse the results of submicroscopic and macroscopic models
 - [ ] Implement the β algorithm
 - [ ] Compare the results of the two algorithms
-
 
 Week 12
 -------

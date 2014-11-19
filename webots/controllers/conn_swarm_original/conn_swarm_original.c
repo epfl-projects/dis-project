@@ -100,19 +100,20 @@ void move() {
 }
 
 /* ****************************** BEHAVIORS ***************************** */
-typedef enum {RANDOM, SEARCH_SWARM} State;
+typedef enum {FORWARD, COHERENCE} State;
 State currentState;
-
+/** Time left remaining in state COHERENCE */
+int coherenceTime = 0;
 void setState(State newState) {
   if(currentState != newState) {
     switch(newState) {
-      // Pick a new random orientation
-      case RANDOM:
-        initiateTurn(rand() % 180 + 90);
+      case FORWARD:
+        coherenceTime = 0;
         break;
 
       // Make a 180° turn
-      case SEARCH_SWARM:
+      case COHERENCE:
+        coherenceTime = MAX_COHERENCE_TIME;
         initiateTurn(180);
         break;
     }
@@ -166,14 +167,23 @@ void alphaAlgorithm() {
   int n = countNeighbors();
 
   // Lost the swarm
-  if(currentState == RANDOM && n < ALPHA) {
-    setState(SEARCH_SWARM);
+  if(currentState == FORWARD && n < ALPHA) {
+    setState(COHERENCE);
     printf("Robot %s is turning back (%d neighbors).\n", robotName, n);
   }
-  // Found the swarm back
-  else if(currentState == SEARCH_SWARM && n >= ALPHA) {
-    setState(RANDOM);
-    printf("Robot %s found back %d neighbors :)\n", robotName, n);
+  else if(currentState == COHERENCE) {
+    if(n >= ALPHA) {
+      // Found the swarm back: pick a new random orientation
+      initiateTurn(rand() % MAX_RANDOM_TURN);
+      setState(FORWARD);
+      printf("Robot %s found back %d neighbors :)\n", robotName, n);
+    }
+    coherenceTime--;
+    if(coherenceTime <= 0) {
+      // Failed coherence, go back to state FORWARD
+      setState(FORWARD);
+      printf("Robot %s failed coherence :(\n", robotName);
+    }
   }
 }
 
@@ -203,7 +213,7 @@ void reset()
 {
   int i;
   robotName = wb_robot_get_name();
-  currentState = RANDOM;
+  currentState = FORWARD;
 
   // Make sure to initialize the RNG with different values for each thread
   srand(time(NULL) + (int)&robotName);
