@@ -44,6 +44,8 @@
 ###
 ###-----------------------------------------------------------------------------
 
+CFLAGS=--std=c99
+
 ### Do not modify: this includes Webots global Makefile.include
 space :=
 space +=
