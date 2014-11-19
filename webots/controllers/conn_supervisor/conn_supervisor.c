@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,14 +9,6 @@
 #include <webots/receiver.h>
 
 #include "../defines.h"
-#define TIME_STEP 64
-
-// Initial agents distribution parameters
-#define INITIAL_BOX_SIDE  30
-#define NEIGHBOURHOOD     5
-
-// Duration of the experiment (in seconds)
-#define EXP_TIME          900
 
 WbNodeRef epucks[NUM_ROBOTS];
 WbFieldRef locfield[NUM_ROBOTS];

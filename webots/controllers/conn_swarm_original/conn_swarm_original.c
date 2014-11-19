@@ -14,15 +14,6 @@
 
 #include "../defines.h"
 
-// ALPHA ALGORITHM
-#define ALPHA             2 // Minimum number of neighbors
-
-// AUXILIARY
-#define NB_SENSORS        8   // number of sensors
-#define BIAS_SPEED        400 // robot bias speed
-#define MAXSPEED          800 // maximum robot speed
-#define RANGE		  100 // normalisation of the IR sensors for obstacle avoidance
-
 //robot variables
 WbDeviceTag sensors[NB_SENSORS];
 WbDeviceTag emitterTag;
