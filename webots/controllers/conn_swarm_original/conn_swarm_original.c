@@ -12,18 +12,10 @@
 #include <webots/emitter.h>
 #include <webots/receiver.h>
 
-// Global Defines
-// @warning Some constants are duplicated in the supervisor code,
-// make sure the values are consistent
-#define TIME_STEP         64
-#define NUM_ROBOTS        3
+#include "../defines.h"
 
 // ALPHA ALGORITHM
 #define ALPHA             2 // Minimum number of neighbors
-
-// COMMUNICATION
-#define COMMUNICATION_CHANNEL 1
-#define COMM_RADIUS         0.7 // radius of radio communication
 
 // AUXILIARY
 #define NB_SENSORS        8   // number of sensors

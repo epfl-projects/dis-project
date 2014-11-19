@@ -9,17 +9,14 @@
 #include <webots/supervisor.h>
 #include <webots/receiver.h>
 
+#include "../defines.h"
 #define TIME_STEP 64
-#define COMMUNICATION_CHANNEL 1
 
-
-// RUN VARIABLES
-// @warning Some constants are duplicated in the robot controller,
-// make sure the values are consistent
-#define NUM_ROBOTS        3
+// Initial agents distribution parameters
 #define INITIAL_BOX_SIDE  30
 #define NEIGHBOURHOOD     5
-#define COMM_RADIUS       0.7
+
+// Duration of the experiment (in seconds)
 #define EXP_TIME          900
 
 WbNodeRef epucks[NUM_ROBOTS];
