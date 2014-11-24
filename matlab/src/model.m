@@ -75,10 +75,14 @@ while(k<k_end)
 	PaN_F(:,k) = test_prob( Pa, N_F(:,k) );
 	% # of robots which entered in avoidance from coherence state
 	PaN_C(:,k) = test_prob( Pa, N_C(:,k) );
+
+	%this part need only to be calculate every TC timestep
+%
 	% # of robots which fail to recover / recover / lost a connection from coherence state
 	[PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k) ] = test_prob( Pf, Pr, Pla, N_Cbar(:,k) );
 	% # of robots which gain / lost (/ "the rest") a connection from forward state
 	[PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar] =  test_prob( Pg, Pl , N_Fbar(:,k) );
+%
 
 	%Check the existence of PN_F(:,k-TA)
 	if k>TA
@@ -179,8 +183,8 @@ while(k<k_end)
 				- PfN_Cbar(i) ...
 			, 1, TC );
 		end
+	end
 end
-
 %*************************************%
 %Plot of the figures
 %*************************************%
