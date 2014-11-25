@@ -47,7 +47,7 @@ Pla=ones(N_rob,1)-Pr-Pf;
 
 TA = 10; %number of timesteps to spend in the avoidance state
 TC = 1; %number of timesteps to spend in the coherence state
-k_end=200;
+k_end=20;
 
 
 %*************************************%
@@ -81,7 +81,7 @@ while(k<k_end)
 	% # of robots which fail to recover / recover / lost a connection from coherence state
 	[PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k) ] = test_prob( Pf, Pr, Pla, N_Cbar(:,k) );
 	% # of robots which gain / lost (/ "the rest") a connection from forward state
-	[PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar] =  test_prob( Pg, Pl , N_Fbar(:,k) );
+	[PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k)] =  test_prob( Pg, Pl , N_Fbar(:,k) );
 %
 
 	%Check the existence of PN_F(:,k-TA)
@@ -163,7 +163,8 @@ while(k<k_end)
 				+ PlN_Fbar(2,k) ...
 				- PrN_Cbar(1,k) ...
 				- PfN_Cbar(1,k) ...
-				, 1, TC );
+			, 1, TC );
+
 			%for 1 to alpha-2 connections
 			for i=2:alpha-1
 				N_Cbar(i,k+1:k+TC) = repmat( N_Cbar(i,k) ...
@@ -174,6 +175,7 @@ while(k<k_end)
 					- PfN_Cbar(i,k) ...
 				, 1, TC );
 			end
+
 			%for alpha-1 connections
 			i=alpha;
 			N_Cbar(i,k+1:k+TC) = repmat( N_Cbar(i,k) ...
@@ -182,6 +184,7 @@ while(k<k_end)
 				- PlaN_Cbar(i,k) ...
 				- PfN_Cbar(i) ...
 			, 1, TC );
+
 		end
 	end
 end
@@ -190,9 +193,9 @@ end
 %*************************************%
 
 figure();
-plot(N_Fbar'+N_Cbar');
+plot(sum(N_Fbar+N_Cbar)','.');
 figure();
-plot(N_F'+N_AF'+N_C'+N_AC');
+plot(sum(N_F+N_AF+N_C+N_AC)','.');
 % figure();
 % plot(N_Fbar');
 % legend();
@@ -202,3 +205,17 @@ plot(N_F'+N_AF'+N_C'+N_AC');
 % plot(PlN_Fbar');
 % figure();
 % plot(PlaN_Cbar');
+
+
+%************* debuging part *************
+% deb = fopen("debugging.txt","w");
+%
+% for k=1:k_end
+% 	a=[N_Fbar(:,k) N_F(:,k) N_AF(:,k) N_Cbar(:,k) N_C(:,k) N_AC(:,k)];
+% 	for i=1:N_rob
+% 		for j=1:size(a)(2)
+% 			fprintf(deb,'%d\t', a(i,j));
+% 		end
+% 		fprintf(deb,'\n');
+% 	end
+% end
