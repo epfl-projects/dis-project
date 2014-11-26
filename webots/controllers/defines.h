@@ -13,6 +13,7 @@
 // Communication
 #define COMM_RADIUS           0.7 // Range of radio communication (in meters)
 #define COMMUNICATION_CHANNEL 1
+#define COMMUNICATION_CHANNEL_STAT 2
 
 // Initial agents distribution parameters
 #define INITIAL_BOX_SIDE  50

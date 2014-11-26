@@ -19,6 +19,8 @@
 WbDeviceTag sensors[NB_SENSORS];
 WbDeviceTag emitterTag;
 WbDeviceTag receiverTag;
+
+int n_neighbors; // current neighbors of the robot
 /**
  * A unique id from 001 to NUM_ROBOTS (included), allowing leading zeros
  */
@@ -196,16 +198,16 @@ int countNeighbors() {
  * the number of neighbors and the presence of obstacles.
  */
 void alphaAlgorithm() {
-  int n = countNeighbors();
+  n_neighbors = countNeighbors();
 
   if(currentState == FORWARD || currentState == FORWARD_AVOIDANCE) {
     // Lost the swarm --> jump to coherence state
-    if(n < ALPHA) {
+    if(n_neighbors < ALPHA) {
       // Lost the swarm: make a 180° turn
       initiateTurn(180);
 
       setState(COHERENCE);
-      printf("Robot %s is turning back (%d neighbors).\n", robotName, n);
+      printf("Robot %s is turning back (%d neighbors).\n", robotName, n_neighbors);
     }
     // Obstacle avoidance timed out --> go back to forward state
     else if(currentState == FORWARD_AVOIDANCE) {
@@ -222,11 +224,11 @@ void alphaAlgorithm() {
   }
   else if(currentState == COHERENCE || currentState == COHERENCE_AVOIDANCE) {
     // Successful coherence --> pick a random orientation and jump to state forward
-    if(n >= ALPHA) {
+    if(n_neighbors >= ALPHA) {
       // Pick a new random orientation
       initiateTurn(rand() % MAX_RANDOM_TURN);
       setState(FORWARD);
-      printf("Robot %s found back %d neighbors :)\n", robotName, n);
+      printf("Robot %s found back %d neighbors :)\n", robotName, n_neighbors);
     }
     else {
       if(currentState == FORWARD_AVOIDANCE) {
@@ -266,6 +268,17 @@ void run(){
 
     previousSecond = second;
   }
+
+
+  // log state and connectivity
+  wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL_STAT); // change channel temporarily to a different one for stats
+  // create message robot name + state + n_neighbors
+  char stats_message[100];
+  sprintf(stats_message, "%s %d %d", robotName, currentState, n_neighbors);
+  sendMessage(stats_message);
+  wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL); // change back to message channel
+
+
 }
 
 /* ****************************** RESET ****************************** */

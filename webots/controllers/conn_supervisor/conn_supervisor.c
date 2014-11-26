@@ -10,6 +10,8 @@
 
 #include "../defines.h"
 
+WbDeviceTag receiverTag;
+
 WbNodeRef epucks[NUM_ROBOTS];
 WbFieldRef locfield[NUM_ROBOTS];
 
@@ -78,6 +80,14 @@ void reset(void) {
   change_robot_positions();
 
   finalTime = wb_robot_get_time() + EXP_TIME; // 15 MIN == 900
+
+
+  // configure receiver
+  // TODO : not working
+  receiverTag = wb_robot_get_device("receiver");
+  wb_receiver_enable(receiverTag, TIME_STEP);
+  wb_receiver_set_channel(receiverTag, COMMUNICATION_CHANNEL_STAT);
+
 }
 
 void run() {
@@ -85,6 +95,13 @@ void run() {
   // End of the experiment
   if(wb_robot_get_time() > finalTime){
     wb_supervisor_simulation_revert();
+  }
+
+  while(wb_receiver_get_queue_length(receiverTag) > 0) {
+    char * stats = (char *)wb_receiver_get_data(receiverTag);
+    // TODO : parse stats and write to file
+    printf("%s\n", stats);
+    wb_receiver_next_packet(receiverTag);
   }
 }
 
