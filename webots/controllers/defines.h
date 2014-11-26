@@ -9,6 +9,7 @@
 #define ALPHA                4 // Minimum number of neighbors to maintain
 #define MAX_RANDOM_TURN      60 // Maximum value of the random turn (in degrees)
 #define MAX_COHERENCE_TIME   15 // Maximum number of timesteps spent in coherence state
+#define MAX_AVOIDANCE_TIME   5 // Maximum number of timesteps spent in avoidance sub-state
 // Communication
 #define COMM_RADIUS           0.7 // Range of radio communication (in meters)
 #define COMMUNICATION_CHANNEL 1

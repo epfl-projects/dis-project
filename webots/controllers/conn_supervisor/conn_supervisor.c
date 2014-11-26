@@ -82,11 +82,10 @@ void reset(void) {
 
 void run() {
 
+  // End of the experiment
   if(wb_robot_get_time() > finalTime){
-
     wb_supervisor_simulation_revert();
   }
-
 }
 
 
