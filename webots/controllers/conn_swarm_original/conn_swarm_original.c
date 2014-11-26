@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
+#include <math.h>
 #include <assert.h>
 //#include <sys/time.h>
 #include <webots/robot.h>
@@ -23,8 +24,42 @@ WbDeviceTag receiverTag;
  */
 const char *robotName;
 
-int distances[NB_SENSORS];    // for sensor readings
-int speed[2];		              // for obstacle avoidance
+int distances[NB_SENSORS]; // for sensor readings (bigger when an obstacle is closer)
+int speed[2];		           // for obstacle avoidance
+
+/* ****************************** BEHAVIORS ***************************** */
+typedef enum {FORWARD, FORWARD_AVOIDANCE, COHERENCE, COHERENCE_AVOIDANCE} State;
+State currentState;
+/** Time left remaining in state COHERENCE */
+int coherenceTime = 0;
+/** Time left remaining in sub-state AVOIDANCE */
+int avoidanceTime = 0;
+
+void setState(State newState) {
+  if(currentState != newState) {
+    switch(newState) {
+      case FORWARD_AVOIDANCE:
+      case COHERENCE_AVOIDANCE:
+        avoidanceTime = MAX_AVOIDANCE_TIME;
+        break;
+
+      case FORWARD:
+        // We may have failed or succeeded a coherence state
+        coherenceTime = 0;
+        avoidanceTime = 0;
+        break;
+
+      case COHERENCE:
+        // TODO: check this makes sense, in particular in the case ov
+        // transitions COHERENCE <=> COHERENCE_AVOIDANCE
+        coherenceTime = MAX_COHERENCE_TIME;
+        avoidanceTime = 0;
+        break;
+    }
+    currentState = newState;
+  }
+}
+
 
 /* ****************************** MOVEMENT ****************************** */
 void setSpeed(int leftSpeed, int rightSpeed) {
@@ -44,18 +79,22 @@ void getSensorValues(int *sensorTable) {
 }
 
 /**
- * Detect the presence of an obstacle in front based on sensor readings
+ * Detect the presence of an obstacle in front based on sensor readings.
+ * The sensor values must be updated first with `getSensorValues`.
  */
 bool hasObstacle() {
-  // TODO
-  return false;
+  int maxValue = 0;
+  for(unsigned int i = 0; i < NB_SENSORS; i++) {
+    // Note that `distances` holds sensor readings
+    maxValue = fmax(maxValue, distances[i]);
+  }
+  return (maxValue >= OBSTACLE_THRESHOLD);
 }
 
 /**
  * Obstacle avoidance (rule-based)
  */
 void avoidObstacle(int * speed, const int* distances){
-  // TODO: change to a rule-based controller in order to change states
   int brait_coef[8][2] = {
     {140, -35}, {110, -15}, {80,-10},{-10, -10},
     {-15, -10}, {-5, 80}, {-30, 90}, {-20, 160}
@@ -103,41 +142,13 @@ void turn(int * speed) {
 void move() {
   if(isTurning)
     turn(speed);
-  else
+  else if(currentState == FORWARD_AVOIDANCE || currentState == COHERENCE_AVOIDANCE) {
     avoidObstacle(speed, distances);
-  setSpeed(speed[0], speed[1]);
-}
-
-/* ****************************** BEHAVIORS ***************************** */
-typedef enum {FORWARD, FORWARD_AVOIDANCE, COHERENCE, COHERENCE_AVOIDANCE} State;
-State currentState;
-/** Time left remaining in state COHERENCE */
-int coherenceTime = 0;
-/** Time left remaining in sub-state AVOIDANCE */
-int avoidanceTime = 0;
-
-void setState(State newState) {
-  if(currentState != newState) {
-    switch(newState) {
-      case FORWARD_AVOIDANCE:
-      case COHERENCE_AVOIDANCE:
-        avoidanceTime = MAX_AVOIDANCE_TIME;
-        break;
-
-      case FORWARD:
-        // We may have failed or succeeded a coherence state
-        coherenceTime = 0;
-        avoidanceTime = 0;
-        break;
-
-      case COHERENCE:
-        // TODO: check this makes sense, in particular in the case ov
-        // transitions COHERENCE <=> COHERENCE_AVOIDANCE
-        coherenceTime = MAX_COHERENCE_TIME;
-        avoidanceTime = 0;
-        break;
-    }
-    currentState = newState;
+    setSpeed(speed[0], speed[1]);
+  }
+  else {
+    // Just move forward
+    setSpeed(BIAS_SPEED, BIAS_SPEED);
   }
 }
 

@@ -23,5 +23,6 @@
 #define BIAS_SPEED           400 // robot bias speed
 #define MAXSPEED             800 // maximum robot speed
 #define SENSOR_NORMALIZATION 100 // Normalisation constant for the IR sensors measurements
+#define OBSTACLE_THRESHOLD   100 // IR sensor value from which we consider there is an obstalce
 
 #endif
