@@ -51,231 +51,225 @@ Pla=ones(N_rob,1)-Pr-Pf;
 
 TA = 5; %number of timesteps to spend in the avoidance state
 TC = 15; %number of timesteps to spend in the coherence state
-k_end=1000; %length of the simulation in timestep
+k_end=100; %length of the simulation in timestep
 n_end=10; %number of simulations
 
-%final variables to make the average
-N_F_f=0;
-N_AF_f=0;
-N_Fbar_f=0;
-N_C_f=0;
-N_AC_f=0;
-N_Cbar_f=0;
+%final variables to make the average and the standart deviation
+N_F_f=zeros(N_rob,k_end,n_end);
+N_AF_f=zeros(N_rob,k_end,n_end);
+N_Fbar_f=zeros(N_rob,k_end,n_end);
+N_C_f=zeros(N_rob,k_end,n_end);
+N_AC_f=zeros(N_rob,k_end,n_end);
+N_Cbar_f=zeros(N_rob,k_end,n_end);
 
 %*************************************%
 %Simulation
 %*************************************%
 for n=1:n_end
-k=0; %initialisation of the simulation timestep
-while(k<k_end)
-	k++;
+	k=0; %initialisation of the simulation timestep
+	for(k=1:k_end)
+
+		% # of robots in Forwar and in Coherence state
+		N_F(:,k)=N_Fbar(:,k)-N_AF(:,k);
+		N_C(:,k)=N_Cbar(:,k)-N_AC(:,k);
+
+		%*************************************************************************%
+		%Calculation of the number of robots which changed states during timestep k
+		%*************************************************************************%
+
+		%lecture of the following variables
+		% P*N_* means the number of robots of N_* who successfully pass the P* test
+		% # of robots which enter in avoidance from forward state
+
+		% # of robots which entered in avoidance from forward state
+		PaN_F(:,k) = test_prob( Pa, N_F(:,k) );
+
+		% # of robots which entered in avoidance from coherence state
+		PaN_C(:,k) = test_prob( Pa, N_C(:,k) );
+
+		%this part need only to be calculate every TC timestep
+	%
+		% # of robots which fail to recover / recover / lost a connection from coherence state
+		[PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k) ] = test_prob( Pf, Pr, Pla, N_Cbar(:,k) );
+
+		% # of robots which gain / lost (/ "the rest") a connection from forward state
+		[PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k)] =  test_prob( Pg, Pl , N_Fbar(:,k) );
+	%
+
+		%Check the existence of PN_F(:,k-TA)
+		if k>TA
+			PaNF=PaN_F(:,k-TA);
+			PaNC=PaN_C(:,k-TA);
+		else
+			PaNF=0;
+			PaNC=0;
+		end
 
 
-	% # of robots in Forwar and in Coherence state
-	N_F(:,k)=N_Fbar(:,k)-N_AF(:,k);
-	N_C(:,k)=N_Cbar(:,k)-N_AC(:,k);
+		if k<k_end
 
-	%**************************************************************************
-	%Calculation of the number of robots which changed states during timestep k
-	%**************************************************************************
+			N_AF(:,k+1)=N_AF(:,k)+PaN_F(:,k)-PaNF;
+			N_AC(:,k+1)=N_AC(:,k)+PaN_C(:,k)-PaNC;
 
-	%lecture of the following variables
-	% P*N_* means the number of robots of N_* who successfully pass the P* test
-	% # of robots which enter in avoidance from forward state
+			%***********************************************************************%
+			%Simulation for every TC timestep (interval of the connectivity sampling)
+			%***********************************************************************%
 
-	% # of robots which entered in avoidance from forward state
-	PaN_F(:,k) = test_prob( Pa, N_F(:,k) );
+			if mod(k-1,TC)==0
 
-	% # of robots which entered in avoidance from coherence state
-	PaN_C(:,k) = test_prob( Pa, N_C(:,k) );
+				%**************** simulation for the forward state *****************%
 
-	%this part need only to be calculate every TC timestep
-%
-	% # of robots which fail to recover / recover / lost a connection from coherence state
-	[PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k) ] = test_prob( Pf, Pr, Pla, N_Cbar(:,k) );
+				%for 0 connection
+				N_Fbar(1,k+1:k+TC) = repmat( N_Fbar(1,k) ...
+					+ PfN_Cbar(1,k) ...
+					- PgN_Fbar(1,k) ...
+				, 1, TC );
 
-	% # of robots which gain / lost (/ "the rest") a connection from forward state
-	[PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k)] =  test_prob( Pg, Pl , N_Fbar(:,k) );
-%
+				%for 1 to alpha-1 connection
+				for i=2:alpha
 
-	%Check the existence of PN_F(:,k-TA)
-	if k>TA
-		PaNF=PaN_F(:,k-TA);
-		PaNC=PaN_C(:,k-TA);
-	else
-		PaNF=0;
-		PaNC=0;
-	end
+					N_Fbar(i,k+1:k+TC) = repmat( N_Fbar(i,k) ...
+						+ PgN_Fbar(i-1,k) ...
+						+ PfN_Cbar(i,k) ...
+						+ PrN_Cbar(i-1,k) ...
+						- PgN_Fbar(i,k) ...
+						- PlN_Fbar(i,k) ...
+					, 1, TC );
 
+				end
 
-	if k<k_end
-
-		N_AF(:,k+1)=N_AF(:,k)+PaN_F(:,k)-PaNF;
-		N_AC(:,k+1)=N_AC(:,k)+PaN_C(:,k)-PaNC;
-
-		%***********************************************************************%
-		%Simulation for every TC timestep (interval of the connectivity sampling)
-		%***********************************************************************%
-
-		if mod(k-1,TC)==0
-
-			%************* simulation for the forward state ************
-
-			%for 0 connection
-			N_Fbar(1,k+1:k+TC) = repmat( N_Fbar(1,k) ...
-				+ PfN_Cbar(1,k) ...
-				- PgN_Fbar(1,k) ...
-			, 1, TC );
-
-			%for 1 to alpha-1 connection
-			for i=2:alpha
+				%for alpha connections
+				i=alpha+1;
 
 				N_Fbar(i,k+1:k+TC) = repmat( N_Fbar(i,k) ...
 					+ PgN_Fbar(i-1,k) ...
-					+ PfN_Cbar(i,k) ...
+					+ PlN_Fbar(i+1,k) ...
 					+ PrN_Cbar(i-1,k) ...
 					- PgN_Fbar(i,k) ...
 					- PlN_Fbar(i,k) ...
 				, 1, TC );
 
-			end
+				%for alpha+1 to max connections -1 connections
+				for i=alpha+2:dmax-1
 
-			%for alpha connections
-			i=alpha+1;
+					N_Fbar(i,k+1:k+TC) = repmat( N_Fbar(i,k) ...
+						+ PgN_Fbar(i-1,k) ...
+						+ PlN_Fbar(i+1,k) ...
+						- PgN_Fbar(i,k) ...
+						- PlN_Fbar(i,k) ...
+					, 1, TC );
 
-			N_Fbar(i,k+1:k+TC) = repmat( N_Fbar(i,k) ...
-				+ PgN_Fbar(i-1,k) ...
-				+ PlN_Fbar(i+1,k) ...
-				+ PrN_Cbar(i-1,k) ...
-				- PgN_Fbar(i,k) ...
-				- PlN_Fbar(i,k) ...
-			, 1, TC );
+				end
+				%for the full connectivity (N_rob-1 connections)
+				i=dmax;
 
-			%for alpha+1 to max connections -1 connections
-			for i=alpha+2:dmax-1
-
-				N_Fbar(i,k+1:k+TC) = repmat( N_Fbar(i,k) ...
+				N_Fbar(i,k+1:k+TC) = repmat ( N_Fbar(i,k) ...
 					+ PgN_Fbar(i-1,k) ...
-					+ PlN_Fbar(i+1,k) ...
-					- PgN_Fbar(i,k) ...
-					- PlN_Fbar(i,k) ...
+					- PlN_Fbar(i,k)  ...
 				, 1, TC );
 
-			end
-			%for the full connectivity (N_rob-1 connections)
-			i=dmax;
+				%******************* simulation for the coherence state ****************%
 
-			N_Fbar(i,k+1:k+TC) = repmat ( N_Fbar(i,k) ...
-				+ PgN_Fbar(i-1,k) ...
-				- PlN_Fbar(i,k)  ...
-			, 1, TC );
-
-			%******************* simulation for the coherence state ******************
-
-			%for 0 connection
-			i=1;
-			N_Cbar(i,k+1:k+TC) = repmat( N_Cbar(i,k) ...
-				+ PlaN_Cbar(i+1,k) ...
-				+ PlN_Fbar(i+1,k) ...
-				- PrN_Cbar(i,k) ...
-				- PfN_Cbar(i,k) ...
-			, 1, TC );
-
-			%for 1 to alpha-2 connections
-			for i=2:alpha-1
+				%for 0 connection
+				i=1;
 				N_Cbar(i,k+1:k+TC) = repmat( N_Cbar(i,k) ...
 					+ PlaN_Cbar(i+1,k) ...
+					+ PlN_Fbar(i+1,k) ...
+					- PrN_Cbar(i,k) ...
+					- PfN_Cbar(i,k) ...
+				, 1, TC );
+
+				%for 1 to alpha-2 connections
+				for i=2:alpha-1
+					N_Cbar(i,k+1:k+TC) = repmat( N_Cbar(i,k) ...
+						+ PlaN_Cbar(i+1,k) ...
+						+ PlN_Fbar(i+1,k) ...
+						- PrN_Cbar(i,k) ...
+						- PlaN_Cbar(i,k) ...
+						- PfN_Cbar(i,k) ...
+					, 1, TC );
+				end
+
+				%for alpha-1 connections
+				i=alpha;
+				N_Cbar(i,k+1:k+TC) = repmat( N_Cbar(i,k) ...
 					+ PlN_Fbar(i+1,k) ...
 					- PrN_Cbar(i,k) ...
 					- PlaN_Cbar(i,k) ...
 					- PfN_Cbar(i,k) ...
 				, 1, TC );
+
+
+				%*********************** debuging part ***********************%
+
+				% deb = fopen("debugging_N_rob.txt","a+");
+				%
+				% fprintf(deb,"step : %d\n",k);
+				% a=[N_Fbar(:,k) N_F(:,k) N_AF(:,k) N_Cbar(:,k) N_C(:,k) N_AC(:,k)];
+				% a=[a a(:,1)+a(:,4)];
+				% for i=1:N_rob
+				% 	for j=1:size(a)(2)
+				% 		fprintf(deb,'%d\t', a(i,j));
+				% 	end
+				% 	fprintf(deb,'\n');
+				% end
+				% fprintf(deb,'%d\n\n',sum(a(:,size(a)(2))));
+				% fclose(deb);
+				%
+				% deb=fopen("debugging_N_change.txt","a+");
+				% fprintf(deb,"step : %d\n",k);
+				% a=[ N_Fbar(:,k) PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k) N_Cbar(:,k) PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k)];
+				% a=[a a(:,1)+a(:,5)];
+				% for i=1:N_rob
+				% 	for j=1:size(a)(2)
+				% 		fprintf(deb,'%d\t', a(i,j));
+				% 	end
+				% 	fprintf(deb,'\n');
+				% end
+				% fprintf(deb,'%d\n\n',sum(a(:,size(a)(2))));
+				% fclose(deb);
+				% pause();
 			end
-
-			%for alpha-1 connections
-			i=alpha;
-			N_Cbar(i,k+1:k+TC) = repmat( N_Cbar(i,k) ...
-				+ PlN_Fbar(i+1,k) ...
-				- PrN_Cbar(i,k) ...
-				- PlaN_Cbar(i,k) ...
-				- PfN_Cbar(i,k) ...
-			, 1, TC );
-
-
-			%************* debuging part *************%
-
-			% deb = fopen("debugging_N_rob.txt","a+");
-			%
-			% fprintf(deb,"step : %d\n",k);
-			% a=[N_Fbar(:,k) N_F(:,k) N_AF(:,k) N_Cbar(:,k) N_C(:,k) N_AC(:,k)];
-			% a=[a a(:,1)+a(:,4)];
-			% for i=1:N_rob
-			% 	for j=1:size(a)(2)
-			% 		fprintf(deb,'%d\t', a(i,j));
-			% 	end
-			% 	fprintf(deb,'\n');
-			% end
-			% fprintf(deb,'%d\n\n',sum(a(:,size(a)(2))));
-			% fclose(deb);
-			%
-			% deb=fopen("debugging_N_change.txt","a+");
-			% fprintf(deb,"step : %d\n",k);
-			% a=[ N_Fbar(:,k) PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k) N_Cbar(:,k) PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k)];
-			% a=[a a(:,1)+a(:,5)];
-			% for i=1:N_rob
-			% 	for j=1:size(a)(2)
-			% 		fprintf(deb,'%d\t', a(i,j));
-			% 	end
-			% 	fprintf(deb,'\n');
-			% end
-			% fprintf(deb,'%d\n\n',sum(a(:,size(a)(2))));
-			% fclose(deb);
-			% pause();
 		end
+
 	end
 
-end
-
-N_F_f = N_F_f + N_F ;
-N_AF_f = N_AF_f + N_AF ;
-N_Fbar_f = N_Fbar_f + N_Fbar ;
-N_C_f = N_C_f + N_C ;
-N_AC_f = N_AC_f + N_AC ;
-N_Cbar_f = N_Cbar_f + N_Cbar ;
+	N_F_f(:,:,n) =  N_F ;
+	N_AF_f(:,:,n) = N_AF ;
+	N_Fbar_f(:,:,n) = N_Fbar ;
+	N_C_f(:,:,n) = N_C ;
+	N_AC_f(:,:,n) = N_AC ;
+	N_Cbar_f(:,:,n) = N_Cbar ;
 
 end
-%**************************************%
-%mean
-%**************************************%
 
-N_F_f = N_F_f / n_end ;
-N_AF_f = N_AF_f / n_end ;
-N_Fbar_f = N_Fbar_f / n_end ;
-N_C_f = N_C_f / n_end ;
-N_AC_f = N_AC_f / n_end ;
-N_Cbar_f = N_Cbar_f / n_end ;
 
+%**********************************************************%
+%mean and standard deviation over the number of simulations
+%**********************************************************%
+
+mean_N_F = mean( N_F_f, 3 ) ;
+mean_N_AF = mean( N_AF_f, 3 ) ;
+mean_N_Fbar = mean( N_Fbar_f, 3 );
+mean_N_C = mean( N_C_f, 3 ) ;
+mean_N_AC = mean( N_AC_f, 3 ) ;
+mean_N_Cbar = mean( N_Cbar_f, 3) ;
+
+std_N_F = std( N_F_f, 0, 3 ) ;
+std_N_AF = std( N_AF_f, 0, 3 ) ;
+std_N_Fbar = std( N_AF_f, 0, 3 ) ;
+std_N_C = std( N_C_f, 0, 3) ;
+std_N_AC = std( N_AC_f, 0, 3) ;
+std_N_Cbar = std( N_Cbar_f, 0 ,3 ) ;
 
 %**************************************%
 %Plot of the figures
 %**************************************%
-
+%non operational
 figure();
-plot(sum(N_F_f')','-o');
+plot(sum(mean_N_F')','-or');
 hold('on');
-plot(sum(N_C_f')','-o');
-plot(sum(N_AC_f'+N_AF_f')','-o');
-%
-
-
-% figure();
-% plot(sum(N_F+N_AF+N_C+N_AC)','.');
-% figure();
-% plot(N_Fbar');
-% legend();
-% figure();
-% plot(N_Cbar');
-% figure();
-% plot(PlN_Fbar');
-% figure();
-% plot(PlaN_Cbar');
+plot(sum(N_C_f')','-ob');
+plot(sum(N_AC_f'+N_AF_f')','-og');
+plot(sum(N_AC_f'+N_AF_f'+N_F_f'+N_C_f')')
+legend("Forward","Coherence","Avoidance","summation");
