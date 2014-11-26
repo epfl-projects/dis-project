@@ -1,5 +1,9 @@
 close all
 clear all
+a=fopen("debugging_N_rob.txt","w");
+fclose(a);
+a=fopen("debugging_N_change.txt","w");
+fclose(a);
 
 %DIS Project : Macroscopic model of a wireless connected swarm
 
@@ -45,15 +49,23 @@ Pla=ones(N_rob,1)-Pr-Pf;
 %Other simulation parameters
 %*************************************%
 
-TA = 10; %number of timesteps to spend in the avoidance state
-TC = 1; %number of timesteps to spend in the coherence state
-k_end=20;
+TA = 5; %number of timesteps to spend in the avoidance state
+TC = 15; %number of timesteps to spend in the coherence state
+k_end=1000; %length of the simulation in timestep
+n_end=10; %number of simulations
 
+%final variables to make the average
+N_F_f=0;
+N_AF_f=0;
+N_Fbar_f=0;
+N_C_f=0;
+N_AC_f=0;
+N_Cbar_f=0;
 
 %*************************************%
 %Simulation
 %*************************************%
-
+for n=1:n_end
 k=0; %initialisation of the simulation timestep
 while(k<k_end)
 	k++;
@@ -73,6 +85,7 @@ while(k<k_end)
 
 	% # of robots which entered in avoidance from forward state
 	PaN_F(:,k) = test_prob( Pa, N_F(:,k) );
+
 	% # of robots which entered in avoidance from coherence state
 	PaN_C(:,k) = test_prob( Pa, N_C(:,k) );
 
@@ -80,6 +93,7 @@ while(k<k_end)
 %
 	% # of robots which fail to recover / recover / lost a connection from coherence state
 	[PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k) ] = test_prob( Pf, Pr, Pla, N_Cbar(:,k) );
+
 	% # of robots which gain / lost (/ "the rest") a connection from forward state
 	[PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k)] =  test_prob( Pg, Pl , N_Fbar(:,k) );
 %
@@ -92,6 +106,7 @@ while(k<k_end)
 		PaNF=0;
 		PaNC=0;
 	end
+
 
 	if k<k_end
 
@@ -107,8 +122,7 @@ while(k<k_end)
 			%************* simulation for the forward state ************
 
 			%for 0 connection
-			N_Fbar(1,k+1:k+TC) = repmat( ...
-				N_Fbar(1,k) ...
+			N_Fbar(1,k+1:k+TC) = repmat( N_Fbar(1,k) ...
 				+ PfN_Cbar(1,k) ...
 				- PgN_Fbar(1,k) ...
 			, 1, TC );
@@ -184,20 +198,78 @@ while(k<k_end)
 				+ PlN_Fbar(i+1,k) ...
 				- PrN_Cbar(i,k) ...
 				- PlaN_Cbar(i,k) ...
-				- PfN_Cbar(i) ...
+				- PfN_Cbar(i,k) ...
 			, 1, TC );
 
+
+			%************* debuging part *************%
+
+			% deb = fopen("debugging_N_rob.txt","a+");
+			%
+			% fprintf(deb,"step : %d\n",k);
+			% a=[N_Fbar(:,k) N_F(:,k) N_AF(:,k) N_Cbar(:,k) N_C(:,k) N_AC(:,k)];
+			% a=[a a(:,1)+a(:,4)];
+			% for i=1:N_rob
+			% 	for j=1:size(a)(2)
+			% 		fprintf(deb,'%d\t', a(i,j));
+			% 	end
+			% 	fprintf(deb,'\n');
+			% end
+			% fprintf(deb,'%d\n\n',sum(a(:,size(a)(2))));
+			% fclose(deb);
+			%
+			% deb=fopen("debugging_N_change.txt","a+");
+			% fprintf(deb,"step : %d\n",k);
+			% a=[ N_Fbar(:,k) PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k) N_Cbar(:,k) PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k)];
+			% a=[a a(:,1)+a(:,5)];
+			% for i=1:N_rob
+			% 	for j=1:size(a)(2)
+			% 		fprintf(deb,'%d\t', a(i,j));
+			% 	end
+			% 	fprintf(deb,'\n');
+			% end
+			% fprintf(deb,'%d\n\n',sum(a(:,size(a)(2))));
+			% fclose(deb);
+			% pause();
 		end
 	end
+
 end
-%*************************************%
+
+N_F_f = N_F_f + N_F ;
+N_AF_f = N_AF_f + N_AF ;
+N_Fbar_f = N_Fbar_f + N_Fbar ;
+N_C_f = N_C_f + N_C ;
+N_AC_f = N_AC_f + N_AC ;
+N_Cbar_f = N_Cbar_f + N_Cbar ;
+
+end
+%**************************************%
+%mean
+%**************************************%
+
+N_F_f = N_F_f / n_end ;
+N_AF_f = N_AF_f / n_end ;
+N_Fbar_f = N_Fbar_f / n_end ;
+N_C_f = N_C_f / n_end ;
+N_AC_f = N_AC_f / n_end ;
+N_Cbar_f = N_Cbar_f / n_end ;
+
+
+%**************************************%
 %Plot of the figures
-%*************************************%
+%**************************************%
 
 figure();
-plot(sum(N_Fbar+N_Cbar)','.');
-figure();
-plot(sum(N_F+N_AF+N_C+N_AC)','.');
+plot(sum(N_F_f')','-o');
+hold('on');
+plot(sum(N_C_f')','-o');
+plot(sum(N_AC_f'+N_AF_f')','-o');
+%
+
+
+% figure();
+% plot(sum(N_F+N_AF+N_C+N_AC)','.');
 % figure();
 % plot(N_Fbar');
 % legend();
@@ -207,17 +279,3 @@ plot(sum(N_F+N_AF+N_C+N_AC)','.');
 % plot(PlN_Fbar');
 % figure();
 % plot(PlaN_Cbar');
-
-
-%************* debuging part *************
-% deb = fopen("debugging.txt","w");
-%
-% for k=1:k_end
-% 	a=[N_Fbar(:,k) N_F(:,k) N_AF(:,k) N_Cbar(:,k) N_C(:,k) N_AC(:,k)];
-% 	for i=1:N_rob
-% 		for j=1:size(a)(2)
-% 			fprintf(deb,'%d\t', a(i,j));
-% 		end
-% 		fprintf(deb,'\n');
-% 	end
-% end
