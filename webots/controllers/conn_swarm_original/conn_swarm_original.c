@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
+#include <math.h>
 #include <assert.h>
 //#include <sys/time.h>
 #include <webots/robot.h>
@@ -23,8 +24,42 @@ WbDeviceTag receiverTag;
  */
 const char *robotName;
 
-int distances[NB_SENSORS];    // for sensor readings
-int speed[2];		              // for obstacle avoidance
+int distances[NB_SENSORS]; // for sensor readings (bigger when an obstacle is closer)
+int speed[2];		           // for obstacle avoidance
+
+/* ****************************** BEHAVIORS ***************************** */
+typedef enum {FORWARD, FORWARD_AVOIDANCE, COHERENCE, COHERENCE_AVOIDANCE} State;
+State currentState;
+/** Time left remaining in state COHERENCE */
+int coherenceTime = 0;
+/** Time left remaining in sub-state AVOIDANCE */
+int avoidanceTime = 0;
+
+void setState(State newState) {
+  if(currentState != newState) {
+    switch(newState) {
+      case FORWARD_AVOIDANCE:
+      case COHERENCE_AVOIDANCE:
+        avoidanceTime = MAX_AVOIDANCE_TIME;
+        break;
+
+      case FORWARD:
+        // We may have failed or succeeded a coherence state
+        coherenceTime = 0;
+        avoidanceTime = 0;
+        break;
+
+      case COHERENCE:
+        // TODO: check this makes sense, in particular in the case ov
+        // transitions COHERENCE <=> COHERENCE_AVOIDANCE
+        coherenceTime = MAX_COHERENCE_TIME;
+        avoidanceTime = 0;
+        break;
+    }
+    currentState = newState;
+  }
+}
+
 
 /* ****************************** MOVEMENT ****************************** */
 void setSpeed(int leftSpeed, int rightSpeed) {
@@ -44,7 +79,20 @@ void getSensorValues(int *sensorTable) {
 }
 
 /**
- * Obstacle avoidance (Braitenberg controller)
+ * Detect the presence of an obstacle in front based on sensor readings.
+ * The sensor values must be updated first with `getSensorValues`.
+ */
+bool hasObstacle() {
+  int maxValue = 0;
+  for(unsigned int i = 0; i < NB_SENSORS; i++) {
+    // Note that `distances` holds sensor readings
+    maxValue = fmax(maxValue, distances[i]);
+  }
+  return (maxValue >= OBSTACLE_THRESHOLD);
+}
+
+/**
+ * Obstacle avoidance (rule-based)
  */
 void avoidObstacle(int * speed, const int* distances){
   int brait_coef[8][2] = {
@@ -56,7 +104,7 @@ void avoidObstacle(int * speed, const int* distances){
   for(i = 0; i < 2; i++){
     speed[i] = BIAS_SPEED / 2;
     for (j = 0; j < 8; j++){
-      speed[i] += brait_coef[j][i] * (1.0 - (distances[j] / RANGE));
+      speed[i] += brait_coef[j][i] * (1.0 - (distances[j] / SENSOR_NORMALIZATION));
     }
   }
 }
@@ -77,7 +125,7 @@ void initiateTurn(int angle) {
 }
 /**
  * Assuming a turn is in progress
- * @param speed [OUTPUT] The corresponding speed for each wheel
+ * @param speed [OUTPUT] Array of 2 ints. The corresponding speed for each wheel
  */
 void turn(int * speed) {
   // TODO: fine-tune
@@ -94,30 +142,13 @@ void turn(int * speed) {
 void move() {
   if(isTurning)
     turn(speed);
-  else
+  else if(currentState == FORWARD_AVOIDANCE || currentState == COHERENCE_AVOIDANCE) {
     avoidObstacle(speed, distances);
-  setSpeed(speed[0], speed[1]);
-}
-
-/* ****************************** BEHAVIORS ***************************** */
-typedef enum {FORWARD, COHERENCE} State;
-State currentState;
-/** Time left remaining in state COHERENCE */
-int coherenceTime = 0;
-void setState(State newState) {
-  if(currentState != newState) {
-    switch(newState) {
-      case FORWARD:
-        coherenceTime = 0;
-        break;
-
-      // Make a 180° turn
-      case COHERENCE:
-        coherenceTime = MAX_COHERENCE_TIME;
-        initiateTurn(180);
-        break;
-    }
-    currentState = newState;
+    setSpeed(speed[0], speed[1]);
+  }
+  else {
+    // Just move forward
+    setSpeed(BIAS_SPEED, BIAS_SPEED);
   }
 }
 
@@ -161,28 +192,58 @@ int countNeighbors() {
 
 /* ****************************** RUN ****************************** */
 /**
- * @return Whether or not the adjacency criterion is met
+ * Update the state depending on time spent in the current state,
+ * the number of neighbors and the presence of obstacles.
  */
 void alphaAlgorithm() {
   int n = countNeighbors();
 
-  // Lost the swarm
-  if(currentState == FORWARD && n < ALPHA) {
-    setState(COHERENCE);
-    printf("Robot %s is turning back (%d neighbors).\n", robotName, n);
+  if(currentState == FORWARD || currentState == FORWARD_AVOIDANCE) {
+    // Lost the swarm --> jump to coherence state
+    if(n < ALPHA) {
+      // Lost the swarm: make a 180° turn
+      initiateTurn(180);
+
+      setState(COHERENCE);
+      printf("Robot %s is turning back (%d neighbors).\n", robotName, n);
+    }
+    // Obstacle avoidance timed out --> go back to forward state
+    else if(currentState == FORWARD_AVOIDANCE) {
+      avoidanceTime--;
+      if(avoidanceTime <= 0) {
+        setState(FORWARD);
+      }
+    }
+    // Encountered an obstacle --> jump to obstacle avoidance
+    else if(hasObstacle()) {
+      setState(FORWARD_AVOIDANCE);
+    }
+    // Otherwise, persist in forward state
   }
-  else if(currentState == COHERENCE) {
+  else if(currentState == COHERENCE || currentState == COHERENCE_AVOIDANCE) {
+    // Successful coherence --> pick a random orientation and jump to state forward
     if(n >= ALPHA) {
-      // Found the swarm back: pick a new random orientation
+      // Pick a new random orientation
       initiateTurn(rand() % MAX_RANDOM_TURN);
       setState(FORWARD);
       printf("Robot %s found back %d neighbors :)\n", robotName, n);
     }
-    coherenceTime--;
-    if(coherenceTime <= 0) {
-      // Failed coherence, go back to state FORWARD
-      setState(FORWARD);
-      printf("Robot %s failed coherence :(\n", robotName);
+    else {
+      if(currentState == FORWARD_AVOIDANCE) {
+        avoidanceTime--;
+        // Obstacle avoidance timed out --> go back to forward state
+        if(avoidanceTime <= 0) {
+          setState(FORWARD);
+        }
+      }
+
+      // Regardless of avoidance time, the coherence time counter keeps running
+      coherenceTime--;
+      // Failed coherence --> go back to state FORWARD
+      if(coherenceTime <= 0) {
+        setState(FORWARD);
+        printf("Robot %s failed coherence :(\n", robotName);
+      }
     }
   }
 }
@@ -193,7 +254,7 @@ void run(){
   move();
 
   // Periodically check the current value of alpha
-  // TODO: better rate limiting mechanism
+  // TODO: make rate limiting consistent with the article
   double t = wb_robot_get_time();
   long long second = (long long)t;
   if(second != previousSecond) {
