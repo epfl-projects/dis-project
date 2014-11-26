@@ -16,16 +16,7 @@ dmax=N_rob-1;
 
 alpha=5; %should be greater than 2
 
-N_AF(1:N_rob,1)=0;	% # of robots
-N_F(1:N_rob,1)=0;
-N_F(alpha+2,1)=N_rob;
-N_AC(1:alpha,1)=0;
-N_C(1:alpha,1)=0;
-N_AC(alpha+1:N_rob,1)=0;
-N_C(alpha+1:N_rob,1)=0;
 
-N_Fbar(:,1) = N_AF + N_F;
-N_Cbar(:,1) = N_AC + N_C;
 
 
 %*************************************%
@@ -51,7 +42,7 @@ Pla=ones(N_rob,1)-Pr-Pf;
 
 TA = 5; %number of timesteps to spend in the avoidance state
 TC = 15; %number of timesteps to spend in the coherence state
-k_end=100; %length of the simulation in timestep
+k_end=1000; %length of the simulation in timestep
 n_end=10; %number of simulations
 
 %final variables to make the average and the standart deviation
@@ -66,6 +57,17 @@ N_Cbar_f=zeros(N_rob,k_end,n_end);
 %Simulation
 %*************************************%
 for n=1:n_end
+
+	N_AF=zeros(N_rob,k_end);	% # of robots
+	N_F=zeros(N_rob,k_end);
+	N_F(alpha+2,1)=N_rob;
+	N_AC=zeros(N_rob,k_end);
+	N_C=zeros(N_rob,k_end);
+
+	N_Fbar = N_AF + N_F;
+	N_Cbar = N_AC + N_C;
+
+
 	k=0; %initialisation of the simulation timestep
 	for(k=1:k_end)
 
@@ -234,12 +236,12 @@ for n=1:n_end
 
 	end
 
-	N_F_f(:,:,n) =  N_F ;
-	N_AF_f(:,:,n) = N_AF ;
-	N_Fbar_f(:,:,n) = N_Fbar ;
-	N_C_f(:,:,n) = N_C ;
-	N_AC_f(:,:,n) = N_AC ;
-	N_Cbar_f(:,:,n) = N_Cbar ;
+	N_F_f(:,:,n) =  N_F ( 1:N_rob, 1:k_end ) ;
+	N_AF_f(:,:,n) = N_AF( 1:N_rob, 1:k_end ) ;
+	N_Fbar_f(:,:,n) = N_Fbar( 1:N_rob, 1:k_end ) ;
+	N_C_f(:,:,n) = N_C( 1:N_rob, 1:k_end ) ;
+	N_AC_f(:,:,n) = N_AC( 1:N_rob, 1:k_end ) ;
+	N_Cbar_f(:,:,n) = N_Cbar( 1:N_rob, 1:k_end ) ;
 
 end
 
@@ -265,11 +267,14 @@ std_N_Cbar = std( N_Cbar_f, 0 ,3 ) ;
 %**************************************%
 %Plot of the figures
 %**************************************%
-%non operational
+
+y=[ sum( mean_N_F' ) ; sum( mean_N_C' ) ; sum( mean_N_AC' + mean_N_AF' ) ] ;
+e=[ sum( std_N_F' ) ; sum( std_N_C' ) ; sum( std_N_AC' + std_N_AF' ) ] ;
+lab=['rgb'];
 figure();
-plot(sum(mean_N_F')','-or');
 hold('on');
-plot(sum(N_C_f')','-ob');
-plot(sum(N_AC_f'+N_AF_f')','-og');
-plot(sum(N_AC_f'+N_AF_f'+N_F_f'+N_C_f')')
-legend("Forward","Coherence","Avoidance","summation");
+for i=1:size(y)(1)
+	errorbar( y(i,:), e(i,:), [ '-o' lab(i) ] );
+end
+legend("Forward","Coherence","Avoidance","Total");
+hold('off');
