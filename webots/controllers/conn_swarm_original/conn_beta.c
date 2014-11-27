@@ -268,9 +268,14 @@ void listen() {
     wb_receiver_next_packet(receiverTag);
   }
 
-
-  // TODO : !! create neighborhood string to be broadcast
-
+  char temp[500];
+  sprintf(neighborhood, "%s", robotName);
+  for (int i = 1; i <= NUM_ROBOTS; i++) {
+    if (Nlist[i][0]){ // go through the first column
+      sprintf(temp, "%s 00%d", neighborhood, i);
+      strcpy(neighborhood, temp);
+    }
+  }
   
 }
 

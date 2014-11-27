@@ -27,7 +27,7 @@ int n_neighbors; // current neighbors of the robot
 const char *robotName;
 
 int distances[NB_SENSORS]; // for sensor readings (bigger when an obstacle is closer)
-int speed[2];		           // for obstacle avoidance
+int speed[2];                     // for obstacle avoidance
 
 /* ****************************** BEHAVIORS ***************************** */
 typedef enum {FORWARD, FORWARD_AVOIDANCE, COHERENCE, COHERENCE_AVOIDANCE} State;
