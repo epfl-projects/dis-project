@@ -1,9 +1,6 @@
 close all
 clear all
-a=fopen("debugging_N_rob.txt","w");
-fclose(a);
-a=fopen("debugging_N_change.txt","w");
-fclose(a);
+
 
 %DIS Project : Macroscopic model of a wireless connected swarm
 
@@ -30,6 +27,7 @@ Pg=[0.19 0.22 0.24 0.23 0.22 0.17 0.15 0.13 0.11 0.09]';	%gain of a connection
 Pr=[0.28 0.30 0.31 0.29 0.28]';		%recovery of a connection [1:alpha]
 Pf=[0.70 0.58 0.56 0.54 0.52]';	%failure to recover a connection [1:alpha]
 Pla=[0.00 0.05 0.09 0.12 0.15]';	%loss of a connection in coherence state [1:alpha]
+
 %test
 Pr(alpha+1:N_rob)=0;
 Pf(alpha+1:N_rob)=0;
@@ -43,7 +41,7 @@ Pla=ones(N_rob,1)-Pr-Pf;
 TA = 5; %number of timesteps to spend in the avoidance state
 TC = 15; %number of timesteps to spend in the coherence state
 k_end=1000; %length of the simulation in timestep
-n_end=10; %number of simulations
+n_end=3; %number of simulations
 
 %final variables to make the average and the standart deviation
 N_F_f=zeros(N_rob,k_end,n_end);
@@ -110,6 +108,7 @@ for n=1:n_end
 
 		if k<k_end
 
+			%PaNC could be the source of the negative terms (observed on N_C)
 			N_AF(:,k+1)=N_AF(:,k)+PaN_F(:,k)-PaNF;
 			N_AC(:,k+1)=N_AC(:,k)+PaN_C(:,k)-PaNC;
 
@@ -204,6 +203,15 @@ for n=1:n_end
 
 				%*********************** debuging part ***********************%
 
+				%reset the files
+
+				% if k==1
+				% 	a=fopen("debugging_N_rob.txt","w");
+				% 	fclose(a);
+				% 	a=fopen("debugging_N_change.txt","w");
+				% 	fclose(a);
+				% end
+				%
 				% deb = fopen("debugging_N_rob.txt","a+");
 				%
 				% fprintf(deb,"step : %d\n",k);
@@ -231,6 +239,8 @@ for n=1:n_end
 				% fprintf(deb,'%d\n\n',sum(a(:,size(a)(2))));
 				% fclose(deb);
 				% pause();
+				%
+				%************************** end debugging part **************************%
 			end
 		end
 
@@ -260,21 +270,39 @@ mean_N_Cbar = mean( N_Cbar_f, 3) ;
 std_N_F = std( N_F_f, 0, 3 ) ;
 std_N_AF = std( N_AF_f, 0, 3 ) ;
 std_N_Fbar = std( N_AF_f, 0, 3 ) ;
-std_N_C = std( N_C_f, 0, 3) ;
-std_N_AC = std( N_AC_f, 0, 3) ;
+std_N_C = std( N_C_f, 0, 3 ) ;
+std_N_AC = std( N_AC_f, 0, 3 ) ;
 std_N_Cbar = std( N_Cbar_f, 0 ,3 ) ;
 
-%**************************************%
-%Plot of the figures
-%**************************************%
+sum_N = sum(N_Fbar_f, N_Cbar_f) ;
+sum_N2= sum(N_AF_f, N_F_f, N_AC_f, N_C_f);
+if sum_N!=sum_N2
+	error('the conservative proriety isn''t conserved !');
+else
+	clear sum_N2;
+end
 
-y=[ sum( mean_N_F' ) ; sum( mean_N_C' ) ; sum( mean_N_AC' + mean_N_AF' ) ] ;
-e=[ sum( std_N_F' ) ; sum( std_N_C' ) ; sum( std_N_AC' + std_N_AF' ) ] ;
-lab=['rgb'];
+mean_sum_N = mean( sum_N, 3 ) ;
+std_sum_N = std( sum_N, 0, 3 ) ;
+
+%***********************************************************%
+%Plot of the figures
+%***********************************************************%
+
+y=[ sum( mean_N_F' ) ; sum( mean_N_C' ) ; sum( mean_N_AC' + mean_N_AF' ) ; sum( mean_sum_N' )] ;
+
+e=[ sum( std_N_F' ) ; sum( std_N_C' ) ; sum( std_N_AC' + std_N_AF' ) ; sum(std) ] ;
+e(end+1,:)=sum(e);
+
+lab=['rgbk'];
+
 figure();
 hold('on');
 for i=1:size(y)(1)
-	errorbar( y(i,:), e(i,:), [ '-o' lab(i) ] );
+	h(i)=errorbar( y(i,:), e(i,:), [ '-o' lab(i) ] );
 end
 legend("Forward","Coherence","Avoidance","Total");
+xlabel='# of robots';
+ylabel='# of timesteps spent';
+grid('on');
 hold('off');
