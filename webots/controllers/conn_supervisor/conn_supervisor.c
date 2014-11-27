@@ -97,12 +97,12 @@ void run() {
     wb_supervisor_simulation_revert();
   }
 
-  while(wb_receiver_get_queue_length(receiverTag) > 0) {
-    char * stats = (char *)wb_receiver_get_data(receiverTag);
-    // TODO : parse stats and write to file
-    printf("%s\n", stats);
-    wb_receiver_next_packet(receiverTag);
-  }
+  // while(wb_receiver_get_queue_length(receiverTag) > 0) {
+  //   char * stats = (char *)wb_receiver_get_data(receiverTag);
+  //   // TODO : parse stats and write to file
+  //   printf("%s\n", stats);
+  //   wb_receiver_next_packet(receiverTag);
+  // }
 }
 
 

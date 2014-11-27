@@ -252,19 +252,23 @@ void listen() {
     for (int j = 0; j <= NUM_ROBOTS; j++)
       OldList[i][j] = Nlist[i][j];
 
+  // clear Nlist
+  k = 0;
+  for (int i = 0; i <= NUM_ROBOTS; i++) 
+    for (int j = 0; j <= NUM_ROBOTS; j++)
+      Nlist[i][j] = 0;
 
+  
   while(wb_receiver_get_queue_length(receiverTag) > 0) {
     char * message = (char *)wb_receiver_get_data(receiverTag);
     int neighbors[NUM_ROBOTS+1];
     int n = parseMessage(message, neighbors);
 
     Nlist[neighbors[0]][0] = 1; 
-    for (int i = 1; i <= NUM_ROBOTS; i++) 
-      Nlist[neighbors[0]][i] = 0; // clear neighborhood 
     for(int i = 1; i < n; i++) {
       Nlist[neighbors[0]][neighbors[i]] = 1;
     }
-
+    k++;
     wb_receiver_next_packet(receiverTag);
   }
 
@@ -308,16 +312,39 @@ void run(){
       listen(); // ! going to listen to pings from previous step (100 time step in the past)
 
       // create lost list
+      int lostList[NUM_ROBOTS+1];
+      for (int i = 0; i<=NUM_ROBOTS; i++) // clear lost list
+        lostList[i] = 0;
+      for (int i = 1; i<=NUM_ROBOTS; i++) {
+        if (OldList[i][0] && !Nlist[i][0]) // robot lost
+          lostList[i] = 1;
+      }
+
 
       // for each robot in lost list:
       //  check if reaction is triggered
+      bool Back = false;
+      for (int i = 0; i<=NUM_ROBOTS; i++) {
+        if (lostList[i] == 1) { // if robot is lost
+          int nShared = 0; // number of shared connections
+          // go through all the current neighbors and see if they have this lost robot covered
+          for (int j = 1; j<=NUM_ROBOTS; j++) {
+            if (Nlist[j][0] == 1) {
+              if (Nlist[j][i])
+                nShared++;
+            }
+          }
+          if (nShared <= BETA) {
+            Back = true;
+          }
+        }
+      }
 
 
-      // if reaction == true
-      // change state == COHERENCE // setState
-
-      // else if k > LastK
-      // change state  = FORWARD
+      if (Back)
+        setState(COHERENCE);
+      else if (k > LastK)
+        setState(FORWARD); // make random turn
 
       time_step_counter = 0; // reset time step counter 
     }

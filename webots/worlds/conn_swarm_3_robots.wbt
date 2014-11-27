@@ -6,7 +6,6 @@ WorldInfo {
     "Date: 01 SEP 2006"
   ]
   title "E-puck"
-  basicTimeStep 100
 }
 Viewpoint {
   orientation 0.00266546 0.706707 0.707502 3.14084

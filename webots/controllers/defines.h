@@ -7,6 +7,7 @@
 #define NUM_ROBOTS        10 // Total number of robots in the scene
 // Alpha algorithm
 #define ALPHA                4 // Minimum number of neighbors to maintain
+#define BETA				 1 
 #define MAX_RANDOM_TURN      60 // Maximum value of the random turn (in degrees)
 #define MAX_COHERENCE_TIME   15 // Maximum number of timesteps spent in coherence state
 #define MAX_AVOIDANCE_TIME   5 // Maximum number of timesteps spent in avoidance sub-state
