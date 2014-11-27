@@ -22,7 +22,7 @@ for i=1:size(N)(1) %for each number of connections
       tot = tot + varargout{k-1}(i,1);
 
     end
-    varargout{nargin}(i,1) = N(i) - tot; % the rest of the robots
+    varargout{nargin}(i,1) = N(i) - tot; % the rest of the robots (mostly for test and debugging)
 
   else %meaning that N(i)=0 <=> no robot with i connection(s) so all outputs are equal to zero
 
