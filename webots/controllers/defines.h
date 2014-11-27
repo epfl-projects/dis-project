@@ -3,7 +3,7 @@
 
 // Simulation parameters
 #define EXP_TIME          900 // Duration of the experiment (in seconds)
-#define TIME_STEP         64 // Simulation time step (ms)
+#define TIME_STEP         100 // Simulation time step (ms), must be a multiple of basicTimeStep in WorldInfo
 #define NUM_ROBOTS        10 // Total number of robots in the scene
 // Alpha algorithm
 #define ALPHA                4 // Minimum number of neighbors to maintain
