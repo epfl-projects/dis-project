@@ -8,5 +8,37 @@ webots/controllers/conn_supervisor/conn_supervisor
 webots/controllers/conn_swarm_original/conn_swarm_original
 webots/worlds/.*
 
+# Matlab artifacts
+**/*.m~
+
 # Exports
 work-schedule.pdf
+
+# LaTeX artifacts
+*.aux
+*.glo
+*.idx
+*.log
+*.toc
+*.ist
+*.acn
+*.acr
+*.alg
+*.bbl
+*.blg
+*.dvi
+*.glg
+*.gls
+*.ilg
+*.ind
+*.lof
+*.lot
+*.maf
+*.mtc
+*.mtc1
+*.out
+*.synctex.gz
+*.fdb_latexmk
+
+# Generated report (but do not ignore figures)
+report/*.pdf
