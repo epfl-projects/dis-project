@@ -53,9 +53,6 @@ bool react = false; // reaction indicator
 char neighborhood[500]; //first id is the robot's own id, subsequent ids are the neighbors'
 
 
-double previousTime = 0.0, currentTime = 0.0;
-
-
 
 
 void setSpeed(int leftSpeed, int rightSpeed) {
@@ -77,9 +74,10 @@ void setSpeed(int leftSpeed, int rightSpeed) {
  * @param angle The rotation angle between 0 and 360 degrees.
  */
 void initiateTurn(int angle) {
-  angle = (angle % 360);
-  printf("Robot %s is starting a turn of %d degrees\n", robotName, angle);
-  turningTime = (int)(50 * angle / 360.f);
+  if (angle == 180)
+    turningTime = 1000 / TIME_STEP; // this many time steps
+  else 
+    turningTime = (rand() % 10); // [0 .. 9] time steps   
   isTurning = true;
 }
 
@@ -90,13 +88,13 @@ void initiateTurn(int angle) {
  */
 void turn(int * speed) {
   // TODO: fine-tune
-  speed[0] = -450;
-  speed[1] = 450;
+  speed[0] = -500;
+  speed[1] = 500;
   //printf("Robot %s has %d turning time left\n", robotName, turningTime);
   turningTime--;
   if(turningTime <= 0) {
     isTurning = false;
-    printf("Robot %s is done turning.\n", robotName);
+    // printf("Robot %s is done turning.\n", robotName);
   }
 }
 
@@ -115,7 +113,7 @@ void setState(State newState) {
         if (AVOIDANCE)
           AVOIDANCE = false; // FORWARD, COHERENCE take precedence over AVOIDANCE
         // Pick a new random orientation
-        initiateTurn(rand() % MAX_RANDOM_TURN);
+        initiateTurn(-1);
         break;
 
       case COHERENCE:
@@ -225,7 +223,8 @@ void broadcast() {
 }
 
 
-// fills up array with id of neighbors, first element is the robot_id of the robot sending this message, returns number of elements in the array
+// fills up array with id of neighbors, first element is the robot_id of the robot sending this message
+// returns number of elements in the array
 int parseMessage(char* message, int* neighbors) {
   char* token = strtok(message, " ");
   int i = 0;
@@ -261,6 +260,8 @@ void listen() {
   
   while(wb_receiver_get_queue_length(receiverTag) > 0) {
     char * message = (char *)wb_receiver_get_data(receiverTag);
+    // printf("robot %s got messages : %s\n", robotName, message);
+
     int neighbors[NUM_ROBOTS+1];
     int n = parseMessage(message, neighbors);
 
@@ -280,6 +281,8 @@ void listen() {
       strcpy(neighborhood, temp);
     }
   }
+
+  // printf("robot %s got %d messages\n", robotName, k);
   
 }
 
@@ -291,66 +294,91 @@ void listen() {
 
 
 void run(){
+
+  // static int time_step_counter = 0;
+  // if (!isTurning) {
+  //   time_step_counter++;
+  //   if (time_step_counter >= 30) {
+  //      initiateTurn(180);
+  //      time_step_counter = 0;
+  //   }
+  // }
+   
+
+  // move();
+
+  ////////////////
+
+
   static int time_step_counter = 0;
-  double currentTime = wb_robot_get_time();
-  if (currentTime > previousTime) { // this is a new time step
-    time_step_counter++;
-    // Movement
-    move();
-    if (AVOIDANCE) {
-      avoidanceTime--;
-      if(avoidanceTime <= 0) {
-        setState(FORWARD);
-      }
-    }
+  time_step_counter++;
+  
 
-    if (currentState == COHERENCE) // keep coherence clock ticking 
-      coherenceTime--;
-
-    if(time_step_counter >= 100) { // every 100 time step
-      broadcast();
-      listen(); // ! going to listen to pings from previous step (100 time step in the past)
-
-      // create lost list
-      int lostList[NUM_ROBOTS+1];
-      for (int i = 0; i<=NUM_ROBOTS; i++) // clear lost list
-        lostList[i] = 0;
-      for (int i = 1; i<=NUM_ROBOTS; i++) {
-        if (OldList[i][0] && !Nlist[i][0]) // robot lost
-          lostList[i] = 1;
-      }
-
-
-      // for each robot in lost list:
-      //  check if reaction is triggered
-      bool Back = false;
-      for (int i = 0; i<=NUM_ROBOTS; i++) {
-        if (lostList[i] == 1) { // if robot is lost
-          int nShared = 0; // number of shared connections
-          // go through all the current neighbors and see if they have this lost robot covered
-          for (int j = 1; j<=NUM_ROBOTS; j++) {
-            if (Nlist[j][0] == 1) {
-              if (Nlist[j][i])
-                nShared++;
-            }
-          }
-          if (nShared <= BETA) {
-            Back = true;
-          }
-        }
-      }
-
-
-      if (Back)
-        setState(COHERENCE);
-      else if (k > LastK)
-        setState(FORWARD); // make random turn
-
-      time_step_counter = 0; // reset time step counter 
+  // Move
+  move();
+  
+  // keep the clock ticking is AVOIDANCE or COHERENCE
+  if (AVOIDANCE) {
+    avoidanceTime--;
+    if(avoidanceTime <= 0) {
+      setState(FORWARD);
     }
   }
 
-  previousTime = currentTime;
+  if (currentState == COHERENCE) // keep coherence clock ticking 
+    coherenceTime--;
+
+  if(time_step_counter >= 10) { // every 10 time step
+
+    // printf("robot %s is broadcasting\n", robotName);
+    broadcast();
+    listen(); // ! going to listen to pings from previous step (100 time step in the past)
+
+    // create lost list
+    int lostList[NUM_ROBOTS+1];
+    for (int i = 0; i<=NUM_ROBOTS; i++) // clear lost list
+      lostList[i] = 0;
+    for (int i = 1; i<=NUM_ROBOTS; i++) {
+      if (OldList[i][0] && !Nlist[i][0]) { // robot lost
+        lostList[i] = 1;
+      }
+    }
+
+
+    // for each robot in lost list:
+    //  check if reaction is triggered
+    bool Back = false;
+    for (int i = 0; i<=NUM_ROBOTS; i++) {
+      if (lostList[i] == 1) { // if robot is lost
+        int nShared = 0; // number of shared connections
+        // go through all the current neighbors and see if they have this lost robot covered
+        for (int j = 1; j<=NUM_ROBOTS; j++) {
+          if (Nlist[j][0] == 1) {
+            if (Nlist[j][i])
+              nShared++;
+          }
+        }
+        printf("robot %s lost robot %d : nShared : %d\n", robotName, i, nShared);
+        if (nShared <= BETA) {
+          Back = true;
+        }
+      }
+    }
+
+
+    if (Back) {
+      // printf("robot %s is moving to coherence\n", robotName);
+      setState(COHERENCE);
+    }
+    else if (k > LastK) {
+       // printf("robot %s is making a random turn\n", robotName);
+      setState(FORWARD); // make random turn
+    }
+      
+
+    time_step_counter = 0; // reset time step counter 
+  }
+ 
 }
 
 
