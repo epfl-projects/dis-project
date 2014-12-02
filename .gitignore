@@ -7,6 +7,7 @@
 webots/controllers/conn_supervisor/conn_supervisor
 webots/controllers/conn_swarm_original/conn_swarm_original
 webots/worlds/.*
+webots/data/*
 
 # Matlab artifacts
 **/*.m~

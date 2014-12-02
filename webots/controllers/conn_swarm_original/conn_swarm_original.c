@@ -203,6 +203,8 @@ int countNeighbors() {
 
 /* **************************** LOGGING **************************** */
 void sendStateToSupervisor() {
+  // TODO: need perfect infinite communication range!
+
   // Change channel temporarily to communicate with the supervisor
   wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL_STAT);
   // Message format: robot name [space] state [space] nNeighbors

@@ -89,47 +89,84 @@ void reset(void) {
 }
 
 /* **************************** LOGGING **************************** */
+int nReceived = 0;
+int robotsStates[NUM_ROBOTS];
+int robotsNeighborsCount[NUM_ROBOTS];
+void resetLogs() {
+  nReceived = 0;
+  for(int i = 0; i < NUM_ROBOTS; ++i) {
+    robotsStates[i] = -1;
+    robotsNeighborsCount[i] = -1;
+  }
+}
+
 /**
  * Stats file logging format: CSV
  * Filename: simulation-[number of robots]-.csv
  */
-FILE * logFile;
+char filename[255];
 void createNewLogFile() {
+  resetLogs();
+
   time_t currentTime;
   currentTime = time(NULL);
 
-  char filename[255];
   sprintf(filename, "%s/simulation-%d-%ld.csv", LOG_FILES_FOLDER, NUM_ROBOTS, currentTime);
 
-  logFile = fopen(filename, "w+");
+  FILE * logFile = fopen(filename, "w+");
   // Specify CSV columns' title
   fprintf(logFile, "Time, Robot ID, Robot state, Number of neighbors\n");
+  fclose(logFile);
 }
 void writeStats() {
-  fprintf(logFile, "Hello world, this is time %f.\n", wb_robot_get_time());
+  FILE * logFile = fopen(filename, "a+");
+  for(int i = 0; i < NUM_ROBOTS; ++i) {
+    fprintf(logFile, "%f, %d, %d, %d\n", wb_robot_get_time(), i, robotsStates[i], robotsNeighborsCount[i]);
+  }
+  fprintf(logFile, "\n");
+  fclose(logFile);
 }
 
 /**
  * Each time period, receive and aggregate stats from the robots.
  * Write them out to a file.
  */
-int nReceived = 0;
 void receiveRobotsStates() {
   while(wb_receiver_get_queue_length(receiverTag) > 0) {
+    // Message format: see robot's controller
     char * stats = (char *)wb_receiver_get_data(receiverTag);
-    // TODO: parse stats
-    printf("%s\n", stats);
+
+    // Position of the next separator
+    int separatorPosition = 0;
+
+    // Parse robot index from its name
+    int robotId = (int)strtol(stats, NULL, 10);
+    // Map the ID to an index
+    robotId--;
+
+    // Parse state
+    while(stats[separatorPosition] != ' ')
+      separatorPosition++;
+    robotsStates[robotId] = (int)strtol(stats + separatorPosition, NULL, 10);
+    separatorPosition++;
+
+    // Parse number of neighbors
+    while(stats[separatorPosition] != ' ')
+      separatorPosition++;
+    robotsNeighborsCount[robotId] = (int)strtol(stats + separatorPosition, NULL, 10);
+
+    printf("%d %d %d\n", robotId, robotsStates[robotId], robotsNeighborsCount[robotId]);
+
     nReceived++;
     wb_receiver_next_packet(receiverTag);
   }
 
   // Done receiving all robots states for this timestep
   if(nReceived == NUM_ROBOTS) {
-    nReceived = 0;
-    // TODO: write useful stats
-    // TODO: clear array
     writeStats();
     printf("Received %d messages at time %f\n", nReceived, wb_robot_get_time());
+
+    resetLogs();
   }
 }
 
@@ -162,7 +199,6 @@ int main(int argc, char *argv[]) {
     wb_robot_step(TIME_STEP);
   }
 
-  fclose(logFile);
   return 0;
 }
 
