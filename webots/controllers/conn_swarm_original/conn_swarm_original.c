@@ -15,19 +15,28 @@
 
 #include "../defines.h"
 
-//robot variables
+/** Robot devices */
 WbDeviceTag sensors[NB_SENSORS];
 WbDeviceTag emitterTag;
 WbDeviceTag receiverTag;
 
-int n_neighbors; // current neighbors of the robot
 /**
  * A unique id from 001 to NUM_ROBOTS (included), allowing leading zeros
  */
 const char *robotName;
+/**
+ * Current number of neighbors of this robot
+ * TODO: is it needed for the Alpha algorithm?
+ */
+int nNeighbors;
 
-int distances[NB_SENSORS]; // for sensor readings (bigger when an obstacle is closer)
-int speed[2];                     // for obstacle avoidance
+/**
+ * For sensor readings
+ * Values are bigger when an obstacle is closer (non linear increase)
+ */
+int distances[NB_SENSORS];
+/** For obstacle avoidance **/
+int speed[2];
 
 /* ****************************** BEHAVIORS ***************************** */
 typedef enum {FORWARD, FORWARD_AVOIDANCE, COHERENCE, COHERENCE_AVOIDANCE} State;
@@ -196,10 +205,10 @@ int countNeighbors() {
 void sendStateToSupervisor() {
   // Change channel temporarily to communicate with the supervisor
   wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL_STAT);
-  // Message format: robot name [space] state [space] n_neighbors
-  char stats_message[100];
-  sprintf(stats_message, "%s %d %d", robotName, currentState, n_neighbors);
-  sendMessage(stats_message);
+  // Message format: robot name [space] state [space] nNeighbors
+  char message[100];
+  sprintf(message, "%s %d %d", robotName, currentState, nNeighbors);
+  sendMessage(message);
   // Back to the inter-robot communication channel
   wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL);
 }
@@ -210,16 +219,16 @@ void sendStateToSupervisor() {
  * the number of neighbors and the presence of obstacles.
  */
 void alphaAlgorithm() {
-  n_neighbors = countNeighbors();
+  nNeighbors = countNeighbors();
 
   if(currentState == FORWARD || currentState == FORWARD_AVOIDANCE) {
     // Lost the swarm --> jump to coherence state
-    if(n_neighbors < ALPHA) {
+    if(nNeighbors < ALPHA) {
       // Lost the swarm: make a 180° turn
       initiateTurn(180);
 
       setState(COHERENCE);
-      // printf("Robot %s is turning back (%d neighbors).\n", robotName, n_neighbors);
+      // printf("Robot %s is turning back (%d neighbors).\n", robotName, nNeighbors);
     }
     // Obstacle avoidance timed out --> go back to forward state
     else if(currentState == FORWARD_AVOIDANCE) {
@@ -236,11 +245,11 @@ void alphaAlgorithm() {
   }
   else if(currentState == COHERENCE || currentState == COHERENCE_AVOIDANCE) {
     // Successful coherence --> pick a random orientation and jump to state forward
-    if(n_neighbors >= ALPHA) {
+    if(nNeighbors >= ALPHA) {
       // Pick a new random orientation
       initiateTurn(rand() % MAX_RANDOM_TURN);
       setState(FORWARD);
-      // printf("Robot %s found back %d neighbors :)\n", robotName, n_neighbors);
+      // printf("Robot %s found back %d neighbors :)\n", robotName, nNeighbors);
     }
     else {
       if(currentState == FORWARD_AVOIDANCE) {
