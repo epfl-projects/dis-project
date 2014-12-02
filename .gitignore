@@ -6,6 +6,7 @@
 *.wbproj
 webots/controllers/conn_supervisor/conn_supervisor
 webots/controllers/conn_swarm_original/conn_swarm_original
+webots/controllers/conn_beta/conn_beta
 webots/worlds/.*
 webots/data/*
 
