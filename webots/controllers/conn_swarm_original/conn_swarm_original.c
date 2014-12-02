@@ -16,11 +16,6 @@
 #include "../defines.h"
 
 
-// BEHAVIOURS
-// TODO: move this to define.h
-typedef enum {FORWARD, COHERENCE} State;
-
-
 
 //robot variables
 WbDeviceTag sensors[NB_SENSORS];
@@ -239,8 +234,32 @@ void listen() {
   }
 
   assert(k <= NUM_ROBOTS - 1); 
-  if (k == 0) 
-  printf("Robot %s lost!\n", robotName);
+  printf("Robot %s has %d neighbors\n", robotName, k);
+}
+
+
+void sendStateToSupervisor() {
+  // Change channel temporarily to communicate with the supervisor
+  wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL_STAT);
+  // Allow infinite communication range
+  wb_emitter_set_range(emitterTag, -1);
+
+  // Message format: robot name [space] state [space] avoidance(0 or 1) [space] nNeighbors
+  char message[100];
+
+  // since only two states FORWARD and COHERENCE are effectively used in addition to the boolean variable AVOIDANCE, adapt states
+  // State controller_state = currentState;
+  // if (AVOIDANCE) {
+  //   if (currentState == FORWARD) 
+  //     controller_state = FORWARD_AVOIDANCE;
+  //   else if (currentState == COHERENCE)
+  //     controller_state = COHERENCE_AVOIDANCE;
+  // }
+  sprintf(message, "%s %d %d", robotName, AVOIDANCE ? currentState + 1 : currentState, k);
+  sendMessage(message);
+  // Back to the inter-robot, imperfect communication
+  wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL);
+  wb_emitter_set_range(emitterTag, COMM_RADIUS);
 }
 
 
@@ -307,6 +326,8 @@ void run(){
 
     time_step_counter = 0; // reset time step counter 
   }
+
+  // sendStateToSupervisor();
  
 }
 

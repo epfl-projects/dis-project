@@ -30,4 +30,6 @@
 #define SENSOR_NORMALIZATION 100 // Normalisation constant for the IR sensors measurements
 #define OBSTACLE_THRESHOLD   100 // IR sensor value from which we consider there is an obstalce
 
+typedef enum {FORWARD = 0, FORWARD_AVOIDANCE = 1, COHERENCE = 2, COHERENCE_AVOIDANCE = 3} State;
+
 #endif

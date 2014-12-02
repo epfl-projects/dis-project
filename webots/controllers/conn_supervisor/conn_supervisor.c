@@ -161,7 +161,7 @@ void receiveRobotsStates() {
       separatorPosition++;
     robotsNeighborsCount[robotId] = (int)strtol(stats + separatorPosition, NULL, 10);
 
-    printf("%d %d %d\n", robotId, robotsStates[robotId], robotsNeighborsCount[robotId]);
+    // printf("%d %d %d\n", robotId, robotsStates[robotId], robotsNeighborsCount[robotId]);
 
     wb_receiver_next_packet(receiverTag);
   }
@@ -169,7 +169,7 @@ void receiveRobotsStates() {
   // Done receiving all robots states for this timestep
   if(nReceived == NUM_ROBOTS) {
     writeStats();
-    printf("Received %d messages at time %f\n", nReceived, wb_robot_get_time());
+    // printf("Received %d messages at time %f\n", nReceived, wb_robot_get_time());
 
     resetLogs();
   }
