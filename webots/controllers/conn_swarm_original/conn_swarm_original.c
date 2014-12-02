@@ -203,16 +203,18 @@ int countNeighbors() {
 
 /* **************************** LOGGING **************************** */
 void sendStateToSupervisor() {
-  // TODO: need perfect infinite communication range!
-
   // Change channel temporarily to communicate with the supervisor
   wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL_STAT);
+  // Allow infinite communication range
+  wb_emitter_set_range(emitterTag, -1);
+
   // Message format: robot name [space] state [space] nNeighbors
   char message[100];
   sprintf(message, "%s %d %d", robotName, currentState, nNeighbors);
   sendMessage(message);
-  // Back to the inter-robot communication channel
+  // Back to the inter-robot, imperfect communication
   wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL);
+  wb_emitter_set_range(emitterTag, COMM_RADIUS);
 }
 
 /* ****************************** RUN ****************************** */
