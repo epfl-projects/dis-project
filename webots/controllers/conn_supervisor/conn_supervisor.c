@@ -88,22 +88,52 @@ void reset(void) {
   wb_receiver_set_channel(receiverTag, COMMUNICATION_CHANNEL_STAT);
 }
 
+/* **************************** LOGGING **************************** */
+/**
+ * Stats file logging format: CSV
+ * Filename: simulation-[number of robots]-.csv
+ */
+FILE * logFile;
+void createNewLogFile() {
+  time_t currentTime;
+  currentTime = time(NULL);
+
+  char filename[255];
+  sprintf(filename, "%s/simulation-%d-%ld.csv", LOG_FILES_FOLDER, NUM_ROBOTS, currentTime);
+
+  logFile = fopen(filename, "w+");
+  // Specify CSV columns' title
+  fprintf(logFile, "Time, Robot ID, Robot state, Number of neighbors\n");
+}
+void writeStats() {
+  fprintf(logFile, "Hello world, this is time %f.\n", wb_robot_get_time());
+}
+
 /**
  * Each time period, receive and aggregate stats from the robots.
  * Write them out to a file.
  */
+int nReceived = 0;
 void receiveRobotsStates() {
-  int nReceived = 0;
   while(wb_receiver_get_queue_length(receiverTag) > 0) {
     char * stats = (char *)wb_receiver_get_data(receiverTag);
-    // TODO : parse stats and write to file
+    // TODO: parse stats
     printf("%s\n", stats);
     nReceived++;
     wb_receiver_next_packet(receiverTag);
   }
-  printf("Received %d messages at time %f\n", nReceived, wb_robot_get_time());
+
+  // Done receiving all robots states for this timestep
+  if(nReceived == NUM_ROBOTS) {
+    nReceived = 0;
+    // TODO: write useful stats
+    // TODO: clear array
+    writeStats();
+    printf("Received %d messages at time %f\n", nReceived, wb_robot_get_time());
+  }
 }
 
+/* **************************** RUN ******************************* */
 void run() {
   // End of the experiment
   if(wb_robot_get_time() > finalTime){
@@ -115,9 +145,9 @@ void run() {
 
 
 int main(int argc, char *argv[]) {
-
   /* initialize Webots */
   wb_robot_init();
+  createNewLogFile();
 
   reset();
 
@@ -130,9 +160,9 @@ int main(int argc, char *argv[]) {
 
     /* perform a simulation step */
     wb_robot_step(TIME_STEP);
-
   }
 
+  fclose(logFile);
   return 0;
 }
 

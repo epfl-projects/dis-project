@@ -16,6 +16,9 @@
 #define COMMUNICATION_CHANNEL 1      // Channel to use for inter-robot communication
 #define COMMUNICATION_CHANNEL_STAT 2 // Another channel to send stats & state to the supervisor
 
+ // Path to the logs (relative to the supervisor's directory)
+#define LOG_FILES_FOLDER "../../data"
+
 // Initial agents distribution parameters
 #define INITIAL_BOX_SIDE  50
 #define NEIGHBOURHOOD     5
