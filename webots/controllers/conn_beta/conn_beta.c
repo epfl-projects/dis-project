@@ -16,12 +16,6 @@
 #include "../defines.h"
 
 
-// BEHAVIOURS
-// TODO: move this to define.h
-typedef enum {FORWARD, COHERENCE} State;
-
-
-
 //robot variables
 WbDeviceTag sensors[NB_SENSORS];
 WbDeviceTag emitterTag;
@@ -331,7 +325,7 @@ void run(){
       setState(FORWARD);
   }
 
-  if(time_step_counter >= 10) { // every 10 time step
+  if(time_step_counter >= 20) { // every 20 time step
 
     // printf("robot %s is broadcasting\n", robotName);
     broadcast();
@@ -361,7 +355,7 @@ void run(){
               nShared++;
           }
         }
-        printf("robot %s lost robot %d : nShared : %d\n", robotName, i, nShared);
+        // printf("robot %s lost robot %d : nShared : %d\n", robotName, i, nShared);
         if (nShared <= BETA) {
           Back = true;
         }

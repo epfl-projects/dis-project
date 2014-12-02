@@ -234,7 +234,7 @@ void listen() {
   }
 
   assert(k <= NUM_ROBOTS - 1); 
-  printf("Robot %s has %d neighbors\n", robotName, k);
+  // printf("Robot %s has %d neighbors\n", robotName, k);
 }
 
 
