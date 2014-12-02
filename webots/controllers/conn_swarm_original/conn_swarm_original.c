@@ -192,6 +192,18 @@ int countNeighbors() {
   return n;
 }
 
+/* **************************** LOGGING **************************** */
+void sendStateToSupervisor() {
+  // Change channel temporarily to communicate with the supervisor
+  wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL_STAT);
+  // Message format: robot name [space] state [space] n_neighbors
+  char stats_message[100];
+  sprintf(stats_message, "%s %d %d", robotName, currentState, n_neighbors);
+  sendMessage(stats_message);
+  // Back to the inter-robot communication channel
+  wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL);
+}
+
 /* ****************************** RUN ****************************** */
 /**
  * Update the state depending on time spent in the current state,
@@ -267,17 +279,10 @@ void run(){
       alphaAlgorithm();
 
     previousSecond = second;
+
+    // Communicate current state (for performance measures)
+    sendStateToSupervisor();
   }
-
-
-  // log state and connectivity
-  wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL_STAT); // change channel temporarily to a different one for stats
-  // create message robot name + state + n_neighbors
-  char stats_message[100];
-  sprintf(stats_message, "%s %d %d", robotName, currentState, n_neighbors);
-  sendMessage(stats_message);
-  wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL); // change back to message channel
-
 
 }
 

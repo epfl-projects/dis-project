@@ -82,27 +82,35 @@ void reset(void) {
   finalTime = wb_robot_get_time() + EXP_TIME; // 15 MIN == 900
 
 
-  // configure receiver
-  // TODO : not working
+  // Configure receiver device
   receiverTag = wb_robot_get_device("receiver");
   wb_receiver_enable(receiverTag, TIME_STEP);
   wb_receiver_set_channel(receiverTag, COMMUNICATION_CHANNEL_STAT);
+}
 
+/**
+ * Each time period, receive and aggregate stats from the robots.
+ * Write them out to a file.
+ */
+void receiveRobotsStates() {
+  int nReceived = 0;
+  while(wb_receiver_get_queue_length(receiverTag) > 0) {
+    char * stats = (char *)wb_receiver_get_data(receiverTag);
+    // TODO : parse stats and write to file
+    printf("%s\n", stats);
+    nReceived++;
+    wb_receiver_next_packet(receiverTag);
+  }
+  printf("Received %d messages at time %f\n", nReceived, wb_robot_get_time());
 }
 
 void run() {
-
   // End of the experiment
   if(wb_robot_get_time() > finalTime){
     wb_supervisor_simulation_revert();
   }
 
-  // while(wb_receiver_get_queue_length(receiverTag) > 0) {
-  //   char * stats = (char *)wb_receiver_get_data(receiverTag);
-  //   // TODO : parse stats and write to file
-  //   printf("%s\n", stats);
-  //   wb_receiver_next_packet(receiverTag);
-  // }
+  receiveRobotsStates();
 }
 
 

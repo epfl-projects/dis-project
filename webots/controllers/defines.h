@@ -12,9 +12,9 @@
 #define MAX_COHERENCE_TIME   20 // Maximum number of timesteps spent in coherence state
 #define MAX_AVOIDANCE_TIME   5 // Maximum number of timesteps spent in avoidance sub-state
 // Communication
-#define COMM_RADIUS           0.7 // Range of radio communication (in meters)
-#define COMMUNICATION_CHANNEL 1
-#define COMMUNICATION_CHANNEL_STAT 2
+#define COMM_RADIUS           0.7    // Range of radio communication (in meters)
+#define COMMUNICATION_CHANNEL 1      // Channel to use for inter-robot communication
+#define COMMUNICATION_CHANNEL_STAT 2 // Another channel to send stats & state to the supervisor
 
 // Initial agents distribution parameters
 #define INITIAL_BOX_SIDE  50
