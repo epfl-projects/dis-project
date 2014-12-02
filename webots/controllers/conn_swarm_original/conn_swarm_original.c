@@ -121,7 +121,7 @@ bool isTurning = false;
 int turningTime = 0;
 void initiateTurn(int angle) {
   angle = (angle % 360);
-  printf("Robot %s is starting a turn of %d degrees\n", robotName, angle);
+  // printf("Robot %s is starting a turn of %d degrees\n", robotName, angle);
   turningTime = (int)(50 * angle / 360.f);
   isTurning = true;
 }
@@ -137,7 +137,7 @@ void turn(int * speed) {
   turningTime--;
   if(turningTime <= 0) {
     isTurning = false;
-    printf("Robot %s is done turning.\n", robotName);
+    // printf("Robot %s is done turning.\n", robotName);
   }
 }
 
@@ -207,7 +207,7 @@ void alphaAlgorithm() {
       initiateTurn(180);
 
       setState(COHERENCE);
-      printf("Robot %s is turning back (%d neighbors).\n", robotName, n_neighbors);
+      // printf("Robot %s is turning back (%d neighbors).\n", robotName, n_neighbors);
     }
     // Obstacle avoidance timed out --> go back to forward state
     else if(currentState == FORWARD_AVOIDANCE) {
@@ -228,7 +228,7 @@ void alphaAlgorithm() {
       // Pick a new random orientation
       initiateTurn(rand() % MAX_RANDOM_TURN);
       setState(FORWARD);
-      printf("Robot %s found back %d neighbors :)\n", robotName, n_neighbors);
+      // printf("Robot %s found back %d neighbors :)\n", robotName, n_neighbors);
     }
     else {
       if(currentState == FORWARD_AVOIDANCE) {
@@ -244,7 +244,7 @@ void alphaAlgorithm() {
       // Failed coherence --> go back to state FORWARD
       if(coherenceTime <= 0) {
         setState(FORWARD);
-        printf("Robot %s failed coherence :(\n", robotName);
+        // printf("Robot %s failed coherence :(\n", robotName);
       }
     }
   }
