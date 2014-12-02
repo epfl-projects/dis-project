@@ -325,8 +325,11 @@ void run(){
     }
   }
 
-  if (currentState == COHERENCE) // keep coherence clock ticking 
+  if (currentState == COHERENCE) {// keep coherence clock ticking 
     coherenceTime--;
+    if (coherenceTime <= 0)
+      setState(FORWARD);
+  }
 
   if(time_step_counter >= 10) { // every 10 time step
 

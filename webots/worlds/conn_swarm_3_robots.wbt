@@ -101,3 +101,7 @@ DEF E_PUCK_3 E-puck {
   controller "conn_swarm_original"
   name "003"
 }
+DEF E_PUCK_4 E-puck {
+  controller "conn_swarm_original"
+  name "004"
+}

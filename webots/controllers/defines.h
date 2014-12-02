@@ -4,12 +4,12 @@
 // Simulation parameters
 #define EXP_TIME          900 // Duration of the experiment (in seconds)
 #define TIME_STEP         25 // Simulation time step (ms), must be a multiple of basicTimeStep in WorldInfo
-#define NUM_ROBOTS        5 // Total number of robots in the scene
+#define NUM_ROBOTS        4 // Total number of robots in the scene
 // Alpha algorithm
-#define ALPHA                4 // Minimum number of neighbors to maintain
-#define BETA				 2
+#define ALPHA                3 // Minimum number of neighbors to maintain
+#define BETA				 1
 #define MAX_RANDOM_TURN      50 // Maximum value of the random turn (in degrees)
-#define MAX_COHERENCE_TIME   20 // Maximum number of timesteps spent in coherence state
+#define MAX_COHERENCE_TIME   80 // Maximum number of timesteps spent in coherence state
 #define MAX_AVOIDANCE_TIME   5 // Maximum number of timesteps spent in avoidance sub-state
 // Communication
 #define COMM_RADIUS           0.7    // Range of radio communication (in meters)
