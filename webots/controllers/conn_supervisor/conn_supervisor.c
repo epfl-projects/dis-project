@@ -144,6 +144,12 @@ void receiveRobotsStates() {
     // Map the ID to an index
     robotId--;
 
+    // Count each robot only once
+    if(robotsStates[robotId] == -1) {
+      nReceived++;
+    }
+
+
     // Parse state
     while(stats[separatorPosition] != ' ')
       separatorPosition++;
@@ -157,7 +163,6 @@ void receiveRobotsStates() {
 
     printf("%d %d %d\n", robotId, robotsStates[robotId], robotsNeighborsCount[robotId]);
 
-    nReceived++;
     wb_receiver_next_packet(receiverTag);
   }
 
