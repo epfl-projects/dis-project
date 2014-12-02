@@ -83,6 +83,10 @@ DEF ground Solid {
   }
 }
 Supervisor {
+  children [
+    Receiver {
+    }
+  ]
   controller "conn_supervisor"
 }
 DEF E_PUCK_1 E-puck {
