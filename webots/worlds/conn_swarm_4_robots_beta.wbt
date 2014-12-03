@@ -87,7 +87,7 @@ Supervisor {
     Receiver {
     }
   ]
-  controller "conn_supervisor"
+  controller "conn_beta_supervisor"
 }
 DEF E_PUCK_1 E-puck {
   controller "conn_beta"
@@ -104,4 +104,34 @@ DEF E_PUCK_3 E-puck {
 DEF E_PUCK_4 E-puck {
   controller "conn_beta"
   name "004"
+}
+
+DEF BEACON1 Charger {
+  translation 1.0 0 0
+  children [
+    Solid {
+      translation 0 0.05 0
+      children [
+        PointLight {
+          attenuation 1 0 10
+        }
+        Shape {
+          appearance Appearance {
+            material Material {
+              emissiveColor 1 1 0
+            }
+          }
+          geometry Sphere {
+            radius 0.02
+          }
+        }
+      ]
+    }
+  ]
+  name "beacon"
+  battery [
+    1000, 1000, 100
+  ]
+  radius 2.0
+  emissiveColor 1 1 0
 }

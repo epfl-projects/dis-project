@@ -10,6 +10,7 @@
 #include <webots/robot.h>
 #include <webots/differential_wheels.h>
 #include <webots/distance_sensor.h>
+#include <webots/light_sensor.h>
 #include <webots/emitter.h>
 #include <webots/receiver.h>
 
@@ -18,12 +19,14 @@
 
 //robot variables
 WbDeviceTag sensors[NB_SENSORS];
+WbDeviceTag light_sensors[NB_SENSORS]; // Device variables for light sensors
 WbDeviceTag emitterTag;
 WbDeviceTag receiverTag;
 
 const char *robotName; // A unique id from 001 to NUM_ROBOTS (included), allowing leading zeros
 
 int distances[NB_SENSORS]; // for sensor readings (bigger when an obstacle is closer)
+int light_intensity[NB_SENSORS]; // light sensor readings
 int speed[2];              // for obstacle avoidance
 
 
@@ -142,6 +145,16 @@ bool hasObstacle() {
   return (maxValue >= OBSTACLE_THRESHOLD);
 }
 
+bool isIlluminated() {
+  int maxValue = 0;
+  for(unsigned int i = 0; i < NB_SENSORS; i++) {
+    // Note that `distances` holds sensor readings
+    maxValue = fmax(maxValue, light_intensity[i]);
+  }
+  return (maxValue >= LIGHT_THRESHOLD);
+
+}
+
 
 
 /**
@@ -177,6 +190,20 @@ void getSensorValues(int *sensorTable) {
   } else {
     AVOIDANCE = false;
   }
+}
+
+
+
+void lightGetSensorValues(int *sensorTable)
+{
+  unsigned int i;
+  for (i=0; i < NB_SENSORS; i++) {
+    sensorTable[i] = wb_light_sensor_get_value(light_sensors[i]);
+    // printf("%d ", sensorTable[i]);
+  }
+  // printf("\n");
+  
+  
 }
 
 
@@ -217,7 +244,7 @@ void broadcast() {
 }
 
 
-// fills up array with id of neighbors, first element is the robot_id of the robot sending this message
+// fills up array with id of neighbors, first element is the robot_id of the robot sending this message, second number tells if the robot is illuminated
 // returns number of elements in the array
 int parseMessage(char* message, int* neighbors) {
   char* token = strtok(message, " ");
@@ -256,11 +283,15 @@ void listen() {
     char * message = (char *)wb_receiver_get_data(receiverTag);
     // printf("robot %s got messages : %s\n", robotName, message);
 
-    int neighbors[NUM_ROBOTS+1];
+    int neighbors[NUM_ROBOTS+2];
     int n = parseMessage(message, neighbors);
 
-    Nlist[neighbors[0]][0] = 1; 
-    for(int i = 1; i < n; i++) {
+    if (neighbors[1]) // if robot illuminated
+      Nlist[neighbors[0]][0] = 2;
+    else // if not illuminated
+      Nlist[neighbors[0]][0] = 1;
+
+    for(int i = 2; i < n; i++) {
       Nlist[neighbors[0]][neighbors[i]] = 1;
     }
     k++;
@@ -268,7 +299,7 @@ void listen() {
   }
 
   char temp[500];
-  sprintf(neighborhood, "%s", robotName);
+  sprintf(neighborhood, "%s %d", robotName, isIlluminated() ? 1 : 0);
   for (int i = 1; i <= NUM_ROBOTS; i++) {
     if (Nlist[i][0]){ // go through the first column
       sprintf(temp, "%s 00%d", neighborhood, i);
@@ -337,7 +368,7 @@ void run(){
       lostList[i] = 0;
     for (int i = 1; i<=NUM_ROBOTS; i++) {
       if (OldList[i][0] && !Nlist[i][0]) { // robot lost
-        lostList[i] = 1;
+        lostList[i] = OldList[i][0]; // 1 or 2 depending on whether the lost robot was illuminated or not
       }
     }
 
@@ -346,7 +377,7 @@ void run(){
     //  check if reaction is triggered
     bool Back = false;
     for (int i = 0; i<=NUM_ROBOTS; i++) {
-      if (lostList[i] == 1) { // if robot is lost
+      if (lostList[i] == 1) { // if robot is lost and not illuminated
         int nShared = 0; // number of shared connections
         // go through all the current neighbors and see if they have this lost robot covered
         for (int j = 1; j<=NUM_ROBOTS; j++) {
@@ -359,6 +390,8 @@ void run(){
         if (nShared <= BETA) {
           Back = true;
         }
+      } else if (lostList[i] == 2) { // if robot is lost and illuminated treat in a special way
+        Back = true;
       }
     }
 
@@ -390,14 +423,21 @@ void reset()
   int i;
   robotName = wb_robot_get_name();
 
+  // reset sensor readings
+  for (i=0; i < NB_SENSORS; i++) {
+    distances[i] = 0;
+    light_intensity[i] = 0;
+  }
+
   currentState = FORWARD;
-  sprintf(neighborhood, "%s", robotName); // initially no neighborhood info to broadcast
+  sprintf(neighborhood, "%s %d", robotName, isIlluminated() ? 1 : 0); // initially no neighborhood info to broadcast
 
 
   k = 0;
   for (int i = 0; i <= NUM_ROBOTS; i++) 
     for (int j = 0; j <= NUM_ROBOTS; j++)
       Nlist[i][j] = 0;
+
 
   
 
@@ -406,6 +446,9 @@ void reset()
 
   char e_puck_name[] = "ps0";
   char sensorsName[5];
+
+  char light_name[] = "ls0";
+  char light_sensors_name[5];
 
   // Emitter and receiver device tags
   emitterTag = wb_robot_get_device("emitter");
@@ -418,24 +461,38 @@ void reset()
   wb_receiver_set_channel(receiverTag, COMMUNICATION_CHANNEL);
 
   sprintf(sensorsName, "%s", e_puck_name);
+  sprintf(light_sensors_name, "%s", light_name);
+
+
+  // Initialize proximity and light sensors
   for (i = 0; i < NB_SENSORS; i++) {
     sensors[i] = wb_robot_get_device(sensorsName);
     wb_distance_sensor_enable(sensors[i], TIME_STEP);
+    light_sensors[i] = wb_robot_get_device(light_sensors_name);
+    wb_light_sensor_enable(light_sensors[i], TIME_STEP);
 
     if ((i + 1) >= 10) {
       sensorsName[2] = '1';
       sensorsName[3]++;
+      light_sensors_name[2] = '1';
+      light_sensors_name[3]++;
 
       if ((i + 1) == 10) {
         sensorsName[3] = '0';
         sensorsName[4] = (char) '\0';
+        light_sensors_name[3] = '0';
+        light_sensors_name[4] = (char) '\0';
         }
     } else {
         sensorsName[2]++;
+        light_sensors_name[2]++;
     }
   }
 
   wb_differential_wheels_enable_encoders(TIME_STEP);
+
+ 
+
 
   printf("Robot %s is reset\n", robotName);
   return;
@@ -455,7 +512,8 @@ int main(int argc, char *argv[]) {
 
   /* main loop */
   for (;;) {
-    getSensorValues(distances);
+    getSensorValues(distances); 
+    lightGetSensorValues(light_intensity);
     run();
 
     /* perform a simulation step */

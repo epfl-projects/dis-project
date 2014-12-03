@@ -29,6 +29,7 @@
 #define MAXSPEED             800 // maximum robot speed
 #define SENSOR_NORMALIZATION 100 // Normalisation constant for the IR sensors measurements
 #define OBSTACLE_THRESHOLD   100 // IR sensor value from which we consider there is an obstalce
+#define LIGHT_THRESHOLD 100 // light intensity value larger than which illuminates the robot 
 
 typedef enum {FORWARD = 0, FORWARD_AVOIDANCE = 1, COHERENCE = 2, COHERENCE_AVOIDANCE = 3} State;
 

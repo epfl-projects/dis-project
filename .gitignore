@@ -7,6 +7,7 @@
 webots/controllers/conn_supervisor/conn_supervisor
 webots/controllers/conn_swarm_original/conn_swarm_original
 webots/controllers/conn_beta/conn_beta
+webots/controllers/conn_beta_supervisor/conn_beta_supervisor
 webots/worlds/.*
 webots/data/*
 
