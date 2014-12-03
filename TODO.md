@@ -24,13 +24,12 @@ Week 10
 
 Submicroscopic implementation and macroscopic model design can be parallelized to increase efficiency.
 
-- [ ] Implement the 𝛂 algorithm in Webots
-- [ ] Implement the performance measures in Webots
+- [x] Implement the 𝛂 algorithm in Webots
+- [x] Implement the performance measures in Webots
   - Swarm connectivity
   - Robots' state counter
   - Optional: other measures from the articles
-- [ ] Design the macroscopic model representing the experiment
-- [ ] Implement the macroscopic model in Matlab
+- [x] Implement the macroscopic model in Matlab
 
 Week 11
 -------
@@ -39,7 +38,7 @@ Week 11
   - Follow the parameter values of (Winfield et al, 2008)
 - [ ] Tune the macroscopic model parameters from the experiments
 - [ ] Compare and analyse the results of submicroscopic and macroscopic models
-- [ ] Implement the β algorithm
+- [x] Implement the β algorithm
 - [ ] Compare the results of the two algorithms
 
 Week 12
