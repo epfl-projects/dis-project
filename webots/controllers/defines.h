@@ -2,12 +2,12 @@
 #define CONN_SWARM_DEFINES
 
 // Simulation parameters
-#define EXP_TIME          3600 // Duration of the experiment (in seconds)
+#define EXP_TIME          10000 // Duration of the experiment (in seconds)
 #define TIME_STEP         25 // Simulation time step (ms), must be a multiple of basicTimeStep in WorldInfo
 #define NUM_ROBOTS        4 // Total number of robots in the scene
 // Alpha algorithm
 #define ALPHA                3 // Minimum number of neighbors to maintain
-#define BETA				 2
+#define BETA				         2
 #define MAX_RANDOM_TURN      50 // Maximum value of the random turn (in degrees)
 #define MAX_COHERENCE_TIME   80 // Maximum number of timesteps spent in coherence state
 #define MAX_AVOIDANCE_TIME   5 // Maximum number of timesteps spent in avoidance sub-state
@@ -29,7 +29,7 @@
 #define MAXSPEED             800 // maximum robot speed
 #define SENSOR_NORMALIZATION 100 // Normalisation constant for the IR sensors measurements
 #define OBSTACLE_THRESHOLD   100 // IR sensor value from which we consider there is an obstalce
-#define LIGHT_THRESHOLD 100 // light intensity value larger than which illuminates the robot 
+#define LIGHT_THRESHOLD 100 // light intensity value larger than which illuminates the robot
 
 typedef enum {FORWARD = 0, FORWARD_AVOIDANCE = 1, COHERENCE = 2, COHERENCE_AVOIDANCE = 3} State;
 

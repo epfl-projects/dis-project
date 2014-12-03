@@ -6,7 +6,6 @@
 #include <time.h>
 #include <math.h>
 #include <assert.h>
-//#include <sys/time.h>
 #include <webots/robot.h>
 #include <webots/differential_wheels.h>
 #include <webots/distance_sensor.h>
@@ -16,16 +15,18 @@
 #include "../defines.h"
 
 
-
-//robot variables
+// Robot devices
 WbDeviceTag sensors[NB_SENSORS];
 WbDeviceTag emitterTag;
 WbDeviceTag receiverTag;
 
-const char *robotName; // A unique id from 001 to NUM_ROBOTS (included), allowing leading zeros
+// A unique id from 001 to NUM_ROBOTS (included), allowing leading zeros
+const char *robotName;
 
-int distances[NB_SENSORS]; // for sensor readings (bigger when an obstacle is closer)
-int speed[2];              // for obstacle avoidance
+// for sensor readings (bigger when an obstacle is closer)
+int distances[NB_SENSORS];
+// for obstacle avoidance
+int speed[2];
 
 // neighborhood information
 int k = 0; // current number of neighbors
@@ -34,14 +35,11 @@ int LastK = 0;
 
 State currentState;
 bool AVOIDANCE = false;
-int coherenceTime = 0; // Time left remaining in state COHERENCE 
+int coherenceTime = 0; // Time left remaining in state COHERENCE
 int avoidanceTime = 0; // Time left remaining in sub-state AVOIDANCE
 bool isTurning = false;
-int turningTime = 0; // Time left to turn in number of TIME_STEP 
-bool react = false; // reaction indicator 
-
-
-
+int turningTime = 0; // Time left to turn in number of TIME_STEP
+bool react = false; // reaction indicator
 
 
 void setSpeed(int leftSpeed, int rightSpeed) {
@@ -54,9 +52,6 @@ void setSpeed(int leftSpeed, int rightSpeed) {
 }
 
 
-
-
-
 /**
  * Turn by `angle` degrees in a second or less.
  * The speeds are chosen so that a 360° turns takes 1 second.
@@ -65,8 +60,8 @@ void setSpeed(int leftSpeed, int rightSpeed) {
 void initiateTurn(int angle) {
   if (angle == 180)
     turningTime = 1000 / TIME_STEP; // this many time steps
-  else 
-    turningTime = (rand() % 10); // [0 .. 9] time steps   
+  else
+    turningTime = (rand() % 10); // [0 .. 9] time steps
   isTurning = true;
 }
 
@@ -87,27 +82,24 @@ void turn(int * speed) {
   }
 }
 
-
-
-
-
-
-
-
 void setState(State newState) {
-  if(currentState != newState) { // if a new state
+  if(currentState != newState) {
     switch(newState) {
 
       case FORWARD:
-        if (AVOIDANCE)
-          AVOIDANCE = false; // FORWARD, COHERENCE take precedence over AVOIDANCE
+        // FORWARD takes precedence over AVOIDANCE
+        if (AVOIDANCE) {
+          AVOIDANCE = false;
+        }
         // Pick a new random orientation
         initiateTurn(-1);
         break;
 
       case COHERENCE:
-        if (AVOIDANCE) 
-          AVOIDANCE = false; // FORWARD, COHERENCE take precedence over AVOIDANCE
+        // COHERENCE takes precedence over AVOIDANCE
+        if (AVOIDANCE) {
+          AVOIDANCE = false;
+        }
         initiateTurn(180);
         coherenceTime = MAX_COHERENCE_TIME;
         break;
@@ -117,9 +109,7 @@ void setState(State newState) {
 }
 
 
-
-
-//******************************************************* 
+//*******************************************************
 //      MOVEMENT
 //*******************************************************
 
@@ -164,7 +154,7 @@ void getSensorValues(int *sensorTable) {
   for(i = 0; i < NB_SENSORS; i++) {
     sensorTable[i] = wb_distance_sensor_get_value(sensors[i]);
   }
-  if (hasObstacle()) { // if has obstacle 
+  if (hasObstacle()) { // if has obstacle
     if (!AVOIDANCE) { // if not already in avoidance
       AVOIDANCE = true;
       avoidanceTime = MAX_AVOIDANCE_TIME;
@@ -173,11 +163,6 @@ void getSensorValues(int *sensorTable) {
     AVOIDANCE = false;
   }
 }
-
-
-
-
-
 
 
 void move() {
@@ -197,7 +182,7 @@ void move() {
 
 
 
-//******************************************************* 
+//*******************************************************
 //      COMMUNICATION
 //*******************************************************
 
@@ -212,18 +197,15 @@ void broadcast() {
 }
 
 
-
 /**
  * From the received broadcasts, deduce the number of nearby agents and their neighborhood information
  * Each robot is expected to broadcast its `robotName` and also `robotName` of its neighbors, which is expected
  * to be parseable as a positive number in 1..NUM_ROBOTS.
  */
-
 void listen() {
-  // Resent counters
+  // Reset counters
   LastK = k;
   k = 0;
-  
 
   while(wb_receiver_get_queue_length(receiverTag) > 0) {
     char * neighborName = (char *)wb_receiver_get_data(receiverTag);
@@ -233,7 +215,7 @@ void listen() {
     wb_receiver_next_packet(receiverTag);
   }
 
-  assert(k <= NUM_ROBOTS - 1); 
+  assert(k <= NUM_ROBOTS - 1);
   // printf("Robot %s has %d neighbors\n", robotName, k);
 }
 
@@ -250,7 +232,7 @@ void sendStateToSupervisor() {
   // since only two states FORWARD and COHERENCE are effectively used in addition to the boolean variable AVOIDANCE, adapt states
   // State controller_state = currentState;
   // if (AVOIDANCE) {
-  //   if (currentState == FORWARD) 
+  //   if (currentState == FORWARD)
   //     controller_state = FORWARD_AVOIDANCE;
   //   else if (currentState == COHERENCE)
   //     controller_state = COHERENCE_AVOIDANCE;
@@ -264,32 +246,19 @@ void sendStateToSupervisor() {
 
 
 
-//******************************************************* 
+//*******************************************************
 //      RUN
 //*******************************************************
 
 
 void run(){
 
-  // static int time_step_counter = 0;
-  // if (!isTurning) {
-  //   time_step_counter++;
-  //   if (time_step_counter >= 30) {
-  //      initiateTurn(180);
-  //      time_step_counter = 0;
-  //   }
-  // }
-   
-
-  // move();
-
-
   static int time_step_counter = 0;
   time_step_counter++;
 
   // Move
   move();
-  
+
   // keep the clock ticking is AVOIDANCE or COHERENCE
   if (AVOIDANCE) {
     avoidanceTime--;
@@ -298,7 +267,7 @@ void run(){
     }
   }
 
-  if (currentState == COHERENCE) { // keep coherence clock ticking 
+  if (currentState == COHERENCE) { // keep coherence clock ticking
     coherenceTime--;
     if (coherenceTime <= 0)
       setState(FORWARD);
@@ -311,30 +280,28 @@ void run(){
     listen(); // ! going to listen to pings from previous step (50 time step in the past)
 
 
-
     if (k < LastK && k < ALPHA) { // if less neighbors than last time and below threshold
       // printf("Robot %s has %d neighbors!\n", robotName, k);
       // printf("robot %s is moving to coherence state\n", robotName);
       setState(COHERENCE);
     }
-    else if (k > LastK) { 
+    else if (k > LastK) {
       // printf("Robot %s has %d neighbors!\n", robotName, k);
       // printf("robot %s is moving to forward state\n", robotName);
       setState(FORWARD); // make random turn
     }
-      
 
-    time_step_counter = 0; // reset time step counter 
+
+    time_step_counter = 0; // reset time step counter
+
+    sendStateToSupervisor();
   }
-
-  // sendStateToSupervisor();
- 
 }
 
 
 
 
-//******************************************************* 
+//*******************************************************
 //      RESET
 //*******************************************************
 
@@ -389,7 +356,7 @@ void reset()
 
 
 
-//******************************************************* 
+//*******************************************************
 //      MAIN
 //*******************************************************
 

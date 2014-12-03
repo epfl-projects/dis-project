@@ -102,7 +102,7 @@ void resetLogs() {
 
 /**
  * Stats file logging format: CSV
- * Filename: simulation-[number of robots]-.csv
+ * Filename: simulation-[number of robots]-alpha[alpha value]-[time].csv
  */
 char filename[255];
 void createNewLogFile() {
@@ -111,7 +111,7 @@ void createNewLogFile() {
   time_t currentTime;
   currentTime = time(NULL);
 
-  sprintf(filename, "%s/simulation-%d-%ld.csv", LOG_FILES_FOLDER, NUM_ROBOTS, currentTime);
+  sprintf(filename, "%s/simulation-%d-alpha%d-%ld.csv", LOG_FILES_FOLDER, NUM_ROBOTS, ALPHA, currentTime);
 
   FILE * logFile = fopen(filename, "w+");
   // Specify CSV columns' title
