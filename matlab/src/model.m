@@ -274,9 +274,11 @@ std_N_C = std( N_C_f, 0, 3 ) ;
 std_N_AC = std( N_AC_f, 0, 3 ) ;
 std_N_Cbar = std( N_Cbar_f, 0 ,3 ) ;
 
-sum_N = sum(N_Fbar_f, N_Cbar_f) ;
-sum_N2= sum(N_AF_f, N_F_f, N_AC_f, N_C_f);
-if sum_N!=sum_N2
+% TODO: double check the dimensions
+sum_N = sum([N_Fbar_f; N_Cbar_f]);
+sum_N2= sum([N_AF_f; N_F_f; N_AC_f; N_C_f]);
+
+if sum_N ~= sum_N2
 	error('the conservative proriety isn''t conserved !');
 else
 	clear sum_N2;
@@ -286,7 +288,7 @@ mean_sum_N = mean( sum_N, 3 ) ;
 std_sum_N = std( sum_N, 0, 3 ) ;
 
 %***********************************************************%
-%Plot of the figures
+% Plot of the figures
 %***********************************************************%
 
 y=[ sum( mean_N_F' ) ; sum( mean_N_C' ) ; sum( mean_N_AC' + mean_N_AF' ) ; sum( mean_sum_N' )] ;
@@ -298,10 +300,10 @@ lab=['rgbk'];
 
 figure();
 hold('on');
-for i=1:size(y)(1)
+for i=1:size(y, 1)
 	h(i)=errorbar( y(i,:), e(i,:), [ '-o' lab(i) ] );
 end
-legend("Forward","Coherence","Avoidance","Total");
+legend('Forward', 'Coherence', 'Avoidance', 'Total');
 xlabel='# of robots';
 ylabel='# of timesteps spent';
 grid('on');
