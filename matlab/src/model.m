@@ -2,6 +2,8 @@ close all
 clear all
 
 
+%TODO : check N_F and N_C for negative number of robots (usually -1)
+
 %DIS Project : Macroscopic model of a wireless connected swarm
 
 %*************************************%
@@ -41,7 +43,7 @@ Pla=ones(N_rob,1)-Pr-Pf;
 TA = 5; %number of timesteps to spend in the avoidance state
 TC = 15; %number of timesteps to spend in the coherence state
 k_end=1000; %length of the simulation in timestep
-n_end=3; %number of simulations
+n_end=10; %number of simulations
 
 %final variables to make the average and the standart deviation
 N_F_f=zeros(N_rob,k_end,n_end);
@@ -238,6 +240,7 @@ for n=1:n_end
 				% end
 				% fprintf(deb,'%d\n\n',sum(a(:,size(a)(2))));
 				% fclose(deb);
+				%
 				% pause();
 				%
 				%************************** end debugging part **************************%
@@ -275,8 +278,8 @@ std_N_AC = std( N_AC_f, 0, 3 ) ;
 std_N_Cbar = std( N_Cbar_f, 0 ,3 ) ;
 
 % TODO: double check the dimensions
-sum_N = sum([N_Fbar_f; N_Cbar_f]);
-sum_N2= sum([N_AF_f; N_F_f; N_AC_f; N_C_f]);
+sum_N = sum(N_Fbar_f + N_Cbar_f);
+sum_N2= sum(N_AF_f + N_F_f + N_AC_f + N_C_f);
 
 if sum_N ~= sum_N2
 	error('the conservative proriety isn''t conserved !');
@@ -284,27 +287,32 @@ else
 	clear sum_N2;
 end
 
-mean_sum_N = mean( sum_N, 3 ) ;
-std_sum_N = std( sum_N, 0, 3 ) ;
+mean_sum_N = mean(mean_N_Fbar+mean_N_Cbar,2)
+std_sum_N = std(mean_N_Fbar+mean_N_Cbar,0,2);
+% mean_sum_N = mean( sum_N, 3 ) ;
+% std_sum_N = std( sum_N, 0, 3 ) ;
 
 %***********************************************************%
 % Plot of the figures
 %***********************************************************%
 
-y=[ sum( mean_N_F' ) ; sum( mean_N_C' ) ; sum( mean_N_AC' + mean_N_AF' ) ; sum( mean_sum_N' )] ;
-
-e=[ sum( std_N_F' ) ; sum( std_N_C' ) ; sum( std_N_AC' + std_N_AF' ) ; sum(std) ] ;
-e(end+1,:)=sum(e);
+y=[ mean( mean_N_F,2 ) , mean( mean_N_C, 2 ) , mean( mean_N_AC + mean_N_AF,2 ) , mean_sum_N] ;
+%TODO: check the definition of standart deviation (not an linear operator)
+e=[ mean( std_N_F, 2 ) , mean( std_N_C, 2 ) , mean( std_N_AC + std_N_AF, 2) , std_sum_N ] ;
+%e(end+1,:)=sum(e);
 
 lab=['rgbk'];
 
 figure();
 hold('on');
-for i=1:size(y, 1)
-	h(i)=errorbar( y(i,:), e(i,:), [ '-o' lab(i) ] );
+title('Average Number of robots per state and number of connections')
+% h=errorbar(y,e)
+for i=1:size(y, 2)
+	h(i)=errorbar([0:9], y(:,i), e(:,i), [ '-o' lab(i) ] );
 end
 legend('Forward', 'Coherence', 'Avoidance', 'Total');
-xlabel='# of robots';
-ylabel='# of timesteps spent';
+xlabel='N of connections';
+ylabel='N of robots per state';
+axis([0 9, 0 4]);
 grid('on');
 hold('off');
