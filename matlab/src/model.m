@@ -3,6 +3,7 @@ clear all
 
 
 %TODO : check N_F and N_C for negative number of robots (usually -1)
+%??? No negative number of robots anymore but don't know why !! ???
 
 %DIS Project : Macroscopic model of a wireless connected swarm
 
@@ -15,7 +16,10 @@ dmax=N_rob-1;
 
 alpha=5; %should be greater than 2
 
-
+TA = 5; %number of timesteps to spend in the avoidance state
+TC = 15; %number of timesteps to spend in the coherence state
+k_end=1000; %length of the simulation in timestep
+n_end=10; %number of simulations
 
 
 %*************************************%
@@ -39,11 +43,6 @@ Pla=ones(N_rob,1)-Pr-Pf;
 %*************************************%
 %Other simulation parameters
 %*************************************%
-
-TA = 5; %number of timesteps to spend in the avoidance state
-TC = 15; %number of timesteps to spend in the coherence state
-k_end=1000; %length of the simulation in timestep
-n_end=10; %number of simulations
 
 %final variables to make the average and the standart deviation
 N_F_f=zeros(N_rob,k_end,n_end);
@@ -162,6 +161,8 @@ for n=1:n_end
 						- PlN_Fbar(i,k) ...
 					, 1, TC );
 
+
+
 				end
 				%for the full connectivity (N_rob-1 connections)
 				i=dmax;
@@ -207,42 +208,42 @@ for n=1:n_end
 
 				%reset the files
 
-				% if k==1
-				% 	a=fopen("debugging_N_rob.txt","w");
-				% 	fclose(a);
-				% 	a=fopen("debugging_N_change.txt","w");
-				% 	fclose(a);
-				% end
-				%
-				% deb = fopen("debugging_N_rob.txt","a+");
-				%
-				% fprintf(deb,"step : %d\n",k);
-				% a=[N_Fbar(:,k) N_F(:,k) N_AF(:,k) N_Cbar(:,k) N_C(:,k) N_AC(:,k)];
-				% a=[a a(:,1)+a(:,4)];
-				% for i=1:N_rob
-				% 	for j=1:size(a)(2)
-				% 		fprintf(deb,'%d\t', a(i,j));
-				% 	end
-				% 	fprintf(deb,'\n');
-				% end
-				% fprintf(deb,'%d\n\n',sum(a(:,size(a)(2))));
-				% fclose(deb);
-				%
-				% deb=fopen("debugging_N_change.txt","a+");
-				% fprintf(deb,"step : %d\n",k);
-				% a=[ N_Fbar(:,k) PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k) N_Cbar(:,k) PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k)];
-				% a=[a a(:,1)+a(:,5)];
-				% for i=1:N_rob
-				% 	for j=1:size(a)(2)
-				% 		fprintf(deb,'%d\t', a(i,j));
-				% 	end
-				% 	fprintf(deb,'\n');
-				% end
-				% fprintf(deb,'%d\n\n',sum(a(:,size(a)(2))));
-				% fclose(deb);
-				%
-				% pause();
-				%
+				if k==1
+					a=fopen("debugging_N_rob.txt","w");
+					fclose(a);
+					a=fopen("debugging_N_change.txt","w");
+					fclose(a);
+				end
+
+				deb = fopen("debugging_N_rob.txt","a+");
+
+				fprintf(deb,"step : %d\n",k);
+				a1=[N_Fbar(:,k) N_F(:,k) N_AF(:,k) N_Cbar(:,k) N_C(:,k) N_AC(:,k)];
+				a11=[a1 a1(:,1)+a1(:,4)];
+				for i=1:N_rob
+					for j=1:size(a1)(2)
+						fprintf(deb,'%d\t', a1(i,j));
+					end
+					fprintf(deb,'\n');
+				end
+				fprintf(deb,'%d\n\n',sum(a1(:,size(a1)(2))));
+				fclose(deb);
+
+				deb=fopen("debugging_N_change.txt","a+");
+				fprintf(deb,"step : %d\n",k);
+				a2=[ N_Fbar(:,k) PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k) N_Cbar(:,k) PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k)];
+				a2=[a2 a2(:,1)+a2(:,5)];
+				for i=1:N_rob
+					for j=1:size(a2)(2)
+						fprintf(deb,'%d\t', a2(i,j));
+					end
+					fprintf(deb,'\n');
+				end
+				fprintf(deb,'%d\n\n',sum(a2(:,size(a2)(2))));
+				fclose(deb);
+
+				%pause();
+
 				%************************** end debugging part **************************%
 			end
 		end
@@ -263,32 +264,49 @@ end
 %mean and standard deviation over the number of simulations
 %**********************************************************%
 
-mean_N_F = mean( N_F_f, 3 ) ;
-mean_N_AF = mean( N_AF_f, 3 ) ;
-mean_N_Fbar = mean( N_Fbar_f, 3 );
-mean_N_C = mean( N_C_f, 3 ) ;
-mean_N_AC = mean( N_AC_f, 3 ) ;
-mean_N_Cbar = mean( N_Cbar_f, 3) ;
+%
+m_N_F = mean(mean( N_F_f, 2),3) ;
+m_N_Fbar = mean( mean(N_Fbar_f,2),3) ;
+m_N_C = mean( mean( N_C_f,2),3) ;
+m_N_Cbar = mean( mean(N_C_f,2),3) ;
+m_N_A = mean ( mean( N_AC_f + N_AC_f,2),3);
+m_N_T = mean ( mean(N_Fbar_f+N_Cbar_f,2),3);
 
-std_N_F = std( N_F_f, 0, 3 ) ;
-std_N_AF = std( N_AF_f, 0, 3 ) ;
-std_N_Fbar = std( N_AF_f, 0, 3 ) ;
-std_N_C = std( N_C_f, 0, 3 ) ;
-std_N_AC = std( N_AC_f, 0, 3 ) ;
-std_N_Cbar = std( N_Cbar_f, 0 ,3 ) ;
+s_N_F = std( mean( N_F_f, 2 ), 0, 3 ) ;
+s_N_Fbar= std( mean(N_Fbar_f, 2 ), 0, 3 ) ;
+s_N_C = std( mean(N_C_f, 2), 0, 3 ) ;
+s_N_Cbar = std( mean(N_Cbar_f, 2 ), 0, 3 );
+s_N_A = std( mean(N_AC_f + N_AC_f,2), 0, 3 ) ;
+s_N_T = std( mean(N_Fbar_f + N_Cbar_f, 2 ), 0, 3 ) ;
+
+% mean_N_F = mean( N_F_f, 3 ) ;
+% mean_N_AF = mean( N_AF_f, 3 ) ;
+% mean_N_Fbar = mean( N_Fbar_f, 3 );
+% mean_N_C = mean( N_C_f, 3 ) ;
+% mean_N_AC = mean( N_AC_f, 3 ) ;
+% mean_N_Cbar = mean( N_Cbar_f, 3) ;
+% mean_N_A = mean ( N_AC_f + N_AF_f, 3 ) ;
+%
+% std_N_F = std( N_F_f, 0, 3 ) ;
+% std_N_AF = std( N_AF_f, 0, 3 ) ;
+% std_N_Fbar = std( N_AF_f, 0, 3 ) ;
+% std_N_C = std( N_C_f, 0, 3 ) ;
+% std_N_AC = std( N_AC_f, 0, 3 ) ;
+% std_N_Cbar = std( N_Cbar_f, 0 ,3 ) ;
+% std_N_A = std( N_AC_f + N_AF_f, 0, 3 ) ;
 
 % TODO: double check the dimensions
-sum_N = sum(N_Fbar_f + N_Cbar_f);
-sum_N2= sum(N_AF_f + N_F_f + N_AC_f + N_C_f);
-
-if sum_N ~= sum_N2
-	error('the conservative proriety isn''t conserved !');
-else
-	clear sum_N2;
-end
-
-mean_sum_N = mean(mean_N_Fbar+mean_N_Cbar,2)
-std_sum_N = std(mean_N_Fbar+mean_N_Cbar,0,2);
+% sum_N = mean(sum(N_Fbar_f + N_Cbar_f),3);
+% sum_N2= mean(sum(N_AF_f + N_F_f + N_AC_f + N_C_f),3);
+%
+% if sum_N ~= sum_N2
+% 	error('the conservative proriety isn''t conserved !');
+% else
+% 	clear sum_N2;
+% end
+%
+% mean_sum_N = mean(mean_N_Fbar+mean_N_Cbar,2)
+% std_sum_N = std(mean_N_Fbar+mean_N_Cbar,0,2);
 % mean_sum_N = mean( sum_N, 3 ) ;
 % std_sum_N = std( sum_N, 0, 3 ) ;
 
@@ -296,23 +314,26 @@ std_sum_N = std(mean_N_Fbar+mean_N_Cbar,0,2);
 % Plot of the figures
 %***********************************************************%
 
-y=[ mean( mean_N_F,2 ) , mean( mean_N_C, 2 ) , mean( mean_N_AC + mean_N_AF,2 ) , mean_sum_N] ;
+%y=[ mean( mean_N_F,2 ) , mean( mean_N_C, 2 ) , mean( mean_N_AC + mean_N_AF,2 ) , mean_sum_N] ;
+y=[ m_N_F, m_N_C, m_N_A, m_N_T];
 %TODO: check the definition of standart deviation (not an linear operator)
-e=[ mean( std_N_F, 2 ) , mean( std_N_C, 2 ) , mean( std_N_AC + std_N_AF, 2) , std_sum_N ] ;
+%e=[ mean( std_N_F, 2 ) , mean( std_N_C, 2 ) , mean( std_N_AC + std_N_AF, 2) , std_sum_N ] ;
+e=[ s_N_F, s_N_C, s_N_A, s_N_T	];
 %e(end+1,:)=sum(e);
 
 lab=['rgbk'];
+symb=['+ox*'];
 
 figure();
 hold('on');
 title('Average Number of robots per state and number of connections')
 % h=errorbar(y,e)
 for i=1:size(y, 2)
-	h(i)=errorbar([0:9], y(:,i), e(:,i), [ '-o' lab(i) ] );
+	h(i)=errorbar([0:9], y(:,i), e(:,i), [ '-' symb(i) lab(i) ] );
 end
 legend('Forward', 'Coherence', 'Avoidance', 'Total');
-xlabel='N of connections';
-ylabel='N of robots per state';
-axis([0 9, 0 4]);
+xlabel('N of connections');
+ylabel('N of robots per state');
+axis([0 9, 0 3]);
 grid('on');
 hold('off');
