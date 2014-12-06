@@ -6,6 +6,7 @@
 #include <time.h>
 #include <math.h>
 #include <assert.h>
+#include <limits.h>
 //#include <sys/time.h>
 #include <webots/robot.h>
 #include <webots/differential_wheels.h>
@@ -13,6 +14,8 @@
 #include <webots/light_sensor.h>
 #include <webots/emitter.h>
 #include <webots/receiver.h>
+#include <webots/led.h> 
+
 
 #include "../defines.h"
 
@@ -22,6 +25,7 @@ WbDeviceTag sensors[NB_SENSORS];
 WbDeviceTag light_sensors[NB_SENSORS]; // Device variables for light sensors
 WbDeviceTag emitterTag;
 WbDeviceTag receiverTag;
+WbDeviceTag led;
 
 const char *robotName; // A unique id from 001 to NUM_ROBOTS (included), allowing leading zeros
 
@@ -146,12 +150,13 @@ bool hasObstacle() {
 }
 
 bool isIlluminated() {
-  int maxValue = 0;
+  int minValue = INT_MAX;
   for(unsigned int i = 0; i < NB_SENSORS; i++) {
     // Note that `distances` holds sensor readings
-    maxValue = fmax(maxValue, light_intensity[i]);
+    minValue = fmin(minValue, light_intensity[i]);
   }
-  return (maxValue >= LIGHT_THRESHOLD);
+  // printf("MIN intensity : %d\n", minValue);
+  return (minValue < LIGHT_THRESHOLD);
 
 }
 
@@ -202,6 +207,22 @@ void lightGetSensorValues(int *sensorTable)
     // printf("%d ", sensorTable[i]);
   }
   // printf("\n");
+
+  // if (isIlluminated()) {
+  //   wb_led_set(led, 1); 
+  // } else 
+  //   wb_led_set(led, 0); 
+  // debugging 
+  // if (isIlluminated()) {
+  //   // Change channel temporarily to communicate with the supervisor
+  //   wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL_DEBUG);
+  //   // Allow infinite communication range
+  //   wb_emitter_set_range(emitterTag, -1);
+  //   sendMessage(robotName);
+  //   // Back to the inter-robot, imperfect communication
+  //   wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL);
+  //   wb_emitter_set_range(emitterTag, COMM_RADIUS);
+  // }
   
   
 }
@@ -391,6 +412,7 @@ void run(){
           Back = true;
         }
       } else if (lostList[i] == 2) { // if robot is lost and illuminated treat in a special way
+        // printf("Red robot\n");
         Back = true;
       }
     }
@@ -453,6 +475,7 @@ void reset()
   // Emitter and receiver device tags
   emitterTag = wb_robot_get_device("emitter");
   receiverTag = wb_robot_get_device("receiver");
+  led = wb_robot_get_device("led0");
 
   // Configure communication devices
   wb_receiver_enable(receiverTag, TIME_STEP);

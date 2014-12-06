@@ -12,6 +12,7 @@
 
 WbDeviceTag receiverTag;
 
+
 // beacon and its location
 WbNodeRef epucks[NUM_ROBOTS], beacon;
 WbFieldRef locfield[NUM_ROBOTS];
@@ -92,6 +93,9 @@ void reset(void) {
   receiverTag = wb_robot_get_device("receiver");
   wb_receiver_enable(receiverTag, TIME_STEP);
   wb_receiver_set_channel(receiverTag, COMMUNICATION_CHANNEL_STAT);
+  // wb_receiver_set_channel(receiverTag, COMMUNICATION_CHANNEL_DEBUG);
+
+
 
   // get beacon
   beacon=wb_supervisor_node_get_from_def("BEACON1");
@@ -185,6 +189,19 @@ void receiveRobotsStates() {
   }
 }
 
+
+// void getDebugMessages() {
+//   while(wb_receiver_get_queue_length(receiverTag) > 0) {
+//     char * illuminatedRobot = (char *)wb_receiver_get_data(receiverTag);
+//     int robot = (int)strtol(illuminatedRobot, NULL, 10);
+//     WbFieldRef pos;
+//     pos = wb_supervisor_node_get_field(epucks[robot-1],"translation");
+//     wb_supervisor_set_label(0,"RED",pos[0],pos[1],0.1,0xff0000,0);
+//     wb_receiver_next_packet(receiverTag);
+//   }
+
+// }
+
 /* **************************** RUN ******************************* */
 void run() {
   // End of the experiment
@@ -192,7 +209,8 @@ void run() {
     wb_supervisor_simulation_revert();
   }
 
-  receiveRobotsStates();
+  // receiveRobotsStates();
+  // getDebugMessages();
 }
 
 
