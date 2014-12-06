@@ -292,7 +292,7 @@ void run(){
   // Send logging info to the supervisor
   // It needs to be done in a different timestep, otherwise
   // the channel & range switching come in conflict
-  else if(time_step_counter == 10) {
+  else if(time_step_counter == 10 && LOG_EXPERIMENT) {
     sendStateToSupervisor();
   }
 }

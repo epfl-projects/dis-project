@@ -181,15 +181,19 @@ void run() {
   if(wb_robot_get_time() > finalTime){
     wb_supervisor_simulation_revert();
   }
-
-  receiveRobotsStates();
+  if(LOG_EXPERIMENT) {
+    receiveRobotsStates();
+  }
 }
 
 
 int main(int argc, char *argv[]) {
   /* initialize Webots */
   wb_robot_init();
-  createNewLogFile();
+
+  if(LOG_EXPERIMENT) {
+    createNewLogFile();
+  }
 
   reset();
 

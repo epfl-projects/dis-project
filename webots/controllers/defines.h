@@ -15,9 +15,11 @@
 #define COMM_RADIUS           0.7    // Range of radio communication (in meters)
 #define COMMUNICATION_CHANNEL 1      // Channel to use for inter-robot communication
 #define COMMUNICATION_CHANNEL_STAT 2 // Another channel to send stats & state to the supervisor
-#define COMMUNICATION_CHANNEL_DEBUG 3 // channel for debugging messages 
+#define COMMUNICATION_CHANNEL_DEBUG 3 // channel for debugging messages
 
- // Path to the logs (relative to the supervisor's directory)
+// Enable / disable experiment logging
+#define LOG_EXPERIMENT   true
+// Path to the logs (relative to the supervisor's directory)
 #define LOG_FILES_FOLDER "../../data"
 
 // Initial agents distribution parameters
