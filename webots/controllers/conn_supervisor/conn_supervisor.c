@@ -115,13 +115,33 @@ void createNewLogFile() {
 
   FILE * logFile = fopen(filename, "w+");
   // Specify CSV columns' title
-  fprintf(logFile, "Time, Robot ID, Robot state, Number of neighbors\n");
+  if(LOG_DETAILS) {
+    // There will be one line per robot
+    fprintf(logFile, "Time, Robot ID, Robot state, Number of neighbors\n");
+  }
+  else {
+    // Robot's info will be summarized in one line
+    fprintf(logFile, "Time, Number of state 0, Number of state 1, Number of state 2, Number of state 3\n");
+  }
   fclose(logFile);
 }
+
 void writeStats() {
   FILE * logFile = fopen(filename, "a+");
-  for(int i = 0; i < NUM_ROBOTS; ++i) {
-    fprintf(logFile, "%f, %d, %d, %d\n", wb_robot_get_time(), i, robotsStates[i], robotsNeighborsCount[i]);
+
+  // Detailed format
+  if(LOG_DETAILS) {
+    for(int i = 0; i < NUM_ROBOTS; ++i) {
+      fprintf(logFile, "%f, %d, %d, %d\n", wb_robot_get_time(), i, robotsStates[i], robotsNeighborsCount[i]);
+    }
+  }
+  // Summarized format
+  else {
+    int countPerState[4] = { 0, 0, 0, 0 };
+    for(int i = 0; i < NUM_ROBOTS; ++i) {
+      countPerState[robotsStates[i]]++;
+    }
+    fprintf(logFile, "%f, %d, %d, %d, %d\n", wb_robot_get_time(), countPerState[0], countPerState[1], countPerState[2], countPerState[3]);
   }
   fprintf(logFile, "\n");
   fclose(logFile);
@@ -161,7 +181,7 @@ void receiveRobotsStates() {
       separatorPosition++;
     robotsNeighborsCount[robotId] = (int)strtol(stats + separatorPosition, NULL, 10);
 
-    // printf("%d %d %d\n", robotId, robotsStates[robotId], robotsNeighborsCount[robotId]);
+    printf("Robot %d, state %d, neighbors %d\n", robotId, robotsStates[robotId], robotsNeighborsCount[robotId]);
 
     wb_receiver_next_packet(receiverTag);
   }
@@ -169,16 +189,18 @@ void receiveRobotsStates() {
   // Done receiving all robots states for this timestep
   if(nReceived == NUM_ROBOTS) {
     writeStats();
-    // printf("Received %d messages at time %f\n", nReceived, wb_robot_get_time());
+    printf("Received %d messages at time %f\n", nReceived, wb_robot_get_time());
 
     resetLogs();
   }
 }
 
 /* **************************** RUN ******************************* */
+
 void run() {
   // End of the experiment
   if(wb_robot_get_time() > finalTime){
+    printf("Experiment concluded at time %f.\n", wb_robot_get_time());
     wb_supervisor_simulation_revert();
   }
   if(LOG_EXPERIMENT) {

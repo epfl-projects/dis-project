@@ -247,8 +247,8 @@ void sendStateToSupervisor() {
 
 void run(){
 
-  static int time_step_counter = 0;
-  time_step_counter++;
+  static int timestepCounter = 0;
+  timestepCounter++;
 
   // Move
   move();
@@ -268,7 +268,7 @@ void run(){
   }
 
   // Rate limiting
-  if(time_step_counter >= 20) {
+  if(timestepCounter >= COMMUNICATION_PERIOD) {
     // printf("robot %s is broadcasting\n", robotName);
     broadcast();
     listen(); // ! going to listen to pings from previous step (50 time step in the past)
@@ -286,13 +286,13 @@ void run(){
     }
 
 
-    time_step_counter = 0; // reset time step counter
+    timestepCounter = 0; // reset time step counter
 
   }
   // Send logging info to the supervisor
   // It needs to be done in a different timestep, otherwise
   // the channel & range switching come in conflict
-  else if(time_step_counter == 10 && LOG_EXPERIMENT) {
+  else if(timestepCounter == (COMMUNICATION_PERIOD / 2) && LOG_EXPERIMENT) {
     sendStateToSupervisor();
   }
 }

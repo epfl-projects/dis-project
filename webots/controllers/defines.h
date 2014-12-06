@@ -16,9 +16,13 @@
 #define COMMUNICATION_CHANNEL 1      // Channel to use for inter-robot communication
 #define COMMUNICATION_CHANNEL_STAT 2 // Another channel to send stats & state to the supervisor
 #define COMMUNICATION_CHANNEL_DEBUG 3 // channel for debugging messages
+// Interval between two broadcasts (in number of timesteps)
+#define COMMUNICATION_PERIOD 20
 
 // Enable / disable experiment logging
 #define LOG_EXPERIMENT   true
+// Detailed logs contain the state of each particular robot
+#define LOG_DETAILS      false
 // Path to the logs (relative to the supervisor's directory)
 #define LOG_FILES_FOLDER "../../data"
 
