@@ -66,28 +66,6 @@ void change_robot_positions(){
   }
 }
 
-void reset(void) {
-  int i;
-  char stringaux[20];
-
-  for(i=0;i<NUM_ROBOTS;i++){
-    sprintf(stringaux,"E_PUCK_%d",i+1);
-    epucks[i]=wb_supervisor_node_get_from_def(stringaux);
-    locfield[i]=wb_supervisor_node_get_field(epucks[i],"translation");
-  }
-
-  srand(time(NULL));
-  change_robot_positions();
-
-  finalTime = wb_robot_get_time() + EXP_TIME; // 15 MIN == 900
-
-
-  // Configure receiver device
-  receiverTag = wb_robot_get_device("receiver");
-  wb_receiver_enable(receiverTag, TIME_STEP);
-  wb_receiver_set_channel(receiverTag, COMMUNICATION_CHANNEL_STAT);
-}
-
 /* **************************** LOGGING **************************** */
 int nReceived = 0;
 int robotsStates[NUM_ROBOTS];
@@ -216,6 +194,28 @@ void receiveRobotsStates() {
 }
 
 /* **************************** RUN ******************************* */
+void reset(void) {
+  int i;
+  char stringaux[20];
+
+  for(i=0;i<NUM_ROBOTS;i++){
+    sprintf(stringaux,"E_PUCK_%d",i+1);
+    epucks[i]=wb_supervisor_node_get_from_def(stringaux);
+    locfield[i]=wb_supervisor_node_get_field(epucks[i],"translation");
+  }
+
+  srand(time(NULL));
+  change_robot_positions();
+
+  finalTime = wb_robot_get_time() + EXP_TIME; // 15 MIN == 900
+
+  // Configure receiver device
+  receiverTag = wb_robot_get_device("receiver");
+  wb_receiver_enable(receiverTag, TIME_STEP);
+  wb_receiver_set_channel(receiverTag, COMMUNICATION_CHANNEL_STAT);
+
+  resetLogs();
+}
 
 void run() {
   // End of the experiment
