@@ -38,6 +38,12 @@
 #define OBSTACLE_THRESHOLD   100 // IR sensor value from which we consider there is an obstalce
 #define LIGHT_THRESHOLD 100 // light intensity value larger than which illuminates the robot
 
-typedef enum {FORWARD = 0, FORWARD_AVOIDANCE = 1, COHERENCE = 2, COHERENCE_AVOIDANCE = 3} State;
+/**
+ * FORWARD_AVOIDANCE corresponds to 1
+ * COHERENCE_AVOIDANCE corresponds to 3
+ * But in practice, we use a boolean flag to represent
+ * the subsumed AVOIDANCE state.
+ */
+typedef enum {FORWARD = 0, COHERENCE = 2} State;
 
 #endif
