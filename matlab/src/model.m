@@ -27,7 +27,7 @@ n_end=10; %number of simulations
 %*************************************%
 %those probabilities were extract from the second article page 256 the top figure on the left
 
-Pa=[0.00 0.00 0.01 0.02 0.02 0.03 0.03 0.03 0.05 0.05]';	%collision with another robot
+Pa=[0.00 0.00 0.01 0.02 0.02 0.03 0.03 0.03 0.05 0.06]';	%collision with another robot
 Pl=[0.00 0.12 0.15 0.17 0.18 0.26 0.28 0.31 0.33 0.33]'; 	%loss of a connection in forward state
 Pg=[0.19 0.22 0.24 0.23 0.22 0.17 0.15 0.13 0.11 0.09]';	%gain of a connection
 Pr=[0.28 0.30 0.31 0.29 0.28]';		%recovery of a connection [1:alpha]
@@ -57,6 +57,8 @@ N_Cbar_f=zeros(N_rob,k_end,n_end);
 %*************************************%
 for n=1:n_end
 
+
+
 	N_AF=zeros(N_rob,k_end);	% # of robots
 	N_F=zeros(N_rob,k_end);
 	N_F(alpha+2,1)=N_rob;
@@ -67,15 +69,13 @@ for n=1:n_end
 	N_Cbar = N_AC + N_C;
 
 
-	k=0; %initialisation of the simulation timestep
+	%initialisation of the simulation timestep
 	for(k=1:k_end)
 
-		% # of robots in Forwar and in Coherence state
-		N_F(:,k)=N_Fbar(:,k)-N_AF(:,k);
-		N_C(:,k)=N_Cbar(:,k)-N_AC(:,k);
+
 
 		%*************************************************************************%
-		%Calculation of the number of robots which changed states during timestep k
+		%Calculation of the number of robots which changed states at timestep k
 		%*************************************************************************%
 
 		%lecture of the following variables
@@ -97,6 +97,10 @@ for n=1:n_end
 		[PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k)] =  test_prob( Pg, Pl , N_Fbar(:,k) );
 	%
 
+	% # of robots in Forwar and in Coherence state
+	%N_F(:,k)=N_Fbar(:,k)-N_AF(:,k);
+	%N_C(:,k)=N_Cbar(:,k)-N_AC(:,k);
+
 		%Check the existence of PN_F(:,k-TA)
 		if k>TA
 			PaNF=PaN_F(:,k-TA);
@@ -108,11 +112,11 @@ for n=1:n_end
 
 
 		if k<k_end
-
+			
 			%PaNC could be the source of the negative terms (observed on N_C)
 			N_AF(:,k+1)=N_AF(:,k)+PaN_F(:,k)-PaNF;
 			N_AC(:,k+1)=N_AC(:,k)+PaN_C(:,k)-PaNC;
-
+			
 			%***********************************************************************%
 			%Simulation for every TC timestep (interval of the connectivity sampling)
 			%***********************************************************************%
@@ -204,48 +208,54 @@ for n=1:n_end
 				, 1, TC );
 
 
+
 				%*********************** debuging part ***********************%
 
 				%reset the files
 
-				if k==1
-					a=fopen("debugging_N_rob.txt","w");
-					fclose(a);
-					a=fopen("debugging_N_change.txt","w");
-					fclose(a);
-				end
-
-				deb = fopen("debugging_N_rob.txt","a+");
-
-				fprintf(deb,"step : %d\n",k);
-				a1=[N_Fbar(:,k) N_F(:,k) N_AF(:,k) N_Cbar(:,k) N_C(:,k) N_AC(:,k)];
-				a11=[a1 a1(:,1)+a1(:,4)];
-				for i=1:N_rob
-					for j=1:size(a1)(2)
-						fprintf(deb,'%d\t', a1(i,j));
-					end
-					fprintf(deb,'\n');
-				end
-				fprintf(deb,'%d\n\n',sum(a1(:,size(a1)(2))));
-				fclose(deb);
-
-				deb=fopen("debugging_N_change.txt","a+");
-				fprintf(deb,"step : %d\n",k);
-				a2=[ N_Fbar(:,k) PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k) N_Cbar(:,k) PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k)];
-				a2=[a2 a2(:,1)+a2(:,5)];
-				for i=1:N_rob
-					for j=1:size(a2)(2)
-						fprintf(deb,'%d\t', a2(i,j));
-					end
-					fprintf(deb,'\n');
-				end
-				fprintf(deb,'%d\n\n',sum(a2(:,size(a2)(2))));
-				fclose(deb);
-
-				%pause();
+				%~ if k==1
+					%~ a=fopen("debugging_N_rob.txt","w");
+					%~ fclose(a);
+					%~ a=fopen("debugging_N_change.txt","w");
+					%~ fclose(a);
+				%~ end
+				%~ 
+				%~ deb = fopen("debugging_N_rob.txt","a+");
+				%~ 
+				%~ fprintf(deb,"step : %d\n",k);
+				%~ a1=[N_Fbar(:,k) N_F(:,k) N_AF(:,k) N_Cbar(:,k) N_C(:,k) N_AC(:,k)];
+				%~ a11=[a1 a1(:,1)+a1(:,4)];
+				%~ for i=1:N_rob
+					%~ for j=1:size(a1)(2)
+						%~ fprintf(deb,'%d\t', a1(i,j));
+					%~ end
+					%~ fprintf(deb,'\n');
+				%~ end
+				%~ fprintf(deb,'%d\n\n',sum(a1(:,size(a1)(2))));
+				%~ fclose(deb);
+				%~ 
+				%~ deb=fopen("debugging_N_change.txt","a+");
+				%~ fprintf(deb,"step : %d\n",k);
+				%~ a2=[ N_Fbar(:,k) PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k) N_Cbar(:,k) PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k)];
+				%~ a2=[a2 a2(:,1)+a2(:,5)];
+				%~ for i=1:N_rob
+					%~ for j=1:size(a2)(2)
+						%~ fprintf(deb,'%d\t', a2(i,j));
+					%~ end
+					%~ fprintf(deb,'\n');
+				%~ end
+				%~ fprintf(deb,'%d\n\n',sum(a2(:,size(a2)(2))));
+				%~ fclose(deb);
+				%~ 
+				%~ %pause();
 
 				%************************** end debugging part **************************%
 			end
+
+			% # of robots in Forwar and in Coherence state
+			N_F(:,k+1)=N_Fbar(:,k+1)-N_AF(:,k+1);
+			N_C(:,k+1)=N_Cbar(:,k+1)-N_AC(:,k+1);
+
 		end
 
 	end
@@ -268,8 +278,8 @@ end
 m_N_F = mean(mean( N_F_f, 2),3) ;
 m_N_Fbar = mean( mean(N_Fbar_f,2),3) ;
 m_N_C = mean( mean( N_C_f,2),3) ;
-m_N_Cbar = mean( mean(N_C_f,2),3) ;
-m_N_A = mean ( mean( N_AC_f + N_AC_f,2),3);
+m_N_Cbar = mean( mean(N_Cbar_f,2),3) ;
+m_N_A = mean ( mean( N_AC_f + N_AF_f,2),3);
 m_N_T = mean ( mean(N_Fbar_f+N_Cbar_f,2),3);
 
 s_N_F = std( mean( N_F_f, 2 ), 0, 3 ) ;
@@ -311,23 +321,20 @@ s_N_T = std( mean(N_Fbar_f + N_Cbar_f, 2 ), 0, 3 ) ;
 % std_sum_N = std( sum_N, 0, 3 ) ;
 
 %***********************************************************%
-% Plot of the figures
+% Plot of the figure(s)
 %***********************************************************%
 
-%y=[ mean( mean_N_F,2 ) , mean( mean_N_C, 2 ) , mean( mean_N_AC + mean_N_AF,2 ) , mean_sum_N] ;
-y=[ m_N_F, m_N_C, m_N_A, m_N_T];
-%TODO: check the definition of standart deviation (not an linear operator)
-%e=[ mean( std_N_F, 2 ) , mean( std_N_C, 2 ) , mean( std_N_AC + std_N_AF, 2) , std_sum_N ] ;
-e=[ s_N_F, s_N_C, s_N_A, s_N_T	];
-%e(end+1,:)=sum(e);
+
+y=[ m_N_F, m_N_C, m_N_A, m_N_T ];
+e=[ s_N_F, s_N_C, s_N_A, s_N_T ];
+
 
 lab=['rgbk'];
 symb=['+ox*'];
 
 figure();
 hold('on');
-title('Average Number of robots per state and number of connections')
-% h=errorbar(y,e)
+ht=title('Average Number of robots per state and number of connections')
 for i=1:size(y, 2)
 	h(i)=errorbar([0:9], y(:,i), e(:,i), [ '-' symb(i) lab(i) ] );
 end
@@ -335,5 +342,7 @@ legend('Forward', 'Coherence', 'Avoidance', 'Total');
 xlabel('N of connections');
 ylabel('N of robots per state');
 axis([0 9, 0 3]);
+set(h,'linewidth',1.5);
+set(ht,'fontsize',16);
 grid('on');
 hold('off');
