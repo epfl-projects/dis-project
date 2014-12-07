@@ -8,9 +8,9 @@ function robotsPerNeighbors = experiment_stats(simulation)
 %     The two avoidance subsumed states are merged into one. The last
 %     column counts regardless of the state.
 
-    NUM_STATES = 4;
     nRobots = size(simulation, 2) - 2;
     nTimesteps = length(unique(simulation(:, 1)));
+    nStates = length(unique(simulation(:, 2)));
 
     % Overall repartition of time spent in the different states
     %averageRobotsPerState = sum(simulation(:, 2:5)) ./ nTimesteps;
@@ -18,8 +18,8 @@ function robotsPerNeighbors = experiment_stats(simulation)
 
     % Average number of robots having each number of
     % neighbors (one curve for each state)
-    robotsPerNeighbors = zeros(nRobots, NUM_STATES);
-    for i = 0:(NUM_STATES-1)
+    robotsPerNeighbors = zeros(nRobots, nStates);
+    for i = 0:(nStates-1)
         % Select lines about this state
         thisState = simulation(simulation(:, 2) == i, 3:end);
         robotsPerNeighbors(:, i+1) = sum(thisState, 1)' ./ nTimesteps;
