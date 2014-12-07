@@ -193,7 +193,11 @@ void sendMessage(char const * message) {
 
 
 void broadcast() {
-  sendMessage(robotName); // broadcast robotName
+  // Setup inter-robot, imperfect communication
+  wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL);
+  wb_emitter_set_range(emitterTag, COMM_RADIUS);
+
+  sendMessage(robotName);
 }
 
 
@@ -230,18 +234,8 @@ void sendStateToSupervisor() {
   char message[100];
 
   // since only two states FORWARD and COHERENCE are effectively used in addition to the boolean variable AVOIDANCE, adapt states
-  // State controller_state = currentState;
-  // if (AVOIDANCE) {
-  //   if (currentState == FORWARD)
-  //     controller_state = FORWARD_AVOIDANCE;
-  //   else if (currentState == COHERENCE)
-  //     controller_state = COHERENCE_AVOIDANCE;
-  // }
   sprintf(message, "%s %d %d", robotName, AVOIDANCE ? currentState + 1 : currentState, k);
   sendMessage(message);
-  // Back to the inter-robot, imperfect communication
-  wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL);
-  wb_emitter_set_range(emitterTag, COMM_RADIUS);
 }
 
 
@@ -253,8 +247,8 @@ void sendStateToSupervisor() {
 
 void run(){
 
-  static int time_step_counter = 0;
-  time_step_counter++;
+  static int timestepCounter = 0;
+  timestepCounter++;
 
   // Move
   move();
@@ -273,8 +267,8 @@ void run(){
       setState(FORWARD);
   }
 
-  if(time_step_counter >= 20) { // every 50 time step
-
+  // Rate limiting
+  if(timestepCounter >= COMMUNICATION_PERIOD) {
     // printf("robot %s is broadcasting\n", robotName);
     broadcast();
     listen(); // ! going to listen to pings from previous step (50 time step in the past)
@@ -292,8 +286,13 @@ void run(){
     }
 
 
-    time_step_counter = 0; // reset time step counter
+    timestepCounter = 0; // reset time step counter
 
+  }
+  // Send logging info to the supervisor
+  // It needs to be done in a different timestep, otherwise
+  // the channel & range switching come in conflict
+  else if(timestepCounter == (COMMUNICATION_PERIOD / 2) && LOG_EXPERIMENT) {
     sendStateToSupervisor();
   }
 }

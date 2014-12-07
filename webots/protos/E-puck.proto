@@ -824,6 +824,7 @@ DifferentialWheels {
         0 4095 0.01
         0.2 0 0.01
       ]
+      occlusion TRUE
     }
     DEF EPUCK_LS1 LightSensor {
       translation 0.025 0.0329 -0.022
@@ -833,6 +834,7 @@ DifferentialWheels {
         0 4095 0.01
         0.2 0 0.01
       ]
+      occlusion TRUE
     }
     DEF EPUCK_LS2 LightSensor {
       translation 0.031 0.0329 0
@@ -841,6 +843,7 @@ DifferentialWheels {
         0 4095 0.01
         0.2 0 0.01
       ]
+      occlusion TRUE
     }
     DEF EPUCK_LS3 LightSensor {
       translation 0.015 0.0329 0.03
@@ -850,6 +853,7 @@ DifferentialWheels {
         0 4095 0.01
         0.2 0 0.01
       ]
+      occlusion TRUE
     }
     DEF EPUCK_LS4 LightSensor {
       translation -0.015 0.0329 0.03
@@ -859,6 +863,7 @@ DifferentialWheels {
         0 4095 0.01
         0.2 0 0.01
       ]
+      occlusion TRUE
     }
     DEF EPUCK_LS5 LightSensor {
       translation -0.031 0.0329 0
@@ -868,6 +873,7 @@ DifferentialWheels {
         0 4095 0.01
         0.2 0 0.01
       ]
+      occlusion TRUE
     }
     DEF EPUCK_LS6 LightSensor {
       translation -0.025 0.0329 -0.022
@@ -877,6 +883,7 @@ DifferentialWheels {
         0 4095 0.01
         0.2 0 0.01
       ]
+      occlusion TRUE
     }
     DEF EPUCK_LS7 LightSensor {
       translation -0.01 0.0329 -0.03
@@ -886,6 +893,7 @@ DifferentialWheels {
         0 4095 0.01
         0.2 0 0.01
       ]
+      occlusion TRUE
     }
     DEF EPUCK_LED0 LED {
       translation 0 0.041 -0.0335

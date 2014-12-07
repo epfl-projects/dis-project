@@ -16,14 +16,7 @@ Background {
     0.4 0.7 1
   ]
 }
-PointLight {
-  intensity 0.5
-  location 0.14 0.6 -0.55
-}
-PointLight {
-  intensity 0.5
-  location -0.43 0.6 0.5
-}
+
 DEF ground Solid {
   translation 0.0108903 -0.0001 0.0108139
   children [
@@ -131,14 +124,14 @@ DEF E_PUCK_10 E-puck {
 }
 
 
+
 DEF BEACON1 Charger {
-  translation 1.0 0 0
+  translation 10.0 0 0
   children [
     Solid {
-      translation 0 0.05 0
+      translation 0 0 0
       children [
         PointLight {
-          attenuation 1 0 10
         }
         Shape {
           appearance Appearance {

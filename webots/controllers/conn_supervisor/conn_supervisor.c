@@ -66,28 +66,6 @@ void change_robot_positions(){
   }
 }
 
-void reset(void) {
-  int i;
-  char stringaux[20];
-
-  for(i=0;i<NUM_ROBOTS;i++){
-    sprintf(stringaux,"E_PUCK_%d",i+1);
-    epucks[i]=wb_supervisor_node_get_from_def(stringaux);
-    locfield[i]=wb_supervisor_node_get_field(epucks[i],"translation");
-  }
-
-  srand(time(NULL));
-  change_robot_positions();
-
-  finalTime = wb_robot_get_time() + EXP_TIME; // 15 MIN == 900
-
-
-  // Configure receiver device
-  receiverTag = wb_robot_get_device("receiver");
-  wb_receiver_enable(receiverTag, TIME_STEP);
-  wb_receiver_set_channel(receiverTag, COMMUNICATION_CHANNEL_STAT);
-}
-
 /* **************************** LOGGING **************************** */
 int nReceived = 0;
 int robotsStates[NUM_ROBOTS];
@@ -115,15 +93,55 @@ void createNewLogFile() {
 
   FILE * logFile = fopen(filename, "w+");
   // Specify CSV columns' title
-  fprintf(logFile, "Time, Robot ID, Robot state, Number of neighbors\n");
+  if(LOG_DETAILS) {
+    // There will be one line per robot
+    fprintf(logFile, "Time, Robot ID, Robot state, Number of neighbors\n");
+  }
+  else {
+    // All info for a given timestep will be summarized in one line per state
+    // Columns:
+    //   Time, State, 0 neighbors, 1 neighbors, ..., (N-1) neighbors
+    fprintf(logFile, "Time, State");
+    for(int i = 0; i < NUM_ROBOTS; ++i)
+      fprintf(logFile, ", %d neighbors", i);
+
+    fprintf(logFile, "\n");
+  }
   fclose(logFile);
 }
+
 void writeStats() {
   FILE * logFile = fopen(filename, "a+");
-  for(int i = 0; i < NUM_ROBOTS; ++i) {
-    fprintf(logFile, "%f, %d, %d, %d\n", wb_robot_get_time(), i, robotsStates[i], robotsNeighborsCount[i]);
+
+  // Detailed format
+  if(LOG_DETAILS) {
+    for(int i = 0; i < NUM_ROBOTS; ++i) {
+      fprintf(logFile, "%f, %d, %d, %d\n", wb_robot_get_time(), i, robotsStates[i], robotsNeighborsCount[i]);
+    }
+    fprintf(logFile, "\n");
   }
-  fprintf(logFile, "\n");
+  // Summarized format
+  else {
+    int countPerNeighborsPerState[NUM_STATES][NUM_ROBOTS];
+    for(int i = 0; i < NUM_STATES; ++i)
+      memset(countPerNeighborsPerState[i], 0, sizeof(countPerNeighborsPerState[i]));
+
+    // Aggregate stats
+    for(int i = 0; i < NUM_ROBOTS; ++i) {
+      countPerNeighborsPerState[robotsStates[i]][robotsNeighborsCount[i]]++;
+    }
+
+    // For each state
+    for(int i = 0; i < NUM_STATES; ++i) {
+      fprintf(logFile, "%f, %d", wb_robot_get_time(), i);
+      // Number of robots in this state having `j` neighbors
+      for(int j = 0; j < NUM_ROBOTS; ++j) {
+        fprintf(logFile, ", %d", countPerNeighborsPerState[i][j]);
+      }
+      fprintf(logFile, "\n");
+    }
+    fprintf(logFile, "\n");
+  }
   fclose(logFile);
 }
 
@@ -161,7 +179,7 @@ void receiveRobotsStates() {
       separatorPosition++;
     robotsNeighborsCount[robotId] = (int)strtol(stats + separatorPosition, NULL, 10);
 
-    // printf("%d %d %d\n", robotId, robotsStates[robotId], robotsNeighborsCount[robotId]);
+    // printf("Robot %d, state %d, neighbors %d\n", robotId, robotsStates[robotId], robotsNeighborsCount[robotId]);
 
     wb_receiver_next_packet(receiverTag);
   }
@@ -176,20 +194,49 @@ void receiveRobotsStates() {
 }
 
 /* **************************** RUN ******************************* */
-void run() {
-  // End of the experiment
-  if(wb_robot_get_time() > finalTime){
-    wb_supervisor_simulation_revert();
+void reset(void) {
+  int i;
+  char stringaux[20];
+
+  for(i=0;i<NUM_ROBOTS;i++){
+    sprintf(stringaux,"E_PUCK_%d",i+1);
+    epucks[i]=wb_supervisor_node_get_from_def(stringaux);
+    locfield[i]=wb_supervisor_node_get_field(epucks[i],"translation");
   }
 
-  receiveRobotsStates();
+  srand(time(NULL));
+  change_robot_positions();
+
+  finalTime = wb_robot_get_time() + EXP_TIME; // 15 MIN == 900
+
+  // Configure receiver device
+  receiverTag = wb_robot_get_device("receiver");
+  wb_receiver_enable(receiverTag, TIME_STEP);
+  wb_receiver_set_channel(receiverTag, COMMUNICATION_CHANNEL_STAT);
+
+  resetLogs();
+}
+
+void run() {
+  // End of the experiment
+  if(wb_robot_get_time() >= finalTime){
+    printf("Experiment concluded at time %f.\n", wb_robot_get_time());
+    // TODO: make sure to clean every variables
+    wb_supervisor_simulation_revert();
+  }
+  if(LOG_EXPERIMENT) {
+    receiveRobotsStates();
+  }
 }
 
 
 int main(int argc, char *argv[]) {
   /* initialize Webots */
   wb_robot_init();
-  createNewLogFile();
+
+  if(LOG_EXPERIMENT) {
+    createNewLogFile();
+  }
 
   reset();
 
