@@ -120,8 +120,18 @@ void createNewLogFile() {
     fprintf(logFile, "Time, Robot ID, Robot state, Number of neighbors\n");
   }
   else {
-    // Robot's info will be summarized in one line
-    fprintf(logFile, "Time, Number of state 0, Number of state 1, Number of state 2, Number of state 3\n");
+    // All info for a given timestep will be summarized in one line
+    // Columns:
+    //   Time,
+    //   State 0, State 1, ..., State (NUM_STATES-1),
+    //   0 neighbors, 1 neighbors, ..., (N-1) neighbors
+    fprintf(logFile, "Time");
+    for(int i = 0; i < NUM_STATES; ++i)
+      fprintf(logFile, ", State %d", i);
+    for(int i = 0; i < NUM_ROBOTS; ++i)
+      fprintf(logFile, ", %d neighbors", i);
+
+    fprintf(logFile, "\n");
   }
   fclose(logFile);
 }
@@ -134,16 +144,31 @@ void writeStats() {
     for(int i = 0; i < NUM_ROBOTS; ++i) {
       fprintf(logFile, "%f, %d, %d, %d\n", wb_robot_get_time(), i, robotsStates[i], robotsNeighborsCount[i]);
     }
+    fprintf(logFile, "\n");
   }
   // Summarized format
   else {
     int countPerState[4] = { 0, 0, 0, 0 };
+    int countPerNeighbors[NUM_ROBOTS];
+    memset(countPerNeighbors, 0, sizeof(countPerNeighbors));
+
+    // Aggregate stats
     for(int i = 0; i < NUM_ROBOTS; ++i) {
       countPerState[robotsStates[i]]++;
+      countPerNeighbors[robotsNeighborsCount[i]]++;
     }
-    fprintf(logFile, "%f, %d, %d, %d, %d\n", wb_robot_get_time(), countPerState[0], countPerState[1], countPerState[2], countPerState[3]);
+
+    // Time
+    fprintf(logFile, "%f", wb_robot_get_time());
+    // Number of robots per state
+    for(int i = 0; i < NUM_STATES; ++i)
+      fprintf(logFile, ", %d", countPerState[i]);
+    // Number of robots having `i` neighbors
+    for(int i = 0; i < NUM_ROBOTS; ++i)
+      fprintf(logFile, ", %d", countPerNeighbors[i]);
+
+    fprintf(logFile, "\n");
   }
-  fprintf(logFile, "\n");
   fclose(logFile);
 }
 
@@ -181,7 +206,7 @@ void receiveRobotsStates() {
       separatorPosition++;
     robotsNeighborsCount[robotId] = (int)strtol(stats + separatorPosition, NULL, 10);
 
-    printf("Robot %d, state %d, neighbors %d\n", robotId, robotsStates[robotId], robotsNeighborsCount[robotId]);
+    // printf("Robot %d, state %d, neighbors %d\n", robotId, robotsStates[robotId], robotsNeighborsCount[robotId]);
 
     wb_receiver_next_packet(receiverTag);
   }
@@ -189,7 +214,7 @@ void receiveRobotsStates() {
   // Done receiving all robots states for this timestep
   if(nReceived == NUM_ROBOTS) {
     writeStats();
-    printf("Received %d messages at time %f\n", nReceived, wb_robot_get_time());
+    // printf("Received %d messages at time %f\n", nReceived, wb_robot_get_time());
 
     resetLogs();
   }

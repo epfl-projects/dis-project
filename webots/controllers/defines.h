@@ -45,5 +45,7 @@
  * the subsumed AVOIDANCE state.
  */
 typedef enum {FORWARD = 0, COHERENCE = 2} State;
+/** Total number of states */
+#define NUM_STATES 4
 
 #endif
