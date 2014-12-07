@@ -120,14 +120,10 @@ void createNewLogFile() {
     fprintf(logFile, "Time, Robot ID, Robot state, Number of neighbors\n");
   }
   else {
-    // All info for a given timestep will be summarized in one line
+    // All info for a given timestep will be summarized in one line per state
     // Columns:
-    //   Time,
-    //   State 0, State 1, ..., State (NUM_STATES-1),
-    //   0 neighbors, 1 neighbors, ..., (N-1) neighbors
-    fprintf(logFile, "Time");
-    for(int i = 0; i < NUM_STATES; ++i)
-      fprintf(logFile, ", State %d", i);
+    //   Time, State, 0 neighbors, 1 neighbors, ..., (N-1) neighbors
+    fprintf(logFile, "Time, State");
     for(int i = 0; i < NUM_ROBOTS; ++i)
       fprintf(logFile, ", %d neighbors", i);
 
@@ -148,25 +144,24 @@ void writeStats() {
   }
   // Summarized format
   else {
-    int countPerState[4] = { 0, 0, 0, 0 };
-    int countPerNeighbors[NUM_ROBOTS];
-    memset(countPerNeighbors, 0, sizeof(countPerNeighbors));
+    int countPerNeighborsPerState[NUM_STATES][NUM_ROBOTS];
+    for(int i = 0; i < NUM_STATES; ++i)
+      memset(countPerNeighborsPerState[i], 0, sizeof(countPerNeighborsPerState[i]));
 
     // Aggregate stats
     for(int i = 0; i < NUM_ROBOTS; ++i) {
-      countPerState[robotsStates[i]]++;
-      countPerNeighbors[robotsNeighborsCount[i]]++;
+      countPerNeighborsPerState[robotsStates[i]][robotsNeighborsCount[i]]++;
     }
 
-    // Time
-    fprintf(logFile, "%f", wb_robot_get_time());
-    // Number of robots per state
-    for(int i = 0; i < NUM_STATES; ++i)
-      fprintf(logFile, ", %d", countPerState[i]);
-    // Number of robots having `i` neighbors
-    for(int i = 0; i < NUM_ROBOTS; ++i)
-      fprintf(logFile, ", %d", countPerNeighbors[i]);
-
+    // For each state
+    for(int i = 0; i < NUM_STATES; ++i) {
+      fprintf(logFile, "%f, %d", wb_robot_get_time(), i);
+      // Number of robots in this state having `j` neighbors
+      for(int j = 0; j < NUM_ROBOTS; ++j) {
+        fprintf(logFile, ", %d", countPerNeighborsPerState[i][j]);
+      }
+      fprintf(logFile, "\n");
+    }
     fprintf(logFile, "\n");
   }
   fclose(logFile);
@@ -224,8 +219,9 @@ void receiveRobotsStates() {
 
 void run() {
   // End of the experiment
-  if(wb_robot_get_time() > finalTime){
+  if(wb_robot_get_time() >= finalTime){
     printf("Experiment concluded at time %f.\n", wb_robot_get_time());
+    // TODO: make sure to clean every variables
     wb_supervisor_simulation_revert();
   }
   if(LOG_EXPERIMENT) {
