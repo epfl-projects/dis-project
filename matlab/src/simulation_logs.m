@@ -15,6 +15,10 @@ nStates = 4;
 nRobots = 10;
 alpha = 4;
 
+% Number of initial timesteps to skip
+% (making sure our system has reached its stable state)
+skipped = 10;
+
 pattern = [logsDirectory, '/simulation-', int2str(nRobots), '-alpha', int2str(alpha), '-*.csv'];
 filenames = dir(pattern);
 nExperiments = size(filenames, 1);
@@ -22,7 +26,7 @@ nExperiments = size(filenames, 1);
 % TODO: average over experiments (with error bars)
 stats = zeros(nRobots, nStates, nExperiments);
 for i = 1:nExperiments
-    simulation = csvread([logsDirectory, '/', filenames(i).name], 1, 0);
+    simulation = csvread([logsDirectory, '/', filenames(i).name], skipped + 1, 0);
     % TODO: use only data starting *after* the steady state has been reached
     nTimesteps = length(unique(simulation(:, 1)));
     stats(:, :, i) = experiment_stats(simulation);
