@@ -15,7 +15,7 @@ clearvars;
 logsDirectory = '../data';
 nStates = 4;
 nRobots = 40;
-alpha = 10;
+alpha = 15;
 
 % Number of initial timesteps to skip
 % (making sure our system has reached its stable state)
