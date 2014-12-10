@@ -83,19 +83,26 @@ for n=1:n_end
 		% # of robots which enter in avoidance from forward state
 
 		% # of robots which entered in avoidance from forward state
-		PaN_F(:,k) = test_prob( Pa, N_F(:,k) );
+		PaN_F(:,k) = Pa .* N_F(:,k);
 
 		% # of robots which entered in avoidance from coherence state
-		PaN_C(:,k) = test_prob( Pa, N_C(:,k) );
+		PaN_C(:,k) = Pa .* N_C(:,k);
 
 		%this part need only to be calculate every TC timestep
 	%
 		% # of robots which fail to recover / recover / lost a connection from coherence state
-		[PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k) ] = test_prob( Pf, Pr, Pla, N_Cbar(:,k) );
+		%[PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k) ] = test_prob( Pf, Pr, Pla, N_Cbar(:,k) );
+		PfN_Cbar(:,k)=Pf .* N_Cbar(:,k);
+		PrN_Cbar(:,k)=Pr .* N_Cbar(:,k);
+		PlaN_Cbar(:,k)=Pla .* N_Cbar(:,k);
 
 		% # of robots which gain / lost (/ "the rest") a connection from forward state
-		[PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k)] =  test_prob( Pg, Pl , N_Fbar(:,k) );
+		%[PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k)] =  test_prob( Pg, Pl , N_Fbar(:,k) );
+		PgN_Fbar(:,k)=Pg .* N_Fbar(:,k);
+		PlN_Fbar(:,k)=Pl .* N_Fbar(:,k);
+		restN_Fbar(:,k)=(1-Pg-Pl) .* N_Fbar(:,k) ;
 	%
+
 
 	% # of robots in Forwar and in Coherence state
 	%N_F(:,k)=N_Fbar(:,k)-N_AF(:,k);
@@ -112,11 +119,11 @@ for n=1:n_end
 
 
 		if k<k_end
-			
+
 			%PaNC could be the source of the negative terms (observed on N_C)
 			N_AF(:,k+1)=N_AF(:,k)+PaN_F(:,k)-PaNF;
 			N_AC(:,k+1)=N_AC(:,k)+PaN_C(:,k)-PaNC;
-			
+
 			%***********************************************************************%
 			%Simulation for every TC timestep (interval of the connectivity sampling)
 			%***********************************************************************%
@@ -153,7 +160,7 @@ for n=1:n_end
 					+ PrN_Cbar(i-1,k) ...
 					- PgN_Fbar(i,k) ...
 					- PlN_Fbar(i,k) ...
-				, 1, TC );
+			 	, 1, TC );
 
 				%for alpha+1 to max connections -1 connections
 				for i=alpha+2:dmax-1
@@ -219,9 +226,9 @@ for n=1:n_end
 					%~ a=fopen("debugging_N_change.txt","w");
 					%~ fclose(a);
 				%~ end
-				%~ 
+				%~
 				%~ deb = fopen("debugging_N_rob.txt","a+");
-				%~ 
+				%~
 				%~ fprintf(deb,"step : %d\n",k);
 				%~ a1=[N_Fbar(:,k) N_F(:,k) N_AF(:,k) N_Cbar(:,k) N_C(:,k) N_AC(:,k)];
 				%~ a11=[a1 a1(:,1)+a1(:,4)];
@@ -233,7 +240,7 @@ for n=1:n_end
 				%~ end
 				%~ fprintf(deb,'%d\n\n',sum(a1(:,size(a1)(2))));
 				%~ fclose(deb);
-				%~ 
+				%~
 				%~ deb=fopen("debugging_N_change.txt","a+");
 				%~ fprintf(deb,"step : %d\n",k);
 				%~ a2=[ N_Fbar(:,k) PgN_Fbar(:,k) PlN_Fbar(:,k) restN_Fbar(:,k) N_Cbar(:,k) PfN_Cbar(:,k) PrN_Cbar(:,k) PlaN_Cbar(:,k)];
@@ -246,7 +253,7 @@ for n=1:n_end
 				%~ end
 				%~ fprintf(deb,'%d\n\n',sum(a2(:,size(a2)(2))));
 				%~ fclose(deb);
-				%~ 
+				%~
 				%~ %pause();
 
 				%************************** end debugging part **************************%
@@ -275,19 +282,19 @@ end
 %**********************************************************%
 
 %
-m_N_F = mean(mean( N_F_f, 2),3) ;
-m_N_Fbar = mean( mean(N_Fbar_f,2),3) ;
-m_N_C = mean( mean( N_C_f,2),3) ;
-m_N_Cbar = mean( mean(N_Cbar_f,2),3) ;
-m_N_A = mean ( mean( N_AC_f + N_AF_f,2),3);
-m_N_T = mean ( mean(N_Fbar_f+N_Cbar_f,2),3);
+m_N_F = mean( mean( N_F_f, 2 ),3 ) ;
+m_N_Fbar = mean( mean( N_Fbar_f, 2 ), 3 ) ;
+m_N_C = mean( mean( N_C_f, 2 ), 3 ) ;
+m_N_Cbar = mean( mean( N_Cbar_f, 2 ), 3 ) ;
+m_N_A = mean ( mean( N_AC_f + N_AF_f, 2 ), 3 );
+m_N_T = mean ( mean( N_Fbar_f + N_Cbar_f, 2 ), 3 );
 
 s_N_F = std( mean( N_F_f, 2 ), 0, 3 ) ;
-s_N_Fbar= std( mean(N_Fbar_f, 2 ), 0, 3 ) ;
-s_N_C = std( mean(N_C_f, 2), 0, 3 ) ;
-s_N_Cbar = std( mean(N_Cbar_f, 2 ), 0, 3 );
-s_N_A = std( mean(N_AC_f + N_AC_f,2), 0, 3 ) ;
-s_N_T = std( mean(N_Fbar_f + N_Cbar_f, 2 ), 0, 3 ) ;
+s_N_Fbar= std( mean( N_Fbar_f, 2 ), 0, 3 ) ;
+s_N_C = std( mean( N_C_f, 2), 0, 3 ) ;
+s_N_Cbar = std( mean( N_Cbar_f, 2 ), 0, 3 );
+s_N_A = std( mean( N_AC_f + N_AC_f,2 ), 0, 3 ) ;
+s_N_T = std( mean( N_Fbar_f + N_Cbar_f, 2 ), 0, 3 ) ;
 
 % mean_N_F = mean( N_F_f, 3 ) ;
 % mean_N_AF = mean( N_AF_f, 3 ) ;
@@ -334,7 +341,7 @@ symb=['+ox*'];
 
 figure();
 hold('on');
-ht=title('Average Number of robots per state and number of connections')
+ht=title('Average Number of robots per state and number of connections');
 for i=1:size(y, 2)
 	h(i)=errorbar([0:9], y(:,i), e(:,i), [ '-' symb(i) lab(i) ] );
 end
