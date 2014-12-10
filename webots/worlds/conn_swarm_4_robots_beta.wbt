@@ -25,19 +25,20 @@ DEF ground Solid {
         material Material {
           ambientIntensity 1
           diffuseColor 1 1 1
-          emissiveColor 0.823529 0.6 0.34902
+          emissiveColor 0.9 0.9 1
           shininess 0
-          specularColor 0.196078 0.196078 0
+          specularColor 1 1 1
         }
         texture ImageTexture {
           url [
-            "textures/lightwood.png"
+            "textures/texture_grid.png"
           ]
         }
         textureTransform TextureTransform {
           center 0.46 0
-          rotation -0.32
-          translation -1.01 0
+          rotation 0
+          translation -1.0 0
+          scale 15 15
         }
       }
       geometry DEF ground_geo IndexedFaceSet {
