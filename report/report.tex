@@ -5,7 +5,7 @@
 % See the \addtolength command later in the file to balance the column lengths
 % on the last page of the document
 
-%\usepackage{graphics} % for pdf, bitmapped graphics files
+\usepackage{graphicx} % for pdf, bitmapped graphics files
 %\usepackage{epsfig}   % for postscript graphics files
 %\usepackage{mathptmx} % assumes new font selection scheme installed
 %\usepackage{times}    % assumes new font selection scheme installed
@@ -31,25 +31,63 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
+  Short, but concise description of your project and results.
   Here's how to reference articles from the bibliography: \cite{Nembrini02} and \cite{Winfield08}.
-  Short, but concise description of your project and results
 \end{abstract}
 
 \section{Introduction}
-  brief description of your project and why it is interesting (with citations)
+  TODO: brief description of your project and why it is interesting (with citations)\\
+
+  Define Swarm Robotics. Describe the Coherent Swarming problem.\\
+
+  Present the Alpha algorithm (solution proposed by \cite{Nembrini02}). Present Beta algorithm.
+
+  Define Multilevel modeling (3 levels). Explain the advantages / usage of macroscopic modeling. Present solution proposed by \cite{Winfield08}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Experiments}
-  what you did in your project
+  TODO: what you did in your project\\
+
+  \subsection{Experimental setup}
+  Webots software, arena. E-puck robot: which sensors, which abilities. Communication model (range and delays). No noise used on messages.\\
+
+  \subsection{Experimental parameters}
+  We summarize below the parameters used in our simulations.
+
+  \begin{table}[h]
+    \begin{center}
+      \begin{tabular}{r|c}
+        Parameter name & Value (unit)
+      \end{tabular}
+      \caption{TODO: Experimental parameters}
+    \end{center}
+  \end{table}
+
+  \subsection{Implementation}
+  Implemented in C in Webots. Automatic simulation logging.\\
+
+  \subsection{Macroscopic model}
+  Implementation of the differential equations in Matlab.\\
+  Then, calibration of the probabilities from the simulation's results.
 
 \section{Results}
-  what you discovered (you may want to include tables or plots here)
+  TODO: what you discovered (you may want to include tables or plots here)\\
+
+  \begin{figure}[h]
+    \begin{center}
+      \includegraphics[width=8cm]{figures/simulation-10-alpha4.pdf}
+      \includegraphics[width=8cm]{figures/simulation-40-alpha10.pdf}
+      \caption{TODO: simulation VS macroscopic model for $\alpha = 5$, $10$ and $15$}
+    \end{center}
+  \end{figure}
+
+  We were able to reproduce the results of \cite{Winfield08}. Compare simulation VS macroscopic.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Conclusion}
-  summary and implications of your findings
+  TODO: summary and implications of your findings
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
