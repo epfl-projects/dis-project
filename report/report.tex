@@ -49,6 +49,9 @@
 \section{Experiments}
   TODO: what you did in your project\\
 
+  \subsection{State machine}
+  Present the controller's states. Explain the transitions. Explain the obstacle avoidance behavior (Braitenberg's controller).
+
   \subsection{Experimental setup}
   Webots software, arena. E-puck robot: which sensors, which abilities. Communication model (range and delays). No noise used on messages.\\
 
@@ -57,15 +60,27 @@
 
   \begin{table}[h]
     \begin{center}
-      \begin{tabular}{r|c}
-        Parameter name & Value (unit)
+      \begin{tabular}{r|ll}
+        \hline
+        Parameter                  & Value               & Unit\\
+        \hline
+        Experiment duration        & $1000$              & seconds\\
+        Number of agents           & $40$                & robots\\
+        $\alpha$                   & $5$, $10$ and $15$  & neighbors\\
+        $\beta$                    & $5$                 & neighbors\\
+        Simulation timestep        & $64$                & milliseconds\\
+        $T$ (communication period) & $20$                & timesteps\\
+        $T_A$ (avoidance period)   & $5$                 & timesteps\\
+        $T_C$ (coherence period)   & $80$                & timesteps\\
+        Communication radius       & $0.7$               & meters\\
+        \hline
       \end{tabular}
-      \caption{TODO: Experimental parameters}
+      \caption{Experimental parameters}
     \end{center}
   \end{table}
 
   \subsection{Implementation}
-  Implemented in C in Webots. Automatic simulation logging.\\
+  Implemented in C in Webots. Automatic simulation logging at each communication step.\\
 
   \subsection{Macroscopic model}
   Implementation of the differential equations in Matlab.\\
