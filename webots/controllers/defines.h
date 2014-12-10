@@ -2,11 +2,11 @@
 #define CONN_SWARM_DEFINES
 
 // Simulation parameters
-#define EXP_TIME          10000 // Duration of the experiment (in seconds)
+#define EXP_TIME          1000 // Duration of the experiment (in seconds)
 #define TIME_STEP         25 // Simulation time step (ms), must be a multiple of basicTimeStep in WorldInfo
-#define NUM_ROBOTS        10 // Total number of robots in the scene
+#define NUM_ROBOTS        40 // Total number of robots in the scene
 // Alpha algorithm
-#define ALPHA                4 // Minimum number of neighbors to maintain
+#define ALPHA                15 // Minimum number of neighbors to maintain
 #define BETA				         5
 #define MAX_RANDOM_TURN      50 // Maximum value of the random turn (in degrees)
 #define MAX_COHERENCE_TIME   80 // Maximum number of timesteps spent in coherence state
@@ -27,8 +27,8 @@
 #define LOG_FILES_FOLDER "../../data"
 
 // Initial agents distribution parameters
-#define INITIAL_BOX_SIDE  50
-#define NEIGHBOURHOOD     5
+#define INITIAL_BOX_SIDE  70
+#define NEIGHBOURHOOD     7
 
 // AUXILIARY
 #define NB_SENSORS           8   // number of sensors
