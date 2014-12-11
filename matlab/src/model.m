@@ -40,22 +40,11 @@ Pf(alpha+1:N_rob)=0;
 Pla(alpha+1:N_rob)=0;
 Pla=ones(N_rob,1)-Pr-Pf;
 
-%*************************************%
-%Other simulation parameters
-%*************************************%
-
-%final variables to make the average and the standart deviation
-N_F_f=zeros(N_rob,k_end,n_end);
-N_AF_f=zeros(N_rob,k_end,n_end);
-N_Fbar_f=zeros(N_rob,k_end,n_end);
-N_C_f=zeros(N_rob,k_end,n_end);
-N_AC_f=zeros(N_rob,k_end,n_end);
-N_Cbar_f=zeros(N_rob,k_end,n_end);
 
 %*************************************%
 %Simulation
 %*************************************%
-for n=1:n_end
+%for n=1:n_end
 
 
 
@@ -267,65 +256,18 @@ for n=1:n_end
 
 	end
 
-	N_F_f(:,:,n) =  N_F ( 1:N_rob, 1:k_end ) ;
-	N_AF_f(:,:,n) = N_AF( 1:N_rob, 1:k_end ) ;
-	N_Fbar_f(:,:,n) = N_Fbar( 1:N_rob, 1:k_end ) ;
-	N_C_f(:,:,n) = N_C( 1:N_rob, 1:k_end ) ;
-	N_AC_f(:,:,n) = N_AC( 1:N_rob, 1:k_end ) ;
-	N_Cbar_f(:,:,n) = N_Cbar( 1:N_rob, 1:k_end ) ;
-
-end
 
 
 %**********************************************************%
-%mean and standard deviation over the number of simulations
+%mean over the number of steps
 %**********************************************************%
-
 %
-m_N_F = mean( mean( N_F_f, 2 ),3 ) ;
-m_N_Fbar = mean( mean( N_Fbar_f, 2 ), 3 ) ;
-m_N_C = mean( mean( N_C_f, 2 ), 3 ) ;
-m_N_Cbar = mean( mean( N_Cbar_f, 2 ), 3 ) ;
-m_N_A = mean ( mean( N_AC_f + N_AF_f, 2 ), 3 );
-m_N_T = mean ( mean( N_Fbar_f + N_Cbar_f, 2 ), 3 );
-
-s_N_F = std( mean( N_F_f, 2 ), 0, 3 ) ;
-s_N_Fbar= std( mean( N_Fbar_f, 2 ), 0, 3 ) ;
-s_N_C = std( mean( N_C_f, 2), 0, 3 ) ;
-s_N_Cbar = std( mean( N_Cbar_f, 2 ), 0, 3 );
-s_N_A = std( mean( N_AC_f + N_AC_f,2 ), 0, 3 ) ;
-s_N_T = std( mean( N_Fbar_f + N_Cbar_f, 2 ), 0, 3 ) ;
-
-% mean_N_F = mean( N_F_f, 3 ) ;
-% mean_N_AF = mean( N_AF_f, 3 ) ;
-% mean_N_Fbar = mean( N_Fbar_f, 3 );
-% mean_N_C = mean( N_C_f, 3 ) ;
-% mean_N_AC = mean( N_AC_f, 3 ) ;
-% mean_N_Cbar = mean( N_Cbar_f, 3) ;
-% mean_N_A = mean ( N_AC_f + N_AF_f, 3 ) ;
-%
-% std_N_F = std( N_F_f, 0, 3 ) ;
-% std_N_AF = std( N_AF_f, 0, 3 ) ;
-% std_N_Fbar = std( N_AF_f, 0, 3 ) ;
-% std_N_C = std( N_C_f, 0, 3 ) ;
-% std_N_AC = std( N_AC_f, 0, 3 ) ;
-% std_N_Cbar = std( N_Cbar_f, 0 ,3 ) ;
-% std_N_A = std( N_AC_f + N_AF_f, 0, 3 ) ;
-
-% TODO: double check the dimensions
-% sum_N = mean(sum(N_Fbar_f + N_Cbar_f),3);
-% sum_N2= mean(sum(N_AF_f + N_F_f + N_AC_f + N_C_f),3);
-%
-% if sum_N ~= sum_N2
-% 	error('the conservative proriety isn''t conserved !');
-% else
-% 	clear sum_N2;
-% end
-%
-% mean_sum_N = mean(mean_N_Fbar+mean_N_Cbar,2)
-% std_sum_N = std(mean_N_Fbar+mean_N_Cbar,0,2);
-% mean_sum_N = mean( sum_N, 3 ) ;
-% std_sum_N = std( sum_N, 0, 3 ) ;
+m_N_F = mean( N_F ,2 ) ;
+m_N_Fbar = mean( N_Fbar, 2 ) ;
+m_N_C = mean( N_C, 2 ) ;
+m_N_Cbar = mean( N_Cbar, 2 ) ;
+m_N_A = mean ( N_AC + N_AF, 2 );
+m_N_T = mean ( N_Fbar + N_Cbar, 2 );
 
 %***********************************************************%
 % Plot of the figure(s)
@@ -333,7 +275,6 @@ s_N_T = std( mean( N_Fbar_f + N_Cbar_f, 2 ), 0, 3 ) ;
 
 
 y=[ m_N_F, m_N_C, m_N_A, m_N_T ];
-e=[ s_N_F, s_N_C, s_N_A, s_N_T ];
 
 
 lab=['rgbk'];
@@ -341,9 +282,11 @@ symb=['+ox*'];
 
 figure();
 hold('on');
-ht=title('Average Number of robots per state and number of connections');
+ht=title('Macroscopic model : Number of robots per state and number of connections');
 for i=1:size(y, 2)
-	h(i)=errorbar([0:9], y(:,i), e(:,i), [ '-' symb(i) lab(i) ] );
+	%h(i)=errorbar([0:9], y(:,i), e(:,i), [ '-' symb(i) lab(i) ] );
+	h(i)=plot([0:9], y(:,i), [ '-' symb(i) lab(i) ] );
+
 end
 legend('Forward', 'Coherence', 'Avoidance', 'Total');
 xlabel('N of connections');
