@@ -8,8 +8,8 @@
 %   FORWARD_AVOIDANCE = 1,
 %   COHERENCE = 2,
 %   COHERENCE_AVOIDANCE = 3
-clearvars;
-
+%clearvars;
+clear all
 %% Configuration
 
 logsDirectory = '../data';
@@ -20,6 +20,12 @@ alpha = 15;
 % Number of initial timesteps to skip
 % (making sure our system has reached its stable state)
 skipped = 10;
+
+%TODO: check if it isn't right but there you skip only 10 lines!? not 10 timesteps.
+%could it be like :
+% skipped = 10;
+% skippedRow = skipped * (nStates + 1)
+
 
 % Symbols for each curve of the plot
 symbols = ['x', '*', 'v', '.'];
