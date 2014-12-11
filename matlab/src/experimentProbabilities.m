@@ -45,5 +45,5 @@ for i=1:nTimesteps
   %in case there aren't ordered : order with DIM 1 and MOD 'ascend'
   infoRobots(:,:,i) = sortrows( infoRobots(:,:,i),1,'ascend' );
 
-  nChange(:,:,i) = experimentChange(infoRobots(:,:,i),infoRobots(:,:,i-1));
+  nChange(:,:,i-1) = experimentChange(infoRobots(:,:,i),infoRobots(:,:,i-1));
 end
