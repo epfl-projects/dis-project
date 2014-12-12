@@ -253,7 +253,8 @@ void run() {
     wb_supervisor_simulation_revert();
   }
 
-  if (timestep_counter >= 20) {
+
+  if (timestep_counter >= 200) {
     computeMetrics();
     timestep_counter = 0;
   }

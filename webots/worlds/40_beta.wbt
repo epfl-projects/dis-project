@@ -1,0 +1,347 @@
+#VRML_SIM V8.0.0 utf8
+WorldInfo {
+  info [
+    "The model of the EPuck robot"
+    "Author: Simon Blanchoud"
+    "Date: 01 SEP 2006"
+  ]
+  title "EPuck"
+}
+Viewpoint {
+  orientation 0.00266546 0.706707 0.707502 3.14084
+  position 0.0414974 8.24621 0.0178252
+}
+Background {
+  skyColor [
+    0.4 0.7 1
+  ]
+}
+
+DEF ground Solid {
+  translation 0.0108903 -0.0001 0.0108139
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          ambientIntensity 1
+          diffuseColor 1 1 1
+          emissiveColor 0.9 0.9 1
+          shininess 0
+          specularColor 1 1 1
+        }
+        texture ImageTexture {
+          url [
+            "textures/texture_grid.png"
+          ]
+        }
+        textureTransform TextureTransform {
+          center 0.46 0
+          rotation 0
+          translation -1.0 0
+          scale 15 15
+        }
+      }
+      geometry DEF ground_geo IndexedFaceSet {
+        coord Coordinate {
+          point [
+            -100 0 -100
+            -100 0 100
+            100 0 100
+            100 0 -100
+          ]
+        }
+        texCoord TextureCoordinate {
+          point [
+            0 0
+            0 5
+            5 5
+            5 0
+          ]
+        }
+        coordIndex [
+          0, 1, 2, 3, -1
+        ]
+        texCoordIndex [
+          0, 1, 2, 3, -1
+        ]
+      }
+    }
+  ]
+  boundingObject Transform {
+    translation 0 -0.01 0
+    children [
+      Box {
+        size 200 0.02 200
+      }
+    ]
+  }
+}
+Supervisor {
+  children [
+    Receiver {
+    }
+  ]
+  controller "conn_beta_supervisor"
+}
+DEF E_PUCK_1 E-puck {
+  controller "conn_beta"
+  name "001"
+}
+DEF E_PUCK_2 E-puck {
+  controller "conn_beta"
+  name "002"
+}
+DEF E_PUCK_3 E-puck {
+  controller "conn_beta"
+  name "003"
+}
+DEF E_PUCK_4 E-puck {
+  controller "conn_beta"
+  name "004"
+}
+DEF E_PUCK_5 E-puck {
+  controller "conn_beta"
+  name "005"
+}
+DEF E_PUCK_6 E-puck {
+  controller "conn_beta"
+  name "006"
+}
+DEF E_PUCK_7 E-puck {
+  controller "conn_beta"
+  name "007"
+}
+DEF E_PUCK_8 E-puck {
+  controller "conn_beta"
+  name "008"
+}
+DEF E_PUCK_9 E-puck {
+  controller "conn_beta"
+  name "009"
+}
+DEF E_PUCK_10 E-puck {
+  controller "conn_beta"
+  name "010"
+}
+DEF E_PUCK_11 E-puck {
+  controller "conn_beta"
+  name "011"
+}
+DEF E_PUCK_12 E-puck {
+  controller "conn_beta"
+  name "012"
+}
+DEF E_PUCK_13 E-puck {
+  controller "conn_beta"
+  name "013"
+}
+DEF E_PUCK_14 E-puck {
+  controller "conn_beta"
+  name "014"
+}
+DEF E_PUCK_15 E-puck {
+  controller "conn_beta"
+  name "015"
+}
+DEF E_PUCK_16 E-puck {
+  controller "conn_beta"
+  name "016"
+}
+DEF E_PUCK_17 E-puck {
+  controller "conn_beta"
+  name "017"
+}
+DEF E_PUCK_18 E-puck {
+  controller "conn_beta"
+  name "018"
+}
+DEF E_PUCK_19 E-puck {
+  controller "conn_beta"
+  name "019"
+}
+DEF E_PUCK_20 E-puck {
+  controller "conn_beta"
+  name "020"
+}
+DEF E_PUCK_21 E-puck {
+  controller "conn_beta"
+  name "021"
+}
+DEF E_PUCK_22 E-puck {
+  controller "conn_beta"
+  name "022"
+}
+DEF E_PUCK_23 E-puck {
+  controller "conn_beta"
+  name "023"
+}
+DEF E_PUCK_24 E-puck {
+  controller "conn_beta"
+  name "024"
+}
+DEF E_PUCK_25 E-puck {
+  controller "conn_beta"
+  name "025"
+}
+DEF E_PUCK_26 E-puck {
+  controller "conn_beta"
+  name "026"
+}
+DEF E_PUCK_27 E-puck {
+  controller "conn_beta"
+  name "027"
+}
+DEF E_PUCK_28 E-puck {
+  controller "conn_beta"
+  name "028"
+}
+DEF E_PUCK_29 E-puck {
+  controller "conn_beta"
+  name "029"
+}
+DEF E_PUCK_30 E-puck {
+  controller "conn_beta"
+  name "030"
+}
+DEF E_PUCK_31 E-puck {
+  controller "conn_beta"
+  name "031"
+}
+DEF E_PUCK_32 E-puck {
+  controller "conn_beta"
+  name "032"
+}
+DEF E_PUCK_33 E-puck {
+  controller "conn_beta"
+  name "033"
+}
+DEF E_PUCK_34 E-puck {
+  controller "conn_beta"
+  name "034"
+}
+DEF E_PUCK_35 E-puck {
+  controller "conn_beta"
+  name "035"
+}
+DEF E_PUCK_36 E-puck {
+  controller "conn_beta"
+  name "036"
+}
+DEF E_PUCK_37 E-puck {
+  controller "conn_beta"
+  name "037"
+}
+DEF E_PUCK_38 E-puck {
+  controller "conn_beta"
+  name "038"
+}
+DEF E_PUCK_39 E-puck {
+  controller "conn_beta"
+  name "039"
+}
+DEF E_PUCK_40 E-puck {
+  controller "conn_beta"
+  name "040"
+}
+
+
+
+
+DEF BEACON1 Charger {
+  translation 4.0 0 0
+  children [
+    Solid {
+      translation 0 0 0
+      children [
+        PointLight {
+        }
+        Shape {
+          appearance Appearance {
+            material Material {
+              emissiveColor 1 1 0
+            }
+          }
+          geometry Sphere {
+            radius 0.1
+          }
+        }
+      ]
+    }
+  ]
+  name "beacon"
+  battery [
+    1000, 1000, 100
+  ]
+  radius 2.0
+  emissiveColor 1 1 0
+}
+
+
+
+DEF obs_1 Solid {
+  translation 2.0 0.1 0.0
+  rotation 0 1 0 11.0342
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 1 1 1
+        }
+      }
+      geometry DEF cylinder_1_geometry Cylinder {
+        height 0.2 
+	radius 0.1
+      }
+    }
+  ]
+  name "obs1"
+  boundingObject USE cylinder_1_geometry
+}
+
+
+DEF obs_2 Solid {
+  translation 2.0 0.1 -0.5
+  rotation 0 1 0 11.0342
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 1 1 1
+        }
+      }
+      geometry DEF cylinder_1_geometry Cylinder {
+        height 0.2 
+	radius 0.1
+      }
+    }
+  ]
+  name "obs2"
+  boundingObject USE cylinder_1_geometry
+}
+
+
+
+DEF obs_3 Solid {
+  translation 2.0 0.1 0.5
+  rotation 0 1 0 11.0342
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 1 1 1
+        }
+      }
+      geometry DEF cylinder_1_geometry Cylinder {
+        height 0.2 
+	radius 0.1
+      }
+    }
+  ]
+  name "obs3"
+  boundingObject USE cylinder_1_geometry
+}
+
+
+
+
+

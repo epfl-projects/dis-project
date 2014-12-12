@@ -10,11 +10,12 @@ function P = experimentProbabilities(simulation)
   %      BOTH | FORWARD | COHERENCE
   %     [  Pa    Pg Pl    Pr Pf Pla ]
 nP=7;
-
+nC=9;
 nRobots = length(unique(simulation(:,2)));
 nTimesteps = length(unique(simulation(:, 1)));
+%keep the change between two timesteps for each robots
 %resp. : numbConnection, numbChange, timestep
-nChange=zeros(nRobots,nP+1,nTimesteps);
+nChange=zeros(nRobots,nC,nTimesteps-1);
 
 %this variable regroups :
 %IDRobots, StateRobots, numbNeighborRobots
