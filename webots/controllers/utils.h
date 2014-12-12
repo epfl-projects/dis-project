@@ -87,46 +87,55 @@ int orientation(Point p, Point q, Point r)
 // array 'hull' contains convex hull
 int convexHull(Point points[], int n, Point hull[])
 {
-  // There must be at least 3 points
-  if (n < 3) return 0;
-
-  // Initialize Result
-  int next[n];
-  for (int i = 0; i < n; i++)
-    next[i] = -1;
-
-  // Find the leftmost point
-  int l = 0;
-  for (int i = 1; i < n; i++)
-    if (points[i].x < points[l].x)
-      l = i;
-
-  // Start from leftmost point, keep moving counterclockwise
-  // until reach the start point again
-  int p = l, q;
-  do {
-    // Search for a point 'q' such that orientation(p, i, q) is
-    // counterclockwise for all points 'i'
-    q = (p+1)%n;
+    // There must be at least 3 points
+    if (n < 3) return 0;
+ 
+    // Initialize Result
+    int next[n];
     for (int i = 0; i < n; i++)
-    if (orientation(points[p], points[i], points[q]) == 2)
-      q = i;
-
-    next[p] = q;  // Add q to result as a next point of p
-    p = q; // Set p as q for next iteration
-  } while (p != l);
-
-   
-  int j = 0;
-  for (int i = 0; i < n; i++)
-  {
-    if (next[i] != -1) {
-      hull[j].x = points[i].x;
-      hull[j].y = points[i].y;
-      j++;
+        next[i] = -1;
+ 
+    // Find the leftmost point
+    int l = 0;
+    for (int i = 1; i < n; i++)
+        if (points[i].x < points[l].x)
+            l = i;
+ 
+    // Start from leftmost point, keep moving counterclockwise
+    // until reach the start point again
+    int p = l, q;
+    do
+    {
+        // Search for a point 'q' such that orientation(p, i, q) is
+        // counterclockwise for all points 'i'
+        q = (p+1)%n;
+        for (int i = 0; i < n; i++)
+          if (orientation(points[p], points[i], points[q]) == 2)
+             q = i;
+ 
+        next[p] = q;  // Add q to result as a next point of p
+        p = q; // Set p as q for next iteration
+    } while (p != l);
+ 
+    
+    int j = 0;
+    int starting_index = -1, current_index = -1;
+    // find first index whose value is not -1
+    for (int i = 0; i < n; i++)
+    { 
+        if (next[i] != -1) {
+          starting_index = i;
+          current_index = i;
+          break;
+        }  
     }
-  }
-  return j;
+    do {
+      hull[j].x = points[current_index].x;
+      hull[j].y = points[current_index].y;
+      j++;
+      current_index = next[current_index];
+    } while (current_index != starting_index);
+    return j;
 }
 
   // // Driver program to test above functions
