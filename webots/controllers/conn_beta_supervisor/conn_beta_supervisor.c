@@ -10,11 +10,13 @@
 #include "../utils.h"
 #include "../defines.h"
 
+
+// ROBOT VARIABLES
+
 WbDeviceTag receiverTag;
 
-
-char filename_metrics[255];
-
+char metrics_filename[255];
+char filename[255];
 
 // beacon and its location
 WbNodeRef epucks[NUM_ROBOTS], beacon;
@@ -22,7 +24,14 @@ WbFieldRef locfield[NUM_ROBOTS];
 WbFieldRef beacon_location;
 double beacon_coord[2];
 
+int nReceived = 0;
+int robotsStates[NUM_ROBOTS];
+int robotsNeighborsCount[NUM_ROBOTS];
 float finalTime;
+
+
+
+
 
 void waitaux(long num) {
 	long i;
@@ -30,11 +39,7 @@ void waitaux(long num) {
 }
 
 
-
-
-
 void change_robot_positions(){
-
   int i,j;
   int nooverlap;
 
@@ -70,12 +75,17 @@ void change_robot_positions(){
 
     rotation=rand()%100;
     newrotation[3]=(double)rotation;
-    //newrotation[3]=0.0;
 
     rotfield=wb_supervisor_node_get_field(epucks[i],"rotation");
     wb_supervisor_field_set_sf_rotation(rotfield,newrotation);
   }
 }
+
+
+
+//******************************************************* 
+//      RESET
+//*******************************************************
 
 void reset(void) {
   int i;
@@ -97,10 +107,7 @@ void reset(void) {
   receiverTag = wb_robot_get_device("receiver");
   wb_receiver_enable(receiverTag, TIME_STEP);
   wb_receiver_set_channel(receiverTag, COMMUNICATION_CHANNEL_STAT);
-  // wb_receiver_set_channel(receiverTag, COMMUNICATION_CHANNEL_DEBUG);
-
-
-
+  
   // get beacon
   beacon=wb_supervisor_node_get_from_def("BEACON1");
   beacon_location=wb_supervisor_node_get_field(beacon, "translation");
@@ -110,17 +117,18 @@ void reset(void) {
   beacon_coord[1] = location[2];
 
 
-
-  sprintf(filename_metrics, "%s/metrics.csv", LOG_FILES_FOLDER);
-  FILE * logFile = fopen(filename_metrics, "w+");
+  sprintf(metrics_filename, "%s/metrics.csv", LOG_FILES_FOLDER);
+  FILE * logFile = fopen(metrics_filename, "w+");
   fprintf(logFile, "Time, area_coverage, distance_to_beacon\n");
   fclose(logFile);
 }
 
-/* **************************** LOGGING **************************** */
-int nReceived = 0;
-int robotsStates[NUM_ROBOTS];
-int robotsNeighborsCount[NUM_ROBOTS];
+
+//******************************************************* 
+//      LOGGING
+//*******************************************************
+
+
 void resetLogs() {
   nReceived = 0;
   for(int i = 0; i < NUM_ROBOTS; ++i) {
@@ -129,11 +137,9 @@ void resetLogs() {
   }
 }
 
-/**
- * Stats file logging format: CSV
- * Filename: simulation-[number of robots]-.csv
- */
-char filename[255];
+
+// Stats file logging format: CSV
+// Filename: simulation-[number of robots]-.csv
 void createNewLogFile() {
   resetLogs();
 
@@ -147,6 +153,8 @@ void createNewLogFile() {
   fprintf(logFile, "Time, Robot ID, Robot state, Number of neighbors\n");
   fclose(logFile);
 }
+
+
 void writeStats() {
   FILE * logFile = fopen(filename, "a+");
   for(int i = 0; i < NUM_ROBOTS; ++i) {
@@ -156,10 +164,9 @@ void writeStats() {
   fclose(logFile);
 }
 
-/**
- * Each time period, receive and aggregate stats from the robots.
- * Write them out to a file.
- */
+
+// Each time period, receive and aggregate stats from the robots.
+// Write them out to a file.
 void receiveRobotsStates() {
   while(wb_receiver_get_queue_length(receiverTag) > 0) {
     // Message format: see robot's controller
@@ -178,7 +185,6 @@ void receiveRobotsStates() {
       nReceived++;
     }
 
-
     // Parse state
     while(stats[separatorPosition] != ' ')
       separatorPosition++;
@@ -190,33 +196,21 @@ void receiveRobotsStates() {
       separatorPosition++;
     robotsNeighborsCount[robotId] = (int)strtol(stats + separatorPosition, NULL, 10);
 
-    // printf("%d %d %d\n", robotId, robotsStates[robotId], robotsNeighborsCount[robotId]);
-
     wb_receiver_next_packet(receiverTag);
   }
 
   // Done receiving all robots states for this timestep
   if(nReceived == NUM_ROBOTS) {
     writeStats();
-    // printf("Received %d messages at time %f\n", nReceived, wb_robot_get_time());
-
     resetLogs();
   }
 }
 
 
-// void getDebugMessages() {
-//   while(wb_receiver_get_queue_length(receiverTag) > 0) {
-//     char * illuminatedRobot = (char *)wb_receiver_get_data(receiverTag);
-//     int robot = (int)strtol(illuminatedRobot, NULL, 10);
-//     WbFieldRef pos;
-//     pos = wb_supervisor_node_get_field(epucks[robot-1],"translation");
-//     wb_supervisor_set_label(0,"RED",pos[0],pos[1],0.1,0xff0000,0);
-//     wb_receiver_next_packet(receiverTag);
-//   }
 
-// }
-
+//******************************************************* 
+//      COMPUTE METRICS FOR BETA
+//*******************************************************
 
 void computeMetrics() {
   Point vertices[NUM_ROBOTS];
@@ -228,28 +222,26 @@ void computeMetrics() {
     vertices[i].x = location[0];
     vertices[i].y = location[2];
   }
+  // compute convex hull of vertices formed by robots
   int n = convexHull(vertices, NUM_ROBOTS, convex_hull);
   // get area coverage
   double area_coverage = PolygonArea(convex_hull, n);
   // get centroid 
   Point centeroid = getCentroid(convex_hull, n);
-  // get beacon's location
-  
-
+  // get distance to beacon
   double distance = sqrt(((centeroid.x - beacon_coord[0]) * (centeroid.x - beacon_coord[0])) + ((centeroid.y - beacon_coord[1]) * (centeroid.y - beacon_coord[1])));
-  if (distance > 10) {
-    for (int i = 0; i < NUM_ROBOTS; i++) 
-      printf("%lf, %lf\n", vertices[i].x, vertices[i].y);
-  }
-    
   // log to file
-  FILE * logFile = fopen(filename_metrics, "a");
+  FILE * logFile = fopen(metrics_filename, "a");
   fprintf(logFile, "%f, %lf, %lf\n", wb_robot_get_time(), area_coverage, distance);
   fclose(logFile);
-  
 }
 
-/* **************************** RUN ******************************* */
+
+
+//******************************************************* 
+//      RUN
+//*******************************************************
+
 void run() {
   static int timestep_counter = 0;
   // End of the experiment
@@ -258,35 +250,38 @@ void run() {
   }
 
 
-  if (timestep_counter >= 20) {
-    computeMetrics();
+  if (timestep_counter >= 20) { // compute metrics every 20 time steps 
+    if (LOG_METRICS)
+      computeMetrics();
     timestep_counter = 0;
   }
 
   timestep_counter++;
-  
-
 
   // receiveRobotsStates();
-  // getDebugMessages();
 }
 
 
+
+//******************************************************* 
+//      MAIN
+//*******************************************************
+
 int main(int argc, char *argv[]) {
-  /* initialize Webots */
+  // initialize Webots
   wb_robot_init();
   createNewLogFile();
 
   reset();
 
-  /* perform a simulation step */
+  // perform a simulation step
   wb_robot_step(TIME_STEP);
 
-  /* main loop */
+  // main loop
   for (;;) {
     run();
 
-    /* perform a simulation step */
+    // perform a simulation step
     wb_robot_step(TIME_STEP);
   }
 

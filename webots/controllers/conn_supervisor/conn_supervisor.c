@@ -7,15 +7,25 @@
 #include <webots/differential_wheels.h>
 #include <webots/supervisor.h>
 #include <webots/receiver.h>
-
 #include "../defines.h"
 
+
+// ROBOT VARIABLES
 WbDeviceTag receiverTag;
 
 WbNodeRef epucks[NUM_ROBOTS];
 WbFieldRef locfield[NUM_ROBOTS];
 
+// logging variables
+int nReceived = 0;
+int robotsStates[NUM_ROBOTS];
+int robotsNeighborsCount[NUM_ROBOTS];
+
 float finalTime;
+
+
+
+
 
 void waitaux(long num) {
 	long i;
@@ -59,17 +69,18 @@ void change_robot_positions(){
 
     rotation=rand()%100;
     newrotation[3]=(double)rotation;
-    //newrotation[3]=0.0;
+    
 
     rotfield=wb_supervisor_node_get_field(epucks[i],"rotation");
     wb_supervisor_field_set_sf_rotation(rotfield,newrotation);
   }
 }
 
-/* **************************** LOGGING **************************** */
-int nReceived = 0;
-int robotsStates[NUM_ROBOTS];
-int robotsNeighborsCount[NUM_ROBOTS];
+
+//******************************************************* 
+//      LOGGING
+//*******************************************************
+
 void resetLogs() {
   nReceived = 0;
   for(int i = 0; i < NUM_ROBOTS; ++i) {
@@ -78,10 +89,9 @@ void resetLogs() {
   }
 }
 
-/**
- * Stats file logging format: CSV
- * Filename: simulation-[number of robots]-alpha[alpha value]-[time].csv
- */
+
+// Stats file logging format: CSV
+// Filename: simulation-[number of robots]-alpha[alpha value]-[time].csv
 char filename[255];
 void createNewLogFile() {
   resetLogs();
@@ -109,6 +119,8 @@ void createNewLogFile() {
   }
   fclose(logFile);
 }
+
+
 
 void writeStats() {
   FILE * logFile = fopen(filename, "a+");
@@ -145,10 +157,9 @@ void writeStats() {
   fclose(logFile);
 }
 
-/**
- * Each time period, receive and aggregate stats from the robots.
- * Write them out to a file.
- */
+
+// Each time period, receive and aggregate stats from the robots.
+// Write them out to a file.
 void receiveRobotsStates() {
   while(wb_receiver_get_queue_length(receiverTag) > 0) {
     // Message format: see robot's controller
@@ -167,7 +178,6 @@ void receiveRobotsStates() {
       nReceived++;
     }
 
-
     // Parse state
     while(stats[separatorPosition] != ' ')
       separatorPosition++;
@@ -179,21 +189,22 @@ void receiveRobotsStates() {
       separatorPosition++;
     robotsNeighborsCount[robotId] = (int)strtol(stats + separatorPosition, NULL, 10);
 
-    // printf("Robot %d, state %d, neighbors %d\n", robotId, robotsStates[robotId], robotsNeighborsCount[robotId]);
-
     wb_receiver_next_packet(receiverTag);
   }
 
   // Done receiving all robots states for this timestep
   if(nReceived == NUM_ROBOTS) {
     writeStats();
-    // printf("Received %d messages at time %f\n", nReceived, wb_robot_get_time());
-
     resetLogs();
   }
 }
 
-/* **************************** RUN ******************************* */
+
+
+//******************************************************* 
+//      RESET
+//*******************************************************
+
 void reset(void) {
   int i;
   char stringaux[20];
@@ -217,6 +228,13 @@ void reset(void) {
   resetLogs();
 }
 
+
+
+
+//******************************************************* 
+//      RUN
+//*******************************************************
+
 void run() {
   // End of the experiment
   if(wb_robot_get_time() >= finalTime){
@@ -231,23 +249,22 @@ void run() {
 
 
 int main(int argc, char *argv[]) {
-  /* initialize Webots */
+  // initialize Webots
   wb_robot_init();
 
   if(LOG_EXPERIMENT) {
     createNewLogFile();
   }
-
   reset();
 
-  /* perform a simulation step */
+  // perform a simulation step
   wb_robot_step(TIME_STEP);
 
-  /* main loop */
+  // main loop
   for (;;) {
     run();
 
-    /* perform a simulation step */
+    // perform a simulation step 
     wb_robot_step(TIME_STEP);
   }
 

@@ -7,7 +7,6 @@
 #include <math.h>
 #include <assert.h>
 #include <limits.h>
-//#include <sys/time.h>
 #include <webots/robot.h>
 #include <webots/differential_wheels.h>
 #include <webots/distance_sensor.h>
@@ -15,12 +14,14 @@
 #include <webots/emitter.h>
 #include <webots/receiver.h>
 #include <webots/led.h> 
+#include "../defines.h" 
 
 
-#include "../defines.h"
 
+//******************************************************* 
+//      ROBOT VARIABLES
+//*******************************************************
 
-//robot variables
 WbDeviceTag sensors[NB_SENSORS];
 WbDeviceTag light_sensors[NB_SENSORS]; // Device variables for light sensors
 WbDeviceTag emitterTag;
@@ -34,12 +35,11 @@ int light_intensity[NB_SENSORS]; // light sensor readings
 int speed[2];              // for obstacle avoidance
 
 
-//beta algorithm params
+//beta algorithm parameters
 int k; // current number of neighbors 
 int Nlist[NUM_ROBOTS+1][NUM_ROBOTS+1]; // list of neighbors
 int LastK; // past number of neighbors
 int OldList[NUM_ROBOTS+1][NUM_ROBOTS+1]; // old list of neighbors
-
 
 
 
@@ -56,6 +56,10 @@ char neighborhood[500]; //first id is the robot's own id, subsequent ids are the
 
 
 
+//******************************************************* 
+//      MOVEMENT
+//*******************************************************
+
 void setSpeed(int leftSpeed, int rightSpeed) {
   if (leftSpeed < -MAXSPEED) {leftSpeed = -MAXSPEED;}
   if (leftSpeed >  MAXSPEED) {leftSpeed =  MAXSPEED;}
@@ -67,13 +71,56 @@ void setSpeed(int leftSpeed, int rightSpeed) {
 
 
 
+// Obstacle avoidance Breitenberg
+void avoidObstacle(int * speed, const int* distances){
+  int brait_coef[8][2] = {
+    {140, -35}, {110, -15}, {80,-10},{-10, -10},
+    {-15, -10}, {-5, 80}, {-30, 90}, {-20, 160}
+  };
+
+  unsigned int i, j;
+  for(i = 0; i < 2; i++){
+    speed[i] = BIAS_SPEED / 2;
+    for (j = 0; j < 8; j++){
+      speed[i] += brait_coef[j][i] * (1.0 - (distances[j] / SENSOR_NORMALIZATION));
+    }
+  }
+}
+
+  
+ // Assuming a turn is in progress
+ // @param speed [OUTPUT] Array of 2 ints. The corresponding speed for each wheel
+void turn(int * speed) {
+  speed[0] = -500;
+  speed[1] = 500;
+  turningTime--;
+  if(turningTime <= 0) {
+    isTurning = false;
+  }
+}
 
 
-/**
- * Turn by `angle` degrees in a second or less.
- * The speeds are chosen so that a 360° turns takes 1 second.
- * @param angle The rotation angle between 0 and 360 degrees.
- */
+void move() {
+  if(isTurning){
+    turn(speed);
+    setSpeed(speed[0], speed[1]);
+  }
+  else if(AVOIDANCE) {
+    avoidObstacle(speed, distances);
+    setSpeed(speed[0], speed[1]);
+  }
+  else {
+    // Just move forward
+    setSpeed(BIAS_SPEED, BIAS_SPEED);
+  }
+}
+
+
+
+
+// Turn by `angle` degrees in a second or less.
+// The speeds are chosen so that a 360° turns takes 1 second.
+// @param angle The rotation angle between 0 and 360 degrees.
 void initiateTurn(int angle) {
   if (angle == 180)
     turningTime = 1000 / TIME_STEP; // this many time steps
@@ -81,26 +128,6 @@ void initiateTurn(int angle) {
     turningTime = (rand() % 10); // [0 .. 9] time steps   
   isTurning = true;
 }
-
-
-/**
- * Assuming a turn is in progress
- * @param speed [OUTPUT] Array of 2 ints. The corresponding speed for each wheel
- */
-void turn(int * speed) {
-  // TODO: fine-tune
-  speed[0] = -500;
-  speed[1] = 500;
-  //printf("Robot %s has %d turning time left\n", robotName, turningTime);
-  turningTime--;
-  if(turningTime <= 0) {
-    isTurning = false;
-    // printf("Robot %s is done turning.\n", robotName);
-  }
-}
-
-
-
 
 
 
@@ -130,16 +157,13 @@ void setState(State newState) {
 
 
 
-
 //******************************************************* 
-//      MOVEMENT
+//      SENSOR READINGS
 //*******************************************************
 
 
-/**
- * Detect the presence of an obstacle in front based on sensor readings.
- * The sensor values must be updated first with `getSensorValues`.
- */
+// Detect the presence of an obstacle in front based on sensor readings.
+// The sensor values must be updated first with `getSensorValues`.
 bool hasObstacle() {
   int maxValue = 0;
   for(unsigned int i = 0; i < NB_SENSORS; i++) {
@@ -149,37 +173,16 @@ bool hasObstacle() {
   return (maxValue >= OBSTACLE_THRESHOLD);
 }
 
+
+
 bool isIlluminated() {
   int minValue = INT_MAX;
   for(unsigned int i = 0; i < NB_SENSORS; i++) {
-    // Note that `distances` holds sensor readings
+    //`distances` holds sensor readings
     minValue = fmin(minValue, light_intensity[i]);
   }
-  // printf("MIN intensity : %d\n", minValue);
   return (minValue < LIGHT_THRESHOLD);
-
 }
-
-
-
-/**
- * Obstacle avoidance Breitenberg
- */
-void avoidObstacle(int * speed, const int* distances){
-  int brait_coef[8][2] = {
-    {140, -35}, {110, -15}, {80,-10},{-10, -10},
-    {-15, -10}, {-5, 80}, {-30, 90}, {-20, 160}
-  };
-
-  unsigned int i, j;
-  for(i = 0; i < 2; i++){
-    speed[i] = BIAS_SPEED / 2;
-    for (j = 0; j < 8; j++){
-      speed[i] += brait_coef[j][i] * (1.0 - (distances[j] / SENSOR_NORMALIZATION));
-    }
-  }
-}
-
 
 
 void getSensorValues(int *sensorTable) {
@@ -198,60 +201,24 @@ void getSensorValues(int *sensorTable) {
 }
 
 
-
 void lightGetSensorValues(int *sensorTable)
 {
   unsigned int i;
   for (i=0; i < NB_SENSORS; i++) {
     sensorTable[i] = wb_light_sensor_get_value(light_sensors[i]);
-    // printf("%d ", sensorTable[i]);
   }
-  // printf("\n");
-
-   if (isIlluminated()) {
-     wb_led_set(led, 1); 
-   } else 
-     wb_led_set(led, 0); 
-  // debugging 
-  // if (isIlluminated()) {
-  //   // Change channel temporarily to communicate with the supervisor
-  //   wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL_DEBUG);
-  //   // Allow infinite communication range
-  //   wb_emitter_set_range(emitterTag, -1);
-  //   sendMessage(robotName);
-  //   // Back to the inter-robot, imperfect communication
-  //   wb_emitter_set_channel(emitterTag, COMMUNICATION_CHANNEL);
-  //   wb_emitter_set_range(emitterTag, COMM_RADIUS);
-  // }
-  
-  
+  if (isIlluminated()) { // if a robot is illuminated turn on the LEDS
+    wb_led_set(led, 1); 
+  } else 
+    wb_led_set(led, 0); // else switch of the LEDS (just for debugging purposes)
 }
 
 
-
-
-
-
-
-void move() {
-  if(isTurning){
-    turn(speed);
-    setSpeed(speed[0], speed[1]);
-  }
-  else if(AVOIDANCE) {
-    avoidObstacle(speed, distances);
-    setSpeed(speed[0], speed[1]);
-  }
-  else {
-    // Just move forward
-    setSpeed(BIAS_SPEED, BIAS_SPEED);
-  }
-}
 
 
 
 //******************************************************* 
-//      COMMUNICATION
+//      COMMUNICATIONS
 //*******************************************************
 
 
@@ -279,12 +246,9 @@ int parseMessage(char* message, int* neighbors) {
 
 
 
-/**
- * From the received broadcasts, deduce the number of nearby agents and their neighborhood information
- * Each robot is expected to broadcast its `robotName` and also `robotName` of its neighbors, which is expected
- * to be parseable as a positive number in 1..NUM_ROBOTS.
- */
-
+// From the received broadcasts, deduce the number of nearby agents and their neighborhood information
+// Each robot is expected to broadcast its `robotName` and also `robotName` of its neighbors, which is expected
+// to be parseable as a positive number in 1..NUM_ROBOTS.
 void listen() {
 
   // copy previous neighborhood info
@@ -302,7 +266,6 @@ void listen() {
   
   while(wb_receiver_get_queue_length(receiverTag) > 0) {
     char * message = (char *)wb_receiver_get_data(receiverTag);
-    // printf("robot %s got messages : %s\n", robotName, message);
 
     int neighbors[NUM_ROBOTS+2];
     int n = parseMessage(message, neighbors);
@@ -327,9 +290,6 @@ void listen() {
       strcpy(neighborhood, temp);
     }
   }
-
-  // printf("robot %s got %d messages\n", robotName, k);
-  
 }
 
 
@@ -341,25 +301,9 @@ void listen() {
 
 void run(){
 
-  // static int time_step_counter = 0;
-  // if (!isTurning) {
-  //   time_step_counter++;
-  //   if (time_step_counter >= 30) {
-  //      initiateTurn(180);
-  //      time_step_counter = 0;
-  //   }
-  // }
-   
-
-  // move();
-
-  ////////////////
-
-
   static int time_step_counter = 0;
   time_step_counter++;
   
-
   // Move
   move();
   
@@ -371,15 +315,13 @@ void run(){
     }
   }
 
-  if (currentState == COHERENCE) {// keep coherence clock ticking 
-    coherenceTime--;
+  if (currentState == COHERENCE) {
+    coherenceTime--; // keep coherence clock ticking 
     if (coherenceTime <= 0)
       setState(FORWARD);
   }
 
   if(time_step_counter >= 20) { // every 20 time step
-
-    // printf("robot %s is broadcasting\n", robotName);
     broadcast();
     listen(); // ! going to listen to pings from previous step (100 time step in the past)
 
@@ -407,26 +349,22 @@ void run(){
               nShared++;
           }
         }
-        // printf("robot %s lost robot %d : nShared : %d\n", robotName, i, nShared);
+
         if (nShared <= BETA) {
           Back = true;
         }
       } else if (lostList[i] == 2) { // if robot is lost and illuminated treat in a special way
-        // printf("Red robot\n");
         Back = true;
       }
     }
 
 
     if (Back) {
-      // printf("robot %s is moving to coherence\n", robotName);
       setState(COHERENCE);
     }
     else if (k > LastK) {
-       // printf("robot %s is making a random turn\n", robotName);
       setState(FORWARD); // make random turn
     }
-      
 
     time_step_counter = 0; // reset time step counter 
   }
@@ -459,9 +397,6 @@ void reset()
   for (int i = 0; i <= NUM_ROBOTS; i++) 
     for (int j = 0; j <= NUM_ROBOTS; j++)
       Nlist[i][j] = 0;
-
-
-  
 
   // Make sure to initialize the RNG with different values for each thread
   srand(time(NULL) + (int)&robotName);
@@ -513,10 +448,6 @@ void reset()
   }
 
   wb_differential_wheels_enable_encoders(TIME_STEP);
-
- 
-
-
   printf("Robot %s is reset\n", robotName);
   return;
 }
@@ -528,18 +459,18 @@ void reset()
 //*******************************************************
 
 int main(int argc, char *argv[]) {
-  /* initialize Webots */
+  // initialize Webots
   wb_robot_init();
 
   reset();
 
-  /* main loop */
+  // main loop 
   for (;;) {
     getSensorValues(distances); 
     lightGetSensorValues(light_intensity);
     run();
 
-    /* perform a simulation step */
+    // perform a simulation step
     wb_robot_step(TIME_STEP);
   }
 

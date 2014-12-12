@@ -1,6 +1,14 @@
+/* 
+  * Code snippets borrowed from the following sources:
+  *  - www.geeksforgeeks.org
+  *  - Emile Cormier, http://stackoverflow.com
+  *  - http://paulbourke.net/geometry/polygonmesh/source1.c
+*/
 #include <math.h> 
 #define INF 10000
 #define EPSILON 0.001 
+
+
 
 typedef struct Point
 {
@@ -8,6 +16,11 @@ typedef struct Point
   double y;
 } Point;
 
+
+
+//******************************************************* 
+//      CENTROID OF A POLYGON
+//*******************************************************
 
 Point getCentroid(Point vertices[], int vertexCount) {
   Point centroid = {0, 0};
@@ -51,6 +64,12 @@ Point getCentroid(Point vertices[], int vertexCount) {
 
 
 
+
+
+//******************************************************* 
+//      POLYGON AREA
+//*******************************************************
+
 double PolygonArea(Point *polygon, int N)
 {
   int i,j;
@@ -65,6 +84,15 @@ double PolygonArea(Point *polygon, int N)
   area /= 2;
   return(area < 0 ? -area : area);
 }
+
+
+
+
+
+
+//******************************************************* 
+//      CONVEX HULL
+//*******************************************************
 
 
 
@@ -106,15 +134,15 @@ int convexHull(Point points[], int n, Point hull[])
     int p = l, q;
     do
     {
-        // Search for a point 'q' such that orientation(p, i, q) is
-        // counterclockwise for all points 'i'
-        q = (p+1)%n;
-        for (int i = 0; i < n; i++)
-          if (orientation(points[p], points[i], points[q]) == 2)
-             q = i;
- 
-        next[p] = q;  // Add q to result as a next point of p
-        p = q; // Set p as q for next iteration
+      // Search for a point 'q' such that orientation(p, i, q) is
+      // counterclockwise for all points 'i'
+      q = (p+1)%n;
+      for (int i = 0; i < n; i++)
+        if (orientation(points[p], points[i], points[q]) == 2)
+           q = i;
+
+      next[p] = q;  // Add q to result as a next point of p
+      p = q; // Set p as q for next iteration
     } while (p != l);
  
     
@@ -123,11 +151,11 @@ int convexHull(Point points[], int n, Point hull[])
     // find first index whose value is not -1
     for (int i = 0; i < n; i++)
     { 
-        if (next[i] != -1) {
-          starting_index = i;
-          current_index = i;
-          break;
-        }  
+      if (next[i] != -1) {
+        starting_index = i;
+        current_index = i;
+        break;
+      }  
     }
     do {
       hull[j].x = points[current_index].x;
@@ -138,19 +166,3 @@ int convexHull(Point points[], int n, Point hull[])
     return j;
 }
 
-  // // Driver program to test above functions
-  // int main()
-  // {
-  //     Point points[] = {{1, 2}, {2, 1}, {3, 2}, {2, 1}, {2, 3}};
-  //     // Point points[] = {{0, 0}, {2, 2}, {4, 0}};
-  //     int n = sizeof(points)/sizeof(points[0]);
-  //     Point hull[n];
-  //     int j = convexHull(points, n, hull);
-  //     for (int k = 0; k < j; k++) {
-  //       printf("[%f, %f]\n", hull[k].x, hull[k].y);
-  //     }
-  //     printf("Area : %f\n", PolygonArea(hull, j));
-  //     Point centroid = getCentroid(hull, j);
-  //     printf("Centroid [%f, %f]\n", centroid.x, centroid.y);
-  //     return 0;
-  // }

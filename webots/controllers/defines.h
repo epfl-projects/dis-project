@@ -4,10 +4,10 @@
 // Simulation parameters
 #define EXP_TIME          1000 // Duration of the experiment (in seconds)
 #define TIME_STEP         25 // Simulation time step (ms), must be a multiple of basicTimeStep in WorldInfo
-#define NUM_ROBOTS        40 // Total number of robots in the scene
+#define NUM_ROBOTS        4 // Total number of robots in the scene
 // Alpha algorithm
-#define ALPHA                5 // Minimum number of neighbors to maintain
-#define BETA				         5
+#define ALPHA                2 // Minimum number of neighbors to maintain
+#define BETA				         2
 #define MAX_RANDOM_TURN      50 // Maximum value of the random turn (in degrees)
 #define MAX_COHERENCE_TIME   80 // Maximum number of timesteps spent in coherence state
 #define MAX_AVOIDANCE_TIME   5 // Maximum number of timesteps spent in avoidance sub-state
@@ -23,6 +23,8 @@
 #define LOG_EXPERIMENT   true
 // Detailed logs contain the state of each particular robot
 #define LOG_DETAILS      false
+// compute metrics for beta algorithm
+#define LOG_METRICS true
 // Path to the logs (relative to the supervisor's directory)
 #define LOG_FILES_FOLDER "../../data"
 

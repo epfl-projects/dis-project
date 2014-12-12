@@ -11,7 +11,6 @@
 #include <webots/distance_sensor.h>
 #include <webots/emitter.h>
 #include <webots/receiver.h>
-
 #include "../defines.h"
 
 
@@ -71,14 +70,11 @@ void initiateTurn(int angle) {
  * @param speed [OUTPUT] Array of 2 ints. The corresponding speed for each wheel
  */
 void turn(int * speed) {
-  // TODO: fine-tune
   speed[0] = -490;
   speed[1] = 490;
-  //printf("Robot %s has %d turning time left\n", robotName, turningTime);
   turningTime--;
   if(turningTime <= 0) {
     isTurning = false;
-    // printf("Robot %s is done turning.\n", robotName);
   }
 }
 
@@ -121,7 +117,7 @@ void setState(State newState) {
 bool hasObstacle() {
   int maxValue = 0;
   for(unsigned int i = 0; i < NB_SENSORS; i++) {
-    // Note that `distances` holds sensor readings
+    // `distances` holds sensor readings
     maxValue = fmax(maxValue, distances[i]);
   }
   return (maxValue >= OBSTACLE_THRESHOLD);
@@ -215,12 +211,10 @@ void listen() {
     char * neighborName = (char *)wb_receiver_get_data(receiverTag);
     int id = (int)strtol(neighborName, NULL, 10);
     k++;
-    //printf("Robot %s received: %d present!\n", robotName, id);
     wb_receiver_next_packet(receiverTag);
   }
 
   assert(k <= NUM_ROBOTS - 1);
-  // printf("Robot %s has %d neighbors\n", robotName, k);
 }
 
 
@@ -269,19 +263,14 @@ void run(){
 
   // Rate limiting
   if(timestepCounter >= COMMUNICATION_PERIOD) {
-    // printf("robot %s is broadcasting\n", robotName);
     broadcast();
     listen(); // ! going to listen to pings from previous step (50 time step in the past)
 
 
     if (k < LastK && k < ALPHA) { // if less neighbors than last time and below threshold
-      // printf("Robot %s has %d neighbors!\n", robotName, k);
-      // printf("robot %s is moving to coherence state\n", robotName);
       setState(COHERENCE);
     }
     else if (k > LastK) {
-      // printf("Robot %s has %d neighbors!\n", robotName, k);
-      // printf("robot %s is moving to forward state\n", robotName);
       setState(FORWARD); // make random turn
     }
 
