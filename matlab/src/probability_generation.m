@@ -1,4 +1,4 @@
-function [] = probability_generation(alpha)
+function [] = probability_generation(alpha,nbSkip)
 % Parse and exploit the simulation logs with LOG_DETAILS on
 % Expected format:
 %  Time, Robot ID, Robot state, Number of neighbors
@@ -14,7 +14,7 @@ function [] = probability_generation(alpha)
   nStates = 4;
   nRobots = 40;
   nProbability = 6;
-  nbSkip=10;
+
   % Number of initial timesteps to skip
   % (making sure our system has reached its stable state)
   skipped = nbSkip *(nRobots+1);

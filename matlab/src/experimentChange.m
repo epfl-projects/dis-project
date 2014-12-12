@@ -4,10 +4,11 @@ function nChange = experimentChange(cInfos, pInfos)
   %    regarding (COLUMN) :
   %         IDRobots, StateRobots, numbNeighborRobots
   %OUTPUT:
-  %   nChange : vector
+  %   nChange : matrice counting the change occuring for each state "category"
+  %     and for each number of connection
 
   nC=10;
-  nRobots=size(cInfos,1);
+  nRobots=size(cInfos,1); %nRobots = 40;
   %Na Naf Nac| Ng Nl Nfrest | Nr Nf Nla Ncrest
   nChange = zeros(nRobots,nC);
 

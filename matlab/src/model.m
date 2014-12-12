@@ -5,37 +5,41 @@ clear all
 
 alphaInit=1;
 alphaEnd=3;
+
 for nalpha=alphaInit:alphaEnd
 
-	showFigure = 0;
-	saveFigure = 1;
-	generate = 1;
+	showFigure = 1; %show the figure
+	saveFigure = 0; %save it in the figurePath folder
+	generationProbabilities = 0; %generate the probabilities from files see the function probability_generation.m
+
+	%different paths
 	dataPath= '../data';
 	figurePath= '../../report/figures';
+
 	%*************************************%
 	%Initial conditions
 	%*************************************%
-	alpha = [5,10,15]; %can be 5, 10,15
+	alpha = [5,10,15]; %different alpha for simulation
 	alpha = alpha( nalpha );
-
-
 
 	k_end=1000; %length of the simulation in timesteps
 
-	%constants
-	NRobots=40; %number of robots
+	%CONSTANTS
+	nRobots=40; %number of robots
 	TA = 5; %number of timesteps to spend in the avoidance state
 	TC = 15; %number of timesteps to spend in the coherence state
-
-	%max number of connection possible
-	dmax=NRobots-1;
+	dmax=nRobots-1;	%max number of connection possible
 
 	%*************************************%
 	%Load Probabilities
 	%*************************************%
-	if generate
-		probability_generation(alpha);
+
+	if generationProbabilities
+		%function who generate probabilities from experiment file with LOG_DETAILS=1
+		initiatilisationSteps = 10 ; %number of steps to avoid for the probability estimation
+		probability_generation(alpha,initialisationSteps);
 	end
+	%load the P variable regrouping probabilities generate before (if didn't exist)
 	load( [dataPath, '/probability-alpha-',num2str(alpha),'.mat'] )
 
 	Pa=P(:,1);
@@ -51,13 +55,13 @@ for nalpha=alphaInit:alphaEnd
 	%*************************************%
 
 
-	N_AF=zeros(NRobots,k_end);	% # of robots
-	N_F=zeros(NRobots,k_end);
+	N_AF=zeros(nRobots,k_end);	% # of robots
+	N_F=zeros(nRobots,k_end);
 
-	N_F(alpha+1,1)=NRobots; % intial condition everyone at alpha connections
+	N_F(alpha+1,1)=nRobots; % intial condition everyone at alpha connections
 
-	N_AC=zeros(NRobots,k_end);
-	N_C=zeros(NRobots,k_end);
+	N_AC=zeros(nRobots,k_end);
+	N_C=zeros(nRobots,k_end);
 	N_Fbar = N_AF + N_F;
 	N_Cbar = N_AC + N_C;
 
@@ -115,7 +119,7 @@ for nalpha=alphaInit:alphaEnd
 
 		if mod(k-1,TC)==0
 
-			%**************** simulation for the forward state *****************%
+			%**************** simulation for the FORWARD state *****************%
 
 			%for 0 connection
 			N_Fbar(1,k+1:k+TC) = repmat( N_Fbar(1,k) ...
@@ -157,10 +161,8 @@ for nalpha=alphaInit:alphaEnd
 					- PlN_Fbar(i,k) ...
 				, 1, TC );
 
-
-
 			end
-			%for the full connectivity (NRobots-1 connections)
+			%for the full connectivity (nRobots-1 connections)
 			i=dmax;
 
 			N_Fbar(i,k+1:k+TC) = repmat ( N_Fbar(i,k) ...
@@ -168,7 +170,7 @@ for nalpha=alphaInit:alphaEnd
 				- PlN_Fbar(i,k)  ...
 			, 1, TC );
 
-			%******************* simulation for the coherence state ****************%
+			%******************* simulation for the COHERENCE state ****************%
 
 			%for 0 connection
 			i=1;
@@ -205,11 +207,7 @@ for nalpha=alphaInit:alphaEnd
 		N_F(:,k+1)=N_Fbar(:,k+1)-N_AF(:,k+1);
 		N_C(:,k+1)=N_Cbar(:,k+1)-N_AC(:,k+1);
 
-
-
 	end
-
-
 
 	%**********************************************************%
 	%mean over the number of steps
@@ -230,7 +228,7 @@ for nalpha=alphaInit:alphaEnd
 
 
 	lab=['rcbk'];
-	symb=['+ox*'];
+	symb=['dox*'];
 
 	figure();
 	hold('on');
@@ -249,12 +247,10 @@ for nalpha=alphaInit:alphaEnd
 	hold('off');
 
 	if saveFigure
-		print([figurePath, '/',num2str(NRobots),'-macroscopic-alpha-', num2str(alpha),'.png'] );
+		print([figurePath, '/',num2str(nRobots),'-macroscopic-alpha-', num2str(alpha),'.png'] );
 	end
 	if ~showFigure
 		close
 	end
 
-
-	%avoid problem in between diverent alpha-simulationa
 end
