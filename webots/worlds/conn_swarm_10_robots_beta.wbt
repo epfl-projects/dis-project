@@ -127,7 +127,7 @@ DEF E_PUCK_10 E-puck {
 
 
 DEF BEACON1 Charger {
-  translation 10.0 0 0
+  translation 5.0 0 0
   children [
     Solid {
       translation 0 0 0

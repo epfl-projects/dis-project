@@ -7,10 +7,13 @@
 #include <webots/differential_wheels.h>
 #include <webots/supervisor.h>
 #include <webots/receiver.h>
-
+#include "../utils.h"
 #include "../defines.h"
 
 WbDeviceTag receiverTag;
+
+
+char filename_metrics[255];
 
 
 // beacon and its location
@@ -100,6 +103,12 @@ void reset(void) {
   // get beacon
   beacon=wb_supervisor_node_get_from_def("BEACON1");
   beacon_location=wb_supervisor_node_get_field(beacon, "translation");
+
+
+  sprintf(filename_metrics, "%s/metrics.csv", LOG_FILES_FOLDER);
+  FILE * logFile = fopen(filename_metrics, "w+");
+  fprintf(logFile, "Time, area_coverage, distance_to_beacon\n");
+  fclose(logFile);
 }
 
 /* **************************** LOGGING **************************** */
@@ -202,12 +211,50 @@ void receiveRobotsStates() {
 
 // }
 
+
+void computeMetrics() {
+  Point vertices[NUM_ROBOTS];
+  Point convex_hull[NUM_ROBOTS];
+  double* location;
+  for(int i = 0; i < NUM_ROBOTS; i++){
+    location = wb_supervisor_field_get_sf_vec3f(locfield[i]);
+    // get only x and y
+    vertices[i].x = location[0];
+    vertices[i].y = location[1];
+  }
+  int n = convexHull(vertices, NUM_ROBOTS, convex_hull);
+  // get area coverage
+  double area_coverage = PolygonArea(convex_hull, n);
+  // get centroid 
+  Point centeroid = getCentroid(convex_hull, n);
+  // get beacon's location
+  location = wb_supervisor_field_get_sf_vec3f(beacon_location);
+
+  double distance = sqrt((centeroid.x - location[0]) * (centeroid.x - location[0]) - (centeroid.y - location[1]) * (centeroid.y - location[1]));
+
+  // log to file
+  FILE * logFile = fopen(filename_metrics, "a");
+  fprintf(logFile, "%f, %lf, %lf\n", wb_robot_get_time(), area_coverage*1000, distance);
+  fclose(logFile);
+  
+}
+
 /* **************************** RUN ******************************* */
 void run() {
+  static int timestep_counter = 0;
   // End of the experiment
   if(wb_robot_get_time() > finalTime){
     wb_supervisor_simulation_revert();
   }
+
+  if (timestep_counter >= 10) {
+    computeMetrics();
+    timestep_counter = 0;
+  }
+
+  timestep_counter++;
+  
+
 
   // receiveRobotsStates();
   // getDebugMessages();
