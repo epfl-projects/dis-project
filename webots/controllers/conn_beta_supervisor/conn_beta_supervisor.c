@@ -107,7 +107,7 @@ void reset(void) {
 
   double* location = wb_supervisor_field_get_sf_vec3f(beacon_location);
   beacon_coord[0] = location[0];
-  beacon_coord[1] = location[1];
+  beacon_coord[1] = location[2];
 
 
 
@@ -226,7 +226,7 @@ void computeMetrics() {
     location = wb_supervisor_field_get_sf_vec3f(locfield[i]);
     // get only x and y
     vertices[i].x = location[0];
-    vertices[i].y = location[1];
+    vertices[i].y = location[2];
   }
   int n = convexHull(vertices, NUM_ROBOTS, convex_hull);
   // get area coverage
@@ -237,10 +237,14 @@ void computeMetrics() {
   
 
   double distance = sqrt(((centeroid.x - beacon_coord[0]) * (centeroid.x - beacon_coord[0])) + ((centeroid.y - beacon_coord[1]) * (centeroid.y - beacon_coord[1])));
-
+  if (distance > 10) {
+    for (int i = 0; i < NUM_ROBOTS; i++) 
+      printf("%lf, %lf\n", vertices[i].x, vertices[i].y);
+  }
+    
   // log to file
   FILE * logFile = fopen(filename_metrics, "a");
-  fprintf(logFile, "%f, %lf, %lf\n", wb_robot_get_time(), area_coverage*1000, distance);
+  fprintf(logFile, "%f, %lf, %lf\n", wb_robot_get_time(), area_coverage, distance);
   fclose(logFile);
   
 }
@@ -254,7 +258,7 @@ void run() {
   }
 
 
-  if (timestep_counter >= 200) {
+  if (timestep_counter >= 20) {
     computeMetrics();
     timestep_counter = 0;
   }
