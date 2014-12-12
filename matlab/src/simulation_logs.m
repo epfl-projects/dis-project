@@ -8,6 +8,7 @@
 %   FORWARD_AVOIDANCE = 1,
 %   COHERENCE = 2,
 %   COHERENCE_AVOIDANCE = 3
+
 %clearvars;
 clear all
 %% Configuration
