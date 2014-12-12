@@ -1,5 +1,5 @@
 function P = experimentProbabilities(simulation)
-
+  showFigure=0;
   %INPUT:
   %   simulation: contents of a CSV file from a single Webots simulation run
   %   Expected format:
@@ -10,7 +10,7 @@ function P = experimentProbabilities(simulation)
   %      BOTH | FORWARD | COHERENCE
   %     [  Pa    Pg Pl    Pr Pf Pla ]
   nP=7;
-  nC=9;
+  nC=10;
   nRobots = length(unique(simulation(:,2)));
   nTimesteps = length(unique(simulation(:, 1)));
   %keep the change between two timesteps for each robots
@@ -53,27 +53,30 @@ function P = experimentProbabilities(simulation)
   totChange=sum(nChange,3);
 
   totChangeA=sum(totChange(:,2:end),2);
-  totChangeF=sum(totChange(:,2:5),2);
-  totChangeC=sum([totChange(:,2),totChange(:,6:9)],2);
-  totChangeA(totChangeA==0)=1;
-  totChangeF(totChangeF==0)=1;
-  totChangeC(totChangeC==0)=1;
-  %TODO:check probabilities : is it
-  Pa=totChange(:,1)./totChangeA;
-  Pg=totChange(:,3)./totChangeF;
-  Pl=totChange(:,4)./totChangeF;
-  Pr=totChange(:,6)./totChangeC;
-  Pf=totChange(:,7)./totChangeC;
-  Pla=totChange(:,8)./totChangeC;
+  totChangeF=sum( [totChange(:,2), totChange(:,4:6)], 2);
+  totChangeC=sum( [totChange(:,3),totChange(:,7:end)], 2);
+  %To avoid NaN
+  totChangeA(totChangeA==0) = 1;
+  totChangeF(totChangeF==0) = 1;
+  totChangeC(totChangeC==0) = 1;
 
-  figure
-  plot([0:39]',Pa)
-  hold on
-  plot([0:39]',Pg)
-  plot([0:39]',Pl)
-  plot([0:39]',Pr)
-  plot([0:39]',Pf)
-  plot([0:39]',Pla)
+  %Computation of the probabilities
+  Pa=totChange(:,1)./totChangeA;
+  Pg=totChange(:,4)./totChangeF;
+  Pl=totChange(:,5)./totChangeF;
+  Pr=totChange(:,7)./totChangeC;
+  Pf=totChange(:,8)./totChangeC;
+  Pla=totChange(:,9)./totChangeC;
+  if showFigure
+    figure();
+    plot([0:39]',Pa);
+    hold on
+    plot([0:39]',Pg);
+    plot([0:39]',Pl);
+    plot([0:39]',Pr);
+    plot([0:39]',Pf);
+    plot([0:39]',Pla);
+  end
   P=[Pa Pg Pl Pr Pf Pla];
 
   end
