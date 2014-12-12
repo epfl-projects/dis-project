@@ -9,42 +9,71 @@ function P = experimentProbabilities(simulation)
   %     connections. The estimated Probabilities are :
   %      BOTH | FORWARD | COHERENCE
   %     [  Pa    Pg Pl    Pr Pf Pla ]
-nP=7;
-nC=9;
-nRobots = length(unique(simulation(:,2)));
-nTimesteps = length(unique(simulation(:, 1)));
-%keep the change between two timesteps for each robots
-%resp. : numbConnection, numbChange, timestep
-nChange=zeros(nRobots,nC,nTimesteps-1);
+  nP=7;
+  nC=9;
+  nRobots = length(unique(simulation(:,2)));
+  nTimesteps = length(unique(simulation(:, 1)));
+  %keep the change between two timesteps for each robots
+  %resp. : numbConnection, numbChange, timestep
+  nChange=zeros(nRobots,nC,nTimesteps-1);
 
-%this variable regroups :
-%IDRobots, StateRobots, numbNeighborRobots
-infoRobots=zeros(nRobots,3,nTimesteps);
-
-
-
-%first iteration to avoid a comparaison with nothing
-i=1;
-%interogation is the ID of Robots always in the same Order
-for j=1:3
-  infoRobots(:,j,i) = simulation( rowTimestep+1:rowTimestep + 1 + nRobots , 1+j );
-end
+  %this variable regroups :
+  %IDRobots, StateRobots, numbNeighborRobots
+  infoRobots=zeros(nRobots,3,nTimesteps);
+  Pa=zeros(nRobots,1);
+  Pg=zeros(nRobots,1);
+  Pl=zeros(nRobots,1);
+  Pr=zeros(nRobots,1);
+  Pf=zeros(nRobots,1);
+  Pla=zeros(nRobots,1);
 
 
-%in case there aren't ordered : order with DIM 1 and MOD 'ascend'
-%[idRobots(:,i) stateRobots(:,i) neighborRobots(:,i)] = sort([idRobots(:,i) stateRobots(:,i) neightorRobots(:,i)],1 , 'ascend');
-for i=1:nTimesteps
-  %first row of
-  rowTimestep = (i - 1 ) * nRobots + 1;
-  %iteration over each timestep
-
-  %Q: Is the IDRobots always in the same Order ?
+  %first iteration to avoid a comparaison with nothing
+  i=1;
+  %interogation is the ID of Robots always in the same Order
   for j=1:3
-    infoRobots(:,j,i) = simulation( rowTimestep:rowTimestep + nRobots , 1+j );
+    infoRobots(:,j,i) = simulation( 1 : nRobots , 1+j );
   end
 
-  %in case there aren't ordered : order with DIM 1 and MOD 'ascend'
-  infoRobots(:,:,i) = sortrows( infoRobots(:,:,i),1,'ascend' );
+  for i=2:nTimesteps
+    %first row of
+    rowTimestep = (i - 1 ) * nRobots + 1;
+    %iteration over each timestep
 
-  nChange(:,:,i-1) = experimentChange(infoRobots(:,:,i),infoRobots(:,:,i-1));
-end
+    %Q: Is the IDRobots always in the same Order ?
+    for j=1:3
+      infoRobots(:,j,i) = simulation( rowTimestep:rowTimestep + nRobots-1 , 1+j );
+    end
+
+
+    nChange(:,:,i-1) = experimentChange(infoRobots(:,:,i),infoRobots(:,:,i-1));
+  end
+  nChange;
+  %Compute the probabilities from the nChange 3 dimention matrix
+  totChange=sum(nChange,3);
+
+  totChangeA=sum(totChange(:,2:end),2);
+  totChangeF=sum(totChange(:,2:5),2);
+  totChangeC=sum([totChange(:,2),totChange(:,6:9)],2);
+  totChangeA(totChangeA==0)=1;
+  totChangeF(totChangeF==0)=1;
+  totChangeC(totChangeC==0)=1;
+  %TODO:check probabilities : is it
+  Pa=totChange(:,1)./totChangeA;
+  Pg=totChange(:,3)./totChangeF;
+  Pl=totChange(:,4)./totChangeF;
+  Pr=totChange(:,6)./totChangeC;
+  Pf=totChange(:,7)./totChangeC;
+  Pla=totChange(:,8)./totChangeC;
+
+  figure
+  plot([0:39]',Pa)
+  hold on
+  plot([0:39]',Pg)
+  plot([0:39]',Pl)
+  plot([0:39]',Pr)
+  plot([0:39]',Pf)
+  plot([0:39]',Pla)
+  P=[Pa Pg Pl Pr Pf Pla];
+
+  end

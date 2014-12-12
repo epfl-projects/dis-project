@@ -1,45 +1,52 @@
 close all
 clear all
 
-
-%TODO : check N_F and N_C for negative number of robots (usually -1)
-%??? No negative number of robots anymore but don't know why !! ???
-
 %DIS Project : Macroscopic model of a wireless connected swarm
+
 
 %*************************************%
 %Initial conditions
 %*************************************%
 
-N_rob=10;
+N_rob=40;
 dmax=N_rob-1;
 
-alpha=5; %should be greater than 2
+alpha=15; %should be greater than 2
 
 TA = 5; %number of timesteps to spend in the avoidance state
 TC = 15; %number of timesteps to spend in the coherence state
-k_end=1000; %length of the simulation in timestep
-n_end=10; %number of simulations
+k_end=10000; %length of the simulation in timestep
 
+%*************************************%
+%Load Probabilities
+%*************************************%
+load(['../data/Probability-alpha-',num2str(alpha),'.mat'])
+
+Pa=P(:,1);
+Pg=P(:,2);
+Pl=P(:,3);
+Pr=P(:,4);
+Pf=P(:,5);
+Pla=P(:,6);
 
 %*************************************%
 %Probabilities to calibrate
 %*************************************%
 %those probabilities were extract from the second article page 256 the top figure on the left
-
-Pa=[0.00 0.00 0.01 0.02 0.02 0.03 0.03 0.03 0.05 0.06]';	%collision with another robot
-Pl=[0.00 0.12 0.15 0.17 0.18 0.26 0.28 0.31 0.33 0.33]'; 	%loss of a connection in forward state
-Pg=[0.19 0.22 0.24 0.23 0.22 0.17 0.15 0.13 0.11 0.09]';	%gain of a connection
-Pr=[0.28 0.30 0.31 0.29 0.28]';		%recovery of a connection [1:alpha]
-Pf=[0.70 0.58 0.56 0.54 0.52]';	%failure to recover a connection [1:alpha]
-Pla=[0.00 0.05 0.09 0.12 0.15]';	%loss of a connection in coherence state [1:alpha]
-
-%test
-Pr(alpha+1:N_rob)=0;
-Pf(alpha+1:N_rob)=0;
-Pla(alpha+1:N_rob)=0;
-Pla=ones(N_rob,1)-Pr-Pf;
-
+%
+% Pa=[0.00 0.00 0.01 0.02 0.02 0.03 0.03 0.03 0.05 0.06]';	%collision with another robot
+% Pl=[0.00 0.12 0.15 0.17 0.18 0.26 0.28 0.31 0.33 0.33]'; 	%loss of a connection in forward state
+% Pg=[0.19 0.22 0.24 0.23 0.22 0.17 0.15 0.13 0.11 0.09]';	%gain of a connection
+% Pr=[0.28 0.30 0.31 0.29 0.28]';		%recovery of a connection [1:alpha]
+% Pf=[0.70 0.58 0.56 0.54 0.52]';	%failure to recover a connection [1:alpha]
+% Pla=[0.00 0.05 0.09 0.12 0.15]';	%loss of a connection in coherence state [1:alpha]
+%
+% %test
+% Pr(alpha+1:N_rob)=0;
+% Pf(alpha+1:N_rob)=0;
+% Pla(alpha+1:N_rob)=0;
+% Pla=ones(N_rob,1)-Pr-Pf;
+%
 
 %*************************************%
 %Simulation
@@ -50,7 +57,7 @@ Pla=ones(N_rob,1)-Pr-Pf;
 
 	N_AF=zeros(N_rob,k_end);	% # of robots
 	N_F=zeros(N_rob,k_end);
-	N_F(alpha+2,1)=N_rob;
+	N_F(alpha+1,1)=N_rob;
 	N_AC=zeros(N_rob,k_end);
 	N_C=zeros(N_rob,k_end);
 
@@ -285,13 +292,13 @@ hold('on');
 ht=title('Macroscopic model : Number of robots per state and number of connections');
 for i=1:size(y, 2)
 	%h(i)=errorbar([0:9], y(:,i), e(:,i), [ '-' symb(i) lab(i) ] );
-	h(i)=plot([0:9], y(:,i), [ '-' symb(i) lab(i) ] );
+	h(i)=plot([0:dmax], y(:,i), [ '-' symb(i) lab(i) ] );
 
 end
 legend('Forward', 'Coherence', 'Avoidance', 'Total');
 xlabel('N of connections');
 ylabel('N of robots per state');
-axis([0 9, 0 3]);
+axis([0 dmax, 0 dmax/5]);
 set(h,'linewidth',1.5);
 set(ht,'fontsize',16);
 grid('on');
