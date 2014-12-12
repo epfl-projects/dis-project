@@ -1,3 +1,4 @@
+function [] = probability_generation(alpha)
 % Parse and exploit the simulation logs with LOG_DETAILS on
 % Expected format:
 %  Time, Robot ID, Robot state, Number of neighbors
@@ -41,4 +42,5 @@ for i = 1:nExperiments
   nTimesteps = length(unique(simulation(:, 1)));
   P(:, :, i) = experimentProbabilities(simulation);
 end;
-save([logsDirectory,'/Probability-alpha-',num2str(alpha),'.mat'], 'P')
+save([logsDirectory,'/probability-alpha-',num2str(alpha),'.mat'], 'P')
+end

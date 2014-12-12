@@ -20,7 +20,8 @@ k_end=10000; %length of the simulation in timestep
 %*************************************%
 %Load Probabilities
 %*************************************%
-load(['../data/Probability-alpha-',num2str(alpha),'.mat'])
+probability_generation(alpha);
+load(['../data/probability-alpha-',num2str(alpha),'.mat'])
 
 Pa=P(:,1);
 Pg=P(:,2);
