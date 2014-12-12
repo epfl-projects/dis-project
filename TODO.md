@@ -34,7 +34,7 @@ Submicroscopic implementation and macroscopic model design can be parallelized t
 Week 11
 -------
 
-- [ ] Collect performance measures from the simulations
+- [x] Collect performance measures from the simulations
   - Follow the parameter values of (Winfield et al, 2008)
 - [ ] Tune the macroscopic model parameters from the experiments
 - [ ] Compare and analyse the results of submicroscopic and macroscopic models

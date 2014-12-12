@@ -208,10 +208,10 @@ void lightGetSensorValues(int *sensorTable)
   }
   // printf("\n");
 
-  // if (isIlluminated()) {
-  //   wb_led_set(led, 1); 
-  // } else 
-  //   wb_led_set(led, 0); 
+   if (isIlluminated()) {
+     wb_led_set(led, 1); 
+   } else 
+     wb_led_set(led, 0); 
   // debugging 
   // if (isIlluminated()) {
   //   // Change channel temporarily to communicate with the supervisor
