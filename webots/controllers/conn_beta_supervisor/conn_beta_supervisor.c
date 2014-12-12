@@ -20,6 +20,7 @@ char filename_metrics[255];
 WbNodeRef epucks[NUM_ROBOTS], beacon;
 WbFieldRef locfield[NUM_ROBOTS];
 WbFieldRef beacon_location;
+double beacon_coord[2];
 
 float finalTime;
 
@@ -103,6 +104,11 @@ void reset(void) {
   // get beacon
   beacon=wb_supervisor_node_get_from_def("BEACON1");
   beacon_location=wb_supervisor_node_get_field(beacon, "translation");
+
+  double* location = wb_supervisor_field_get_sf_vec3f(beacon_location);
+  beacon_coord[0] = location[0];
+  beacon_coord[1] = location[1];
+
 
 
   sprintf(filename_metrics, "%s/metrics.csv", LOG_FILES_FOLDER);
@@ -228,9 +234,9 @@ void computeMetrics() {
   // get centroid 
   Point centeroid = getCentroid(convex_hull, n);
   // get beacon's location
-  location = wb_supervisor_field_get_sf_vec3f(beacon_location);
+  
 
-  double distance = sqrt((centeroid.x - location[0]) * (centeroid.x - location[0]) - (centeroid.y - location[1]) * (centeroid.y - location[1]));
+  double distance = sqrt(((centeroid.x - beacon_coord[0]) * (centeroid.x - beacon_coord[0])) + ((centeroid.y - beacon_coord[1]) * (centeroid.y - beacon_coord[1])));
 
   // log to file
   FILE * logFile = fopen(filename_metrics, "a");
@@ -247,7 +253,7 @@ void run() {
     wb_supervisor_simulation_revert();
   }
 
-  if (timestep_counter >= 10) {
+  if (timestep_counter >= 20) {
     computeMetrics();
     timestep_counter = 0;
   }
