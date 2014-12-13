@@ -8,9 +8,8 @@
 %   FORWARD_AVOIDANCE = 1,
 %   COHERENCE = 2,
 %   COHERENCE_AVOIDANCE = 3
+clear all;
 
-%clearvars;
-clear all
 %% Configuration
 
 logsDirectory = '../data';
@@ -23,7 +22,10 @@ alpha = 15;
 skipped = 10 * (nStates + 1);
 
 % Symbols for each curve of the plot
-symbols = ['x', '*', 'v', '.'];
+symbols = {'-x', '.-', '-v', '-.'};
+showErrorBars = 0;
+savePlot = 1;
+figurePath= '../../report/figures';
 
 pattern = [logsDirectory, '/simulation-', int2str(nRobots), '-alpha', int2str(alpha), '-*.csv'];
 filenames = dir(pattern);
@@ -48,16 +50,28 @@ if(nExperiments > 0)
     figure;
     hold on;
 
-    errorbar(0:(nRobots-1), averaged(:, 1), errors(:, 1), [symbols(1), '-']);
-    errorbar(0:(alpha-1), averaged(1:alpha, 2), errors(1:alpha, 2), [symbols(2), '-']);
-    errorbar(0:(nRobots-1), averaged(:, 3), errors(:, 3), [symbols(3), '-']);
-    errorbar(0:(nRobots-1), averaged(:, 4), errors(:, 4), [symbols(4), '-']);
+    if(showErrorBars)
+        errorbar(0:(nRobots-1), averaged(:, 1), errors(:, 1), symbols{1});
+        errorbar(0:(alpha-1), averaged(1:alpha, 2), errors(1:alpha, 2), symbols{2});
+        errorbar(0:(nRobots-1), averaged(:, 3), errors(:, 3), symbols{3});
+        errorbar(0:(nRobots-1), averaged(:, 4), errors(:, 4), symbols{4});
+    else
+        plot(0:(nRobots-1), averaged(:, 1), symbols{1});
+        plot(0:(alpha-1), averaged(1:alpha, 2), symbols{2});
+        plot(0:(nRobots-1), averaged(:, 3), symbols{3});
+        plot(0:(nRobots-1), averaged(:, 4), symbols{4});
+    end;
 
-    title(['Average over ', int2str(nExperiments), ' experiments']);
+    title(['alpha = ', int2str(alpha)]);
     xlabel('Connections (number of neighbors)');
     ylabel('Number of robots');
     axis([0 nRobots 0 max(averaged(:, 4))+1]);
     legend('Forward', 'Coherence', 'Avoidance', 'Any state');
+    
+    if(savePlot)
+        filename = ['simulation-', num2str(nRobots), '-alpha-', num2str(alpha)];
+        print('-dpdf', [figurePath, '/', filename, '.pdf']);
+    end;
 else
     fprintf('No simulation results found for alpha = %d with %d robots.\n', alpha, nRobots);
 end;

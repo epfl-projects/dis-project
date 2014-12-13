@@ -227,27 +227,38 @@ for nalpha=alphaInit:alphaEnd
 	y=[ m_N_F, m_N_C, m_N_A, m_N_T ];
 
 
-	lab=['rcbk'];
-	symb=['dox*'];
+	symb = {'-x', '.-', '-v', '-.'};
 
 	figure();
 	hold('on');
-	ht=title( ['Macroscopic model : Number of robots per state and number of connections with alpha = ' num2str(alpha)] );
+	ht=title( ['\alpha = ' num2str(alpha)] );
 	for i=1:size(y, 2)
-		h(i)=plot([0:dmax], y(:,i), [ '-' symb(i) lab(i) ], 'markersize', 9 );
-	end
-	hl=legend('Forward', 'Coherence', 'Avoidance', 'Total');
-	xlabel('N of connections');
-	ylabel('N of robots per state');
-	axis([0 dmax, 0 floor(max(y(:,4))+1)]);
+		xLimit = dmax;
+        if(i == 2)
+            xLimit = alpha - 1;
+        end;
+        
+        h(i)=plot([0:xLimit], y(1:(xLimit+1),i), [ symb{i}]);
+        
+    end
+    
+    hl = legend('Forward', 'Coherence', 'Avoidance', 'Any state');
+    
+    xlabel('Connections (number of neighbors)');
+    ylabel('Number of robots');
+    axis([0 dmax, 0 floor(max(y(:,4))+1)]);
+    
+    %{
 	set(h,'linewidth',1.5);
 	set(ht,'fontsize',16);
 	set(hl,'fontsize',14);
 	grid('on');
 	hold('off');
-
+    %}
+    
 	if saveFigure
-		print([figurePath, '/',num2str(nRobots),'-macroscopic-alpha-', num2str(alpha),'.png'] );
+        filename = ['/macroscopic-',num2str(nRobots),'-alpha-', num2str(alpha)];
+		print('-dpdf', [figurePath, filename, '.pdf'] );
 	end
 	if ~showFigure
 		close
