@@ -11,6 +11,9 @@
 %\usepackage{amsmath}  % assumes amsmath package installed
 %\usepackage{amssymb}  % assumes amsmath package installed
 
+
+
+
 \title{ %\LARGE \bf
   Distributed Intelligent Systems: Course Project\\
   Swarm compactness maintenance using only local communication
@@ -23,6 +26,7 @@
 }
 
 \begin{document}
+
 
 \maketitle
 \thispagestyle{empty}
@@ -41,6 +45,9 @@
 
   Present the Alpha algorithm (solution proposed by \cite{Nembrini02}). Present Beta algorithm.
 
+  Besides submicroscopic and macroscopic modeling of alpha algorithm we also implemented beta algorithm at the submicroscopic level. We also studied movement of swarm of robots towards a beacon while ensuring obstacle avoidance. The later being an emergent property of the beta algorithm resulting from differentiation of certain robots from the rest. In section III we compare beta algorithm with alpha algorithm based on various metrics and present some visual results. 
+
+
   Define Multilevel modeling (3 levels). Explain the advantages / usage of macroscopic modeling. Present solution proposed by \cite{Winfield08}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -53,6 +60,12 @@
 
   \subsection{Experimental setup}
   Webots software, arena. E-puck robot: which sensors, which abilities. Communication model (range and delays). No noise used on messages.\\
+
+  Just like in alpha algorithm in beta algorithm robots are equipped with basic collision avoidance sensors and short range omnidirectional radio for communication. In addition, each robot is equipped with a beacon sensor. In terms of locomotive capabilities each robot is capable of moving forward in a straight line as well as making a turn in place with reasonable accuracy. In our simulations we use all 8 infrared sensors on-board the robot and a simple weight based Breitenberg controller to achieve obstacle avoidance behavior. A beacon is introduced with line of sight occlusion in order to study the collective movement of swarm towards a certain point. \\
+  While each robot can tell if a certain robot is in its communication range (based on exchanged messages) any kind of absolute or relative pose of neighbors is not available to the robots. Each robot broadcasts its neighborhood information (IDs of its current/latest neighbors) at a regular time interval unlike alpha algorithm where each robot only sends ``I am here!'' messages. This additional information allows for a different locomotive strategy resulting in a more flexible swarm and many more additional emergent behaviors. In alpha algorithm we saw that as the number of robots in the swarm increases the swarm as a whole becomes more and more reactive (since robots reacts to every communication loss) and clumps together. In beta algorithm such over-reactivity is overcome by exploiting the additional neighborhood information available to each robot. Unlike alpha algorithm in beta algorithm a robot reacts to a communication loss only when the lost robot is shared by less than a certain number (given by parameter `beta' and hence the name of the algorithm) of neighbors. In other words, as long as a good number of neighbors are in the range of the lost robot swarm recovery behavior is not triggered. This allows the swarm to be more flexible and thus eliminates the problem of entire swarm collapsing on itself like we saw with the alpha algorithm. Additionally robots take a random heading if the number of connections rises over time. 
+
+
+
 
   \subsection{Experimental parameters}
   We summarize below the parameters used in our simulations.
