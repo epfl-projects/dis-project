@@ -231,7 +231,7 @@ for nalpha=alphaInit:alphaEnd
 
 	figure();
 	hold('on');
-	ht=title( ['\alpha = ' num2str(alpha)] );
+	ht=title( ['alpha = ' num2str(alpha)] );
 	for i=1:size(y, 2)
 		xLimit = dmax;
         if(i == 2)
