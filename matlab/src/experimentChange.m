@@ -33,11 +33,11 @@ function nChange = experimentChange(cInfos, pInfos)
 
     switch pState
 
-    case {0} %robot in FORWARD
+    case 0 %robot in FORWARD
 
       switch cState
 
-      case {0} %the robot is still in FORWARD
+      case 0 %the robot is still in FORWARD
         %so 3 possibilities
         %1. Gain a/several connections
         if cConnect > pConnect
@@ -50,8 +50,7 @@ function nChange = experimentChange(cInfos, pInfos)
           nChange(pCindex, Nfrestindex) = nChange(pCindex, Nfrestindex) + 1;
         end
 
-
-      case {1} %go into avoidance
+      case 1 %go into avoidance
         nChange(pCindex, Naindex)= nChange(pCindex, Naindex) + 1;
         %Could also gain/loose connections
         %1. Gain a/several connections
@@ -65,8 +64,7 @@ function nChange = experimentChange(cInfos, pInfos)
           nChange(pCindex, Nafindex) = nChange(pCindex, Nafindex) + 1;
         end
 
-
-      case {2} %From Forward to Coherence state (means loss of a connection)
+      case 2 %From Forward to Coherence state (means loss of a connection)
         %1. Gain a/several connections
         if cConnect > pConnect
           nChange(pCindex, Ngindex) = nChange(pCindex, Ngindex) + (cConnect-pConnect);
@@ -78,7 +76,7 @@ function nChange = experimentChange(cInfos, pInfos)
           nChange(pCindex, Nfrestindex) = nChange(pCindex, Nfrestindex) + 1;
         end
 
-      case {3} %From Forward to Coherence avoidance state
+      case 3 %From Forward to Coherence avoidance state
         nChage(pCindex, 1) = nChange(pCindex, Naindex) + 1;
         %1. Gain a/several connections
         if cConnect > pConnect
@@ -90,17 +88,17 @@ function nChange = experimentChange(cInfos, pInfos)
         else
           nChange(pCindex, Nacindex) = nChange(pCindex, Nacindex) + 1;
         end
+
       otherwise
         error('no such State');
         %Shouldn't happen
-      endswitch
+      end % end switch
 
 
-
-    case {1} %was in Forward Avoidance
+    case 1 %was in Forward Avoidance
       %I don't know exactly where they could go from AF state
       switch cState
-      case {0} %Go back into Forward, since TA is fixed no probabilities exept if it gain/loss connecitons
+      case 0 %Go back into Forward, since TA is fixed no probabilities exept if it gain/loss connecitons
         %1. Gain a/several connections
         if cConnect > pConnect
           nChange(pCindex, Ngindex) = nChange(pCindex, Ngindex) + (cConnect-pConnect);
@@ -112,7 +110,7 @@ function nChange = experimentChange(cInfos, pInfos)
           nChange(pCindex, Nfrestindex) = nChange(pCindex, Nfrestindex) + 1;
         end
 
-      case {1} %stay in AF state
+      case 1 %stay in AF state
         %1. Gain a/several connections
         if cConnect > pConnect
           nChange(pCindex, Ngindex) = nChange(pCindex, Ngindex) + (cConnect-pConnect);
@@ -124,7 +122,7 @@ function nChange = experimentChange(cInfos, pInfos)
           nChange(pCindex, Nafindex) = nChange(pCindex, Nafindex) + 1;
         end
 
-      case {2} %Go into Coherence state
+      case 2 %Go into Coherence state
         %1. Gain a/several connections
         if cConnect > pConnect
           nChange(pCindex, Ngindex) = nChange(pCindex, Ngindex) + (cConnect-pConnect);
@@ -136,7 +134,7 @@ function nChange = experimentChange(cInfos, pInfos)
           nChange(pCindex, Nfrestindex) = nChange(pCindex, Nfrestindex) + 1;
         end
 
-      case {3} %Go into Coherence Avoidance
+      case 3 %Go into Coherence Avoidance
         nChange(pCindex, Naindex) = nChange(pCindex, Naindex) + 1 ;
         %1. Gain a/several connections
         if cConnect > pConnect
@@ -151,11 +149,11 @@ function nChange = experimentChange(cInfos, pInfos)
 
       otherwise
         error('No such state');
-      endswitch
+      end % end switch
 
-    case {2} %was in Coherence state
+    case 2 %was in Coherence state
       switch cState
-      case {0}
+      case 0
         %1. Gain a/several connections
         if cConnect > pConnect
           nChange(pCindex, Nrindex) = nChange(pCindex, Nrindex) + (cConnect-pConnect);
@@ -167,7 +165,7 @@ function nChange = experimentChange(cInfos, pInfos)
           nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + 1;
         end
 
-      case {1} %go in Avoidance Forward
+      case 1 %go in Avoidance Forward
         nChange(pCindex, Naindex)=nChange(pCindex, Naindex) + 1;
         %1. Gain a/several connections
         if cConnect > pConnect
@@ -180,7 +178,7 @@ function nChange = experimentChange(cInfos, pInfos)
           nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + 1;
         end
 
-      case {2} %Stay in Coherence
+      case 2 %Stay in Coherence
         %1. Gain a/several connections
         if cConnect > pConnect
           nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + (cConnect-pConnect);
@@ -192,7 +190,7 @@ function nChange = experimentChange(cInfos, pInfos)
           nChange(pCindex, Ncrestindex) = nChange(pCindex, Ncrestindex) + 1;
         end
 
-      case {3} %Go in avoidance
+      case 3 %Go in avoidance
         nChange(pCindex, Naindex) = nChange(pCindex, Naindex) + 1;
         %1. Gain a/several connections
         if cConnect > pConnect
@@ -207,11 +205,11 @@ function nChange = experimentChange(cInfos, pInfos)
 
       otherwise
         error('No such state');
-      endswitch
+      end % end switch
 
-    case {3} %was in Coherence Avoidance State
+    case 3 %was in Coherence Avoidance State
       switch cState
-      case {0} % Go in forward (don't know if possible)
+      case 0 % Go in forward (don't know if possible)
         %it would be like from Coherence
         %1. Gain a/several connections (recover connections)
         if cConnect > pConnect
@@ -224,7 +222,7 @@ function nChange = experimentChange(cInfos, pInfos)
           nChange(pCindex, Nacindex) = nChange(pCindex, Nacindex) + 1;
         end
 
-      case {1}
+      case 1
         nChange(pCindex, Naindex) = nChange(pCindex, Naindex) + 1;
         %1. Gain a/several connections (recover connections)
         if cConnect > pConnect
@@ -237,7 +235,7 @@ function nChange = experimentChange(cInfos, pInfos)
           nChange(pCindex, Nacindex) = nChange(pCindex, Nacindex) + 1;
         end
 
-      case {2} %finish avoidance and go back in Coherence
+      case 2 %finish avoidance and go back in Coherence
         %1. Gain a/several connections (recover connections)
         if cConnect > pConnect
           nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + (cConnect-pConnect);
@@ -249,7 +247,7 @@ function nChange = experimentChange(cInfos, pInfos)
           nChange(pCindex, Nacindex) = nChange(pCindex, Nacindex) + 1;
         end
 
-      case {3} %stay in avoidance
+      case 3 %stay in avoidance
         %1. Gain a/several connections (recover connections)
         if cConnect > pConnect
           nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + (cConnect-pConnect);
@@ -259,20 +257,21 @@ function nChange = experimentChange(cInfos, pInfos)
           %3. no change in number of connections (keep track in coherence avoidance)
         else
           nChange(pCindex, Nacindex) = nChange(pCindex, Nacindex) + 1;
-        end
+        end;
 
       otherwise
         error('No such State');
 
-    endswitch
+      end; % end switch
+
     otherwise
-      error('no such State');
       %shouldn't happen
-    endswitch
+      error('no such State');
+    end; % end switch
 
 
 
-  end
+  end; % end for
 
 
-end
+end % end function

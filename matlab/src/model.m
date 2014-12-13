@@ -10,7 +10,7 @@ for nalpha=alphaInit:alphaEnd
 
 	showFigure = 1; %show the figure
 	saveFigure = 0; %save it in the figurePath folder
-	generationProbabilities = 0; %generate the probabilities from files see the function probability_generation.m
+	generateProbabilities = 0; %generate the probabilities from files see the function probability_generation.m
 
 	%different paths
 	dataPath= '../data';
@@ -34,10 +34,10 @@ for nalpha=alphaInit:alphaEnd
 	%Load Probabilities
 	%*************************************%
 
-	if generationProbabilities
+	if generateProbabilities
 		%function who generate probabilities from experiment file with LOG_DETAILS=1
-		initiatilisationSteps = 10 ; %number of steps to avoid for the probability estimation
-		probability_generation(alpha,initialisationSteps);
+		initialisationSteps = 10 ; %number of steps to avoid for the probability estimation
+		probability_generation(alpha, initialisationSteps);
 	end
 	%load the P variable regrouping probabilities generate before (if didn't exist)
 	load( [dataPath, '/probability-alpha-',num2str(alpha),'.mat'] )
