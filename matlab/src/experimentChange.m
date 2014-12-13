@@ -4,12 +4,24 @@ function nChange = experimentChange(cInfos, pInfos)
   %    regarding (COLUMN) :
   %         IDRobots, StateRobots, numbNeighborRobots
   %OUTPUT:
-  %   nChange : vector
+  %   nChange : matrice counting the change occuring for each state "category"
+  %     and for each number of connection
 
-  nC=9;
-  nRobots=size(cInfos,1);
-  %Na Nrest| Ng Nl Nrest | Nr Nf Nla Nrest
+  nC=10;
+  nRobots=size(cInfos,1); %nRobots = 40;
+  %Na Naf Nac| Ng Nl Nfrest | Nr Nf Nla Ncrest
   nChange = zeros(nRobots,nC);
+
+  Naindex = 1;
+  Nafindex = 2;
+  Nacindex = 3;
+  Ngindex = 4;
+  Nlindex = 5;
+  Nfrestindex = 6;
+  Nrindex = 7;
+  Nfindex = 8;
+  Nlaindex = 9;
+  Ncrestindex = 10;
 
   for i=1:nRobots
     cState=cInfos(i,2);
@@ -29,54 +41,54 @@ function nChange = experimentChange(cInfos, pInfos)
         %so 3 possibilities
         %1. Gain a/several connections
         if cConnect > pConnect
-          nChange(pCindex, 3) = nChange(pCindex, 3) + (cConnect-pConnect);
+          nChange(pCindex, Ngindex) = nChange(pCindex, Ngindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
-          nChange(pCindex, 4) = nChange(pCindex, 4) + (pConnect-cConnect);
+          nChange(pCindex, Nlindex) = nChange(pCindex, Nlindex) + (pConnect-cConnect);
           %3. no change in number of connections (keep track)
         else
-          nChange(pCindex, 5) = nChange(pCindex, 5) + 1;
+          nChange(pCindex, Nfrestindex) = nChange(pCindex, Nfrestindex) + 1;
         end
 
 
       case {1} %go into avoidance
-        nChange(pCindex, 1)= nChange(pCindex, 1) + 1;
+        nChange(pCindex, Naindex)= nChange(pCindex, Naindex) + 1;
         %Could also gain/loose connections
         %1. Gain a/several connections
         if cConnect > pConnect
-          nChange(pCindex, 3) = nChange(pCindex, 3) + (cConnect-pConnect);
+          nChange(pCindex, Ngindex) = nChange(pCindex, Ngindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
-          nChange(pCindex, 4) = nChange(pCindex, 4) + (pConnect-cConnect);
+          nChange(pCindex, Nlindex) = nChange(pCindex, Nlindex) + (pConnect-cConnect);
           %3. no change in number of connections (keep track in avoidance)
         else
-          nChange(pCindex, 2) = nChange(pCindex, 2) + 1;
+          nChange(pCindex, Nafindex) = nChange(pCindex, Nafindex) + 1;
         end
 
 
       case {2} %From Forward to Coherence state (means loss of a connection)
         %1. Gain a/several connections
         if cConnect > pConnect
-          nChange(pCindex, 3) = nChange(pCindex, 3) + (cConnect-pConnect);
+          nChange(pCindex, Ngindex) = nChange(pCindex, Ngindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
-          nChange(pCindex, 4) = nChange(pCindex, 4) + (pConnect-cConnect);
+          nChange(pCindex, Nlindex) = nChange(pCindex, Nlindex) + (pConnect-cConnect);
           %3. no change in number of connections (keep track in avoidance)
         else
-          nChange(pCindex, 5) = nChange(pCindex, 5) + 1;
+          nChange(pCindex, Nfrestindex) = nChange(pCindex, Nfrestindex) + 1;
         end
 
       case {3} %From Forward to Coherence avoidance state
-        nChage(pCindex, 1) = nChange(pCindex, 1) + 1;
+        nChage(pCindex, 1) = nChange(pCindex, Naindex) + 1;
         %1. Gain a/several connections
         if cConnect > pConnect
-          nChange(pCindex, 3) = nChange(pCindex, 3) + (cConnect-pConnect);
+          nChange(pCindex, Ngindex) = nChange(pCindex, Ngindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
-          nChange(pCindex, 4) = nChange(pCindex, 4) + (pConnect-cConnect);
+          nChange(pCindex, Nlindex) = nChange(pCindex, Nlindex) + (pConnect-cConnect);
           %3. no change in number of connections (keep track in avoidance)
         else
-          nChange(pCindex, 2) = nChange(pCindex, 2) + 1;
+          nChange(pCindex, Nacindex) = nChange(pCindex, Nacindex) + 1;
         end
       otherwise
         error('no such State');
@@ -91,50 +103,50 @@ function nChange = experimentChange(cInfos, pInfos)
       case {0} %Go back into Forward, since TA is fixed no probabilities exept if it gain/loss connecitons
         %1. Gain a/several connections
         if cConnect > pConnect
-          nChange(pCindex, 3) = nChange(pCindex, 3) + (cConnect-pConnect);
+          nChange(pCindex, Ngindex) = nChange(pCindex, Ngindex) + (cConnect-pConnect);
         %2. Loss a/several connections
         elseif cConnect < pConnect
-          nChange(pCindex, 4) = nChange(pCindex, 4) + (pConnect-cConnect);
+          nChange(pCindex, Nlindex) = nChange(pCindex, Nlindex) + (pConnect-cConnect);
         %3. no change in number of connections (keep track)
         else
-          nChange(pCindex, 5) = nChange(pCindex, 5) + 1;
+          nChange(pCindex, Nfrestindex) = nChange(pCindex, Nfrestindex) + 1;
         end
 
       case {1} %stay in AF state
         %1. Gain a/several connections
         if cConnect > pConnect
-          nChange(pCindex, 3) = nChange(pCindex, 3) + (cConnect-pConnect);
+          nChange(pCindex, Ngindex) = nChange(pCindex, Ngindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
-          nChange(pCindex, 4) = nChange(pCindex, 4) + (pConnect-cConnect);
+          nChange(pCindex, Nlindex) = nChange(pCindex, Nlindex) + (pConnect-cConnect);
           %3. no change in number of connections (keep track)
         else
-          nChange(pCindex, 2) = nChange(pCindex, 2) + 1;
+          nChange(pCindex, Nafindex) = nChange(pCindex, Nafindex) + 1;
         end
 
       case {2} %Go into Coherence state
         %1. Gain a/several connections
         if cConnect > pConnect
-          nChange(pCindex, 3) = nChange(pCindex, 3) + (cConnect-pConnect);
+          nChange(pCindex, Ngindex) = nChange(pCindex, Ngindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
-          nChange(pCindex, 4) = nChange(pCindex, 4) + (pConnect-cConnect);
+          nChange(pCindex, Nlindex) = nChange(pCindex, Nlindex) + (pConnect-cConnect);
           %3. no change in number of connections (keep track)
         else
-          nChange(pCindex, 5) = nChange(pCindex, 5) + 1;
+          nChange(pCindex, Nfrestindex) = nChange(pCindex, Nfrestindex) + 1;
         end
 
       case {3} %Go into Coherence Avoidance
-        nChange(pCindex, 1) = nChange(pCindex, 1) + 1 ;
+        nChange(pCindex, Naindex) = nChange(pCindex, Naindex) + 1 ;
         %1. Gain a/several connections
         if cConnect > pConnect
-          nChange(pCindex, 3) = nChange(pCindex, 3) + (cConnect-pConnect);
+          nChange(pCindex, Ngindex) = nChange(pCindex, Ngindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
-          nChange(pCindex, 4) = nChange(pCindex, 4) + (pConnect-cConnect);
+          nChange(pCindex, Nlindex) = nChange(pCindex, Nlindex) + (pConnect-cConnect);
           %3. no change in number of connections (keep track in avoidance)
         else
-          nChange(pCindex, 2) = nChange(pCindex, 2) + 1;
+          nChange(pCindex, Nafindex) = nChange(pCindex, Nafindex) + 1;
         end
 
       otherwise
@@ -146,51 +158,51 @@ function nChange = experimentChange(cInfos, pInfos)
       case {0}
         %1. Gain a/several connections
         if cConnect > pConnect
-          nChange(pCindex, 6) = nChange(pCindex, 6) + (cConnect-pConnect);
+          nChange(pCindex, Nrindex) = nChange(pCindex, Nrindex) + (cConnect-pConnect);
           %2. Loss a/several connections => Nla
         elseif cConnect < pConnect
-          nChange(pCindex, 8) = nChange(pCindex, 8) + (pConnect-cConnect);
+          nChange(pCindex, Nlaindex) = nChange(pCindex, Nlaindex) + (pConnect-cConnect);
           %3. no change in number of connections => fail to recover
         else
-          nChange(pCindex, 7) = nChange(pCindex, 7) + 1;
+          nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + 1;
         end
 
       case {1} %go in Avoidance Forward
-        nChange(pCindex, 1)=nChange(pCindex, 1) + 1;
+        nChange(pCindex, Naindex)=nChange(pCindex, Naindex) + 1;
         %1. Gain a/several connections
         if cConnect > pConnect
-          nChange(pCindex, 6) = nChange(pCindex, 6) + (cConnect-pConnect);
+          nChange(pCindex, Nrindex) = nChange(pCindex, Nrindex) + (cConnect-pConnect);
           %2. Loss a/several connections => Nla
         elseif cConnect < pConnect
-          nChange(pCindex, 8) = nChange(pCindex, 8) + (pConnect-cConnect);
+          nChange(pCindex, Nlaindex) = nChange(pCindex, Nlaindex) + (pConnect-cConnect);
           %3. no change in number of connections => fail to recover
         else
-          nChange(pCindex, 7) = nChange(pCindex, 7) + 1;
+          nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + 1;
         end
 
       case {2} %Stay in Coherence
         %1. Gain a/several connections
         if cConnect > pConnect
-          nChange(pCindex, 7) = nChange(pCindex, 7) + (cConnect-pConnect);
+          nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
-          nChange(pCindex, 8) = nChange(pCindex, 8) + (pConnect-cConnect);
+          nChange(pCindex, Nlaindex) = nChange(pCindex, Nlaindex) + (pConnect-cConnect);
           %3. no change in number of connections (keep track in coherence)
         else
-          nChange(pCindex, 9) = nChange(pCindex, 9) + 1;
+          nChange(pCindex, Ncrestindex) = nChange(pCindex, Ncrestindex) + 1;
         end
 
       case {3} %Go in avoidance
-        nChange(pCindex, 1) = nChange(pCindex, 1) + 1;
+        nChange(pCindex, Naindex) = nChange(pCindex, Naindex) + 1;
         %1. Gain a/several connections
         if cConnect > pConnect
-          nChange(pCindex, 7) = nChange(pCindex, 7) + (cConnect-pConnect);
+          nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
-          nChange(pCindex, 8) = nChange(pCindex, 8) + (pConnect-cConnect);
+          nChange(pCindex, Nlaindex) = nChange(pCindex, Nlaindex) + (pConnect-cConnect);
           %3. no change in number of connections (keep track in coherence)
         else
-          nChange(pCindex, 9) = nChange(pCindex, 9) + 1;
+          nChange(pCindex, Ncrestindex) = nChange(pCindex, Ncrestindex) + 1;
         end
 
       otherwise
@@ -203,50 +215,50 @@ function nChange = experimentChange(cInfos, pInfos)
         %it would be like from Coherence
         %1. Gain a/several connections (recover connections)
         if cConnect > pConnect
-          nChange(pCindex, 7) = nChange(pCindex, 7) + (cConnect-pConnect);
+          nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
-          nChange(pCindex, 8) = nChange(pCindex, 8) + (pConnect-cConnect);
+          nChange(pCindex, Nlaindex) = nChange(pCindex, Nlaindex) + (pConnect-cConnect);
           %3. no change in number of connections (keep track in coherence)
         else
-          nChange(pCindex, 9) = nChange(pCindex, 9) + 1;
+          nChange(pCindex, Nacindex) = nChange(pCindex, Nacindex) + 1;
         end
 
       case {1}
-        nChange(pCindex, 1) = nChange(pCindex, 1) + 1;
+        nChange(pCindex, Naindex) = nChange(pCindex, Naindex) + 1;
         %1. Gain a/several connections (recover connections)
         if cConnect > pConnect
-          nChange(pCindex, 7) = nChange(pCindex, 7) + (cConnect-pConnect);
+          nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
-          nChange(pCindex, 8) = nChange(pCindex, 8) + (pConnect-cConnect);
+          nChange(pCindex, Nlaindex) = nChange(pCindex, Nlaindex) + (pConnect-cConnect);
           %3. no change in number of connections (keep track in coherence)
         else
-          nChange(pCindex, 9) = nChange(pCindex, 9) + 1;
+          nChange(pCindex, Nacindex) = nChange(pCindex, Nacindex) + 1;
         end
 
       case {2} %finish avoidance and go back in Coherence
         %1. Gain a/several connections (recover connections)
         if cConnect > pConnect
-          nChange(pCindex, 7) = nChange(pCindex, 7) + (cConnect-pConnect);
+          nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
-          nChange(pCindex, 8) = nChange(pCindex, 8) + (pConnect-cConnect);
+          nChange(pCindex, Nlaindex) = nChange(pCindex, Nlaindex) + (pConnect-cConnect);
           %3. no change in number of connections (keep track in coherence)
         else
-          nChange(pCindex, 9) = nChange(pCindex, 9) + 1;
+          nChange(pCindex, Nacindex) = nChange(pCindex, Nacindex) + 1;
         end
 
       case {3} %stay in avoidance
         %1. Gain a/several connections (recover connections)
         if cConnect > pConnect
-          nChange(pCindex, 7) = nChange(pCindex, 7) + (cConnect-pConnect);
+          nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
-          nChange(pCindex, 8) = nChange(pCindex, 8) + (pConnect-cConnect);
-          %3. no change in number of connections (keep track in coherence)
+          nChange(pCindex, Nlaindex) = nChange(pCindex, Nlaindex) + (pConnect-cConnect);
+          %3. no change in number of connections (keep track in coherence avoidance)
         else
-          nChange(pCindex, 9) = nChange(pCindex, 9) + 1;
+          nChange(pCindex, Nacindex) = nChange(pCindex, Nacindex) + 1;
         end
 
       otherwise
