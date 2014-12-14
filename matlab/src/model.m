@@ -1,4 +1,4 @@
-close all
+%close all
 clear all
 
 %DIS Project : Macroscopic model of a wireless connected swarm
@@ -11,7 +11,7 @@ for nalpha=alphaInit:alphaEnd
 	showFigure = 1; %show the figure
 	saveFigure = 1; %save it in the figurePath folder
 	generateProbabilities = 1; %generate the probabilities from files see the function probability_generation.m
-	saveFigureVariable = 1;
+	saveFigureVariable = 0;
 	%different paths
 
 	logsDirectory= '../data';
@@ -23,7 +23,7 @@ for nalpha=alphaInit:alphaEnd
 	alpha = [5,10,15]; %different alpha for simulation
 	alpha = alpha( nalpha );
 
-	k_end=2000; %length of the simulation in timesteps
+	k_end=1000; %length of the simulation in timesteps
 	InitConnections= alpha ; %number of connections of the swarm at t=0
 
 	%CONSTANTS
