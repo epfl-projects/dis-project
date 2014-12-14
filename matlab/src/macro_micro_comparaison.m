@@ -10,7 +10,7 @@ logsDirectory= '../data';
 figureDirectory= '../../report/figures';
 
 NRobots=40;
-nameModel={'microscopic','macroscopic'};
+nameModel={'submicroscopic','macroscopic'};
 
 symbols = {'-x', '.-', '-v', '-.'};
 

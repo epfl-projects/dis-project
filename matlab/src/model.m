@@ -9,7 +9,7 @@ alphaEnd=3;
 for nalpha=alphaInit:alphaEnd
 
 	showFigure = 1; %show the figure
-	saveFigure = 1; %save it in the figurePath folder
+	saveFigure = 0; %save it in the figurePath folder
 	generateProbabilities = 1; %generate the probabilities from files see the function probability_generation.m
 	saveFigureVariable = 0;
 	%different paths
