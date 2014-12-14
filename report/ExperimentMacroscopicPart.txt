@@ -1,0 +1,39 @@
+﻿Experiment
+
+Macroscopic model
+
+The macroscopic model of this wireless connected swarm is established form a set of macroscopic differential equations DEs [#Reference, article 2, 
+"Modeling a wireless connected swarm of mobile robots", Winfield and al] for the state transition. 
+
+The set of DEs can be separate into two hierarchical groups in a particle finite state machine (PFSM) with forward and coherence state and a sub-PFSM for the avoidance state.
+The sub-PFSM can be written as conservation principle because the number of time steps to spend in avoidance is known and fixed. His components are NF, NAF, NC and NAC, respectively in forward, avoidance forward, coherence and avoidance coherence.
+
+The PFSM can be express as the rate of change of the number of robots N at state X over time steps k for a given number of neighbors i,
+
+(#DEs)	dNX_i / dt ≃ %DELTA_NX / %DELTA_t = ( NX_i(k+1)-NX_i(k) ).
+
+Then, the input and output for each DE (#DEs) are derived from the probability to change the state of a robot to X considering his current number of neighbors. The states X are NFbar and NCbar There is six different state transition probabilities defined for the macroscopic model,
+
+[?IN A TABLE?]
+
+-go in avoidance	Pa
+-gain a connection in Forward	Pg
+-lost a connection in Forward	Pl
+-recover a connection in Coherence	Pr
+-fail to recover a connection in Coherence	Pf
+-lost a connection in Coherence	Pla
+
+Those probabilities were computed using data collected from the microscopic model simulations (#CallBack? microscopic model?) over 3 runs of ??? time steps
+
+[TABLE ? resulting probabilities?]
+
+The probabilities are define as the total amount of robots that actually fulfilled the condition over the concerned population at i connection(s). So for instance, the probability to go in avoidance concerned the whole population at i connection(s), when the probability to loose a connection in Forward only concerned the robots in Forward and Avoidance Forward states.
+
+The macroscopic model ran for 1000 time steps, estimating at each steps the number of robots for the next iteration in each state based on (#DEs) and the state transition probabilities, as rates of change coefficients
+
+(2)	PY_i * N(X|PY)_i
+
+with 	PY : each kind of probabilities, Y = {a, g, l, r, f, la}
+	N(X|PY) :Number of robots in the affected state (knowing which one)
+
+e.g., if we consider the state transition of robots which fail to recover a connection Pf, the related state knowing the consider probability N(X|Pf) is the coherence state NCbar
