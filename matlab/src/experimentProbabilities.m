@@ -54,7 +54,7 @@ function P = experimentProbabilities(simulation)
 
   totChangeA=sum(totChange(:,2:end),2);
   totChangeF=sum( [totChange(:,2), totChange(:,4:6)], 2);
-  totChangeC=sum( [totChange(:,3),totChange(:,7:end)], 2);
+  totChangeC=sum( [totChange(:,3),totChange(:,7:end-1)], 2);
   %To avoid NaN
   totChangeA(totChangeA==0) = 1;
   totChangeF(totChangeF==0) = 1;
@@ -67,16 +67,7 @@ function P = experimentProbabilities(simulation)
   Pr=totChange(:,7)./totChangeC;
   Pf=totChange(:,8)./totChangeC;
   Pla=totChange(:,9)./totChangeC;
-  if showFigure
-    figure();
-    plot([0:39]',Pa);
-    hold on
-    plot([0:39]',Pg);
-    plot([0:39]',Pl);
-    plot([0:39]',Pr);
-    plot([0:39]',Pf);
-    plot([0:39]',Pla);
-  end
+
   P=[Pa Pg Pl Pr Pf Pla];
 
   end

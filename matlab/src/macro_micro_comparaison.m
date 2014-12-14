@@ -28,7 +28,6 @@ for i=alphaInit:alphaEnd
   for j=1:4
     plot([0:NRobots-1]',modelDifference(:,j),symbols{j});
   end
-  hold off
   title(['alpha = ', int2str(alpha)]);
   xlabel('Connections (number of neighbors)');
   ylabel('Number of robots');
