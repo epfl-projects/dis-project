@@ -1,11 +1,16 @@
 clear all
 
-logsDirectory= '../data';
-NRobots=40;
-Allalpha=[5 10 15];
-nameModel={'microscopic','macroscopic'};
+saveFigure = 1;
+
 alphaInit = 1;
 alphaEnd = 3;
+Allalpha=[5 10 15];
+
+logsDirectory= '../data';
+figureDirectory= '../../report/figures';
+
+NRobots=40;
+nameModel={'microscopic','macroscopic'};
 
 symbols = {'-x', '.-', '-v', '-.'};
 
@@ -27,7 +32,11 @@ for i=alphaInit:alphaEnd
   title(['alpha = ', int2str(alpha)]);
   xlabel('Connections (number of neighbors)');
   ylabel('Number of robots');
-  axis([0 NRobots 0 max(modelDifference(:, 4))+1]);
+  axis([0 NRobots 0 max(modelDifference(:, 4))+0.25]);
   legend('Forward', 'Coherence', 'Avoidance', 'Any state');
+
+  if saveFigure
+    print('-dpdf',[figureDirectory, '/absolute_difference_macro_micro-alpha-',num2str(alpha),'.pdf']);
+  end
 
 end
