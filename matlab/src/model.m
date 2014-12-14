@@ -3,14 +3,14 @@ clear all
 
 %DIS Project : Macroscopic model of a wireless connected swarm
 
-alphaInit=1;
+alphaInit=3;
 alphaEnd=3;
 
 for nalpha=alphaInit:alphaEnd
 
 	showFigure = 1; %show the figure
 	saveFigure = 0; %save it in the figurePath folder
-	generateProbabilities = 0; %generate the probabilities from files see the function probability_generation.m
+	generateProbabilities = 1; %generate the probabilities from files see the function probability_generation.m
 
 	%different paths
 	dataPath= '../data';
@@ -22,8 +22,9 @@ for nalpha=alphaInit:alphaEnd
 	alpha = [5,10,15]; %different alpha for simulation
 	alpha = alpha( nalpha );
 
-	k_end=1000; %length of the simulation in timesteps
+	k_end=4000; %length of the simulation in timesteps
 
+	InitConnections= alpha ; %number of connections of the swarm at t=0
 	%CONSTANTS
 	nRobots=40; %number of robots
 	TA = 5; %number of timesteps to spend in the avoidance state
@@ -58,7 +59,7 @@ for nalpha=alphaInit:alphaEnd
 	N_AF=zeros(nRobots,k_end);	% # of robots
 	N_F=zeros(nRobots,k_end);
 
-	N_F(alpha+1,1)=nRobots; % intial condition everyone at alpha connections
+	N_F(InitConnections+1,1)=nRobots; % intial condition everyone at alpha connections
 
 	N_AC=zeros(nRobots,k_end);
 	N_C=zeros(nRobots,k_end);
@@ -237,17 +238,17 @@ for nalpha=alphaInit:alphaEnd
         if(i == 2)
             xLimit = alpha - 1;
         end;
-        
+
         h(i)=plot([0:xLimit], y(1:(xLimit+1),i), [ symb{i}]);
-        
+
     end
-    
+
     hl = legend('Forward', 'Coherence', 'Avoidance', 'Any state');
-    
+
     xlabel('Connections (number of neighbors)');
     ylabel('Number of robots');
     axis([0 dmax, 0 floor(max(y(:,4))+1)]);
-    
+
     %{
 	set(h,'linewidth',1.5);
 	set(ht,'fontsize',16);
@@ -255,7 +256,7 @@ for nalpha=alphaInit:alphaEnd
 	grid('on');
 	hold('off');
     %}
-    
+
 	if saveFigure
         filename = ['/macroscopic-',num2str(nRobots),'-alpha-', num2str(alpha)];
 		print('-dpdf', [figurePath, filename, '.pdf'] );

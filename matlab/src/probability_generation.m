@@ -30,6 +30,6 @@ function [] = probability_generation(alpha,nbSkip)
     nTimesteps = length(unique(simulation(:, 1)));
     P(:, :, i) = experimentProbabilities(simulation);
   end;
-
+  P=mean(P,3);
   save([logsDirectory,'/probability-alpha-',num2str(alpha),'.mat'], 'P')
 end

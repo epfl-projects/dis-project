@@ -64,7 +64,7 @@ function nChange = experimentChange(cInfos, pInfos)
           nChange(pCindex, Nafindex) = nChange(pCindex, Nafindex) + 1;
         end
 
-      case 2 %From Forward to Coherence state (means loss of a connection)
+      case 2 %From Forward to Coherence state
         %1. Gain a/several connections
         if cConnect > pConnect
           nChange(pCindex, Ngindex) = nChange(pCindex, Ngindex) + (cConnect-pConnect);
@@ -181,7 +181,7 @@ function nChange = experimentChange(cInfos, pInfos)
       case 2 %Stay in Coherence
         %1. Gain a/several connections
         if cConnect > pConnect
-          nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + (cConnect-pConnect);
+          nChange(pCindex, Nrindex) = nChange(pCindex, Nrindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
           nChange(pCindex, Nlaindex) = nChange(pCindex, Nlaindex) + (pConnect-cConnect);
@@ -194,7 +194,7 @@ function nChange = experimentChange(cInfos, pInfos)
         nChange(pCindex, Naindex) = nChange(pCindex, Naindex) + 1;
         %1. Gain a/several connections
         if cConnect > pConnect
-          nChange(pCindex, Nfindex) = nChange(pCindex, Nfindex) + (cConnect-pConnect);
+          nChange(pCindex, Nrindex) = nChange(pCindex, Nrindex) + (cConnect-pConnect);
           %2. Loss a/several connections
         elseif cConnect < pConnect
           nChange(pCindex, Nlaindex) = nChange(pCindex, Nlaindex) + (pConnect-cConnect);
