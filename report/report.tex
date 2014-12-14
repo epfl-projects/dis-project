@@ -35,26 +35,22 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
   Short, but concise description of your project and results.
-  Here's how to reference articles from the bibliography: \cite{Nembrini02} and \cite{Winfield08}.
 \end{abstract}
 
 \section{Introduction}
-  TODO: brief description of your project and why it is interesting (with citations)\\
+  Modelling of swarm algorithms is important since it allows us to predict the overall behaviour of the swarm as well as study the influence of individual robot parameters on the swarm behaviour. Also swarm modelling is crucial for tasks such as validation of swarm algorithms before they can be deployed in real world situation. In this project we seek to model a wirelessly connected swarm at a macroscopic level and compare it to the same algorithm implemented in sub-microscopic simulation. As a first part of the project we implemented alpha algorithm (discussed below) in webots (sub-microscopic level), as a second part we modeled the same algorithm at a macroscopic level and as a third part we implemented an additional algorithm, beta algorithm, along with behaviours such as taxis towards a beacon and beacon encapsulation.\\
 
-  Define Swarm Robotics. Describe the Coherent Swarming problem.\\
+  We implemented the alpha algorithm as presented in \cite{Winfield08} which is a simpler version of beta algorithm presented in \cite{Nembrini02}. In alpha algorithm robots are in a default state of forward motion until the number of connections drops below a certain threshold. All the robots are equipped with a short range radio communication device (communication range is often much smaller than the size of the swarm) and are able to ``sense'' the number of robots that are within their communication range. At every time step each robot keeps track of number of its neighbors. If the number of neighbors fall below a certain threshold (dictated by alpha parameter) the robot switches form FORWARD state to COHERENCE state. In both states obstacle avoidance is ensured with the help of IR sensors onboard the robot. FORWARD and COHERENCE states are preemptive over AVOIDANCE in that state change to FORWARD or COHERENCE while at AVOIDANCE causes the robot to immediately stop AVOIDANCE and switch to the new state.  Hence the robots behave as if they were attached to each other via an elastic band. In COHERENCE state the robot tries to recover the swarm by turning 180 degrees in place and hence moving backwards. The robot makes a random turn if the number of connections rises following a COHERENCE move to recover the swarm. One drawback of alpha algorithm is that the swarm is very sensitive to communication loss and hence tends to collapse on itself while trying to recover too often.
 
-  Present the Alpha algorithm (solution proposed by \cite{Nembrini02}). Present Beta algorithm.
+  Just like in alpha algorithm in beta algorithm robots are equipped with basic collision avoidance sensors and short range omnidirectional radio for communication. In addition, each robot is equipped with a beacon sensor. In terms of locomotive capabilities each robot is capable of moving forward in a straight line as well as making a turn in place with reasonable accuracy. In our simulations we use all 8 infrared sensors onboard the robot and a simple weight based Breitenberg controller to achieve obstacle avoidance behaviour. A beacon is introduced with line of sight occlusion in order to study the collective movement of swarm towards a certain point.\\
+
+  While each robot can tell if a certain robot is in its communication range (based on exchanged messages) any kind of absolute or relative pose of neighbors is not available to the robots. Each robot broadcasts its neighborhood information (IDs of its current/latest neighbors) at a regular time interval unlike alpha algorithm where each robot only sends ``I am here'' messages. This additional information allows for a different locomotive strategy resulting in a more flexible swarm and results in many more additional emergent behaviours. In alpha algorithm we saw that as the number of robots in the swarm increases the swarm as a whole becomes more and more reactive (since robots reacts to every communication loss) and clumps together. In beta algorithm such overreactivity is overcome by exploiting the additional neighborhood information available to each robot. Unlike alpha algorithm in beta algorithm a robot reacts to a communication loss only when the lost robot is shared by less than a certain number (given by parameter ``beta'' and hence the name of the algorithm) of neighbors. In other words, as long as a good number of neighbors are in the range of the lost robot swarm recovery behaviour is not triggered. This allows the swarm to be more flexible and thus eliminates the problem of entire swarm collapsing on itself like we saw with the alpha algorithm. Additionally robots take a random heading if the number of connections rises over time.\\
 
   Besides submicroscopic and macroscopic modeling of alpha algorithm we also implemented beta algorithm at the submicroscopic level. We also studied movement of swarm of robots towards a beacon while ensuring obstacle avoidance. The later being an emergent property of the beta algorithm resulting from differentiation of certain robots from the rest. In section III we compare beta algorithm with alpha algorithm based on various metrics and present some visual results.
-
-
-  Define Multilevel modeling (3 levels). Explain the advantages / usage of macroscopic modeling. Present solution proposed by \cite{Winfield08}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Experiments}
-  TODO: what you did in your project\\
-
   \subsection{State machine}
   Present the controller's states. Explain the transitions. Explain the obstacle avoidance behavior (Braitenberg's controller).
 
