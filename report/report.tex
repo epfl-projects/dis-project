@@ -46,6 +46,16 @@
 
   While each robot can tell if a certain robot is in its communication range (based on exchanged messages) any kind of absolute or relative pose of neighbors is not available to the robots. Each robot broadcasts its neighborhood information (IDs of its current/latest neighbors) at a regular time interval unlike alpha algorithm where each robot only sends ``I am here'' messages. This additional information allows for a different locomotive strategy resulting in a more flexible swarm and results in many more additional emergent behaviours. In alpha algorithm we saw that as the number of robots in the swarm increases the swarm as a whole becomes more and more reactive (since robots reacts to every communication loss) and clumps together. In beta algorithm such overreactivity is overcome by exploiting the additional neighborhood information available to each robot. Unlike alpha algorithm in beta algorithm a robot reacts to a communication loss only when the lost robot is shared by less than a certain number (given by parameter ``beta'' and hence the name of the algorithm) of neighbors. In other words, as long as a good number of neighbors are in the range of the lost robot swarm recovery behaviour is not triggered. This allows the swarm to be more flexible and thus eliminates the problem of entire swarm collapsing on itself like we saw with the alpha algorithm. Additionally robots take a random heading if the number of connections rises over time.\\
 
+  We use the multilevel modeling methodology to describe the same system at different levels of abstraction, which allows for the study of a robotic swarm at the level of the individuals as well as their inter-robot relations or over the whole population. The three most common levels can be distinguished as follows:
+\begin{itemize}
+  \item \textit{Submicroscopic level}: In this level faithful reproduction of intra-robot interactions (e.g.,
+  S\&A, transceiver) and environment details (physics, rendering) are carried out. All mechanical and control processes are simulated as realistically as possible.
+  \item \textit{Microscopic level}: In this level multi-agent models are used and only relevant robot features are captured. Typically each robot is represented by a single agent (pogram).
+  \item \textit{Macroscopic level}: The swarm is considered as a whole,
+\end{itemize}
+
+
+
   Besides submicroscopic and macroscopic modeling of alpha algorithm we also implemented beta algorithm at the submicroscopic level. We also studied movement of swarm of robots towards a beacon while ensuring obstacle avoidance. The later being an emergent property of the beta algorithm resulting from differentiation of certain robots from the rest. In section III we compare beta algorithm with alpha algorithm based on various metrics and present some visual results.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -169,6 +179,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Conclusion}
+In this project, we studied the multi-level modeling of a simple swarm algorithm, the alpha algorithm as well as a slightly more sophisticated version, the beta algorithm. Our results demonstrated the expected emergent behavior: the swarm maintains its  coherent state over time. Moreover, using probabilities estimated from the submicroscopic simulations, we were able to verify that the macroscopic model lead to results coherent with the submicroscopic simulation observations. The main differences in between the different modeling levels were introduced most certainly during the state transition probability estimation process. The beta algorithm turns out to be less sensitive to communication loss and unlike alpha algorithm does not tend to ``clump'' on itself and hence is more flexible. Moreover, various emergent properties were observed such as taxis towards a beacon and beacon encapsulation. Finally, the swarm was able to make its way thorugh the obstacles while moving towards the beacon.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
