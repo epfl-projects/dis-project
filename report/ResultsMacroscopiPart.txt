@@ -1,0 +1,12 @@
+﻿Results
+
+Macroscopic
+
+The synthesis of the macroscopic simulation is given in F. [#FIGURE result macro model]
+
+The results show the expected global tendency with a clearly visible mode centered on alpha. But some aspects aren't similar, the extremities dropped to zero too quickly, especially in the increasing side of the number of connections. And as a consequence, the number of robots is to high around the mode in particular for the avoidance state. This could indicate a too low rate of transition induced in the estimation of the transition state probabilities.
+
+To investigate the phenomena, the macroscopic model were tested using the results of Winfield et al. (#REFERENCE 2008, "Modeling a wireless connected swarm of mobile robots"), the model showed results similar to the article. That probably means the set of DEs previously describe (#DEs) were correctly implemented.
+
+Especially because this behavior still occurs for more calibration data and more simulation time steps, thus the generation of the probabilities is certainly the source of it.
+
