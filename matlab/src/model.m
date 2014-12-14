@@ -3,17 +3,18 @@ clear all
 
 %DIS Project : Macroscopic model of a wireless connected swarm
 
-alphaInit=3;
+alphaInit=1;
 alphaEnd=3;
 
 for nalpha=alphaInit:alphaEnd
 
 	showFigure = 1; %show the figure
-	saveFigure = 0; %save it in the figurePath folder
+	saveFigure = 1; %save it in the figurePath folder
 	generateProbabilities = 1; %generate the probabilities from files see the function probability_generation.m
-
+	saveFigureVariable = 1;
 	%different paths
-	dataPath= '../data';
+
+	logsDirectory= '../data';
 	figurePath= '../../report/figures';
 
 	%*************************************%
@@ -22,13 +23,13 @@ for nalpha=alphaInit:alphaEnd
 	alpha = [5,10,15]; %different alpha for simulation
 	alpha = alpha( nalpha );
 
-	k_end=4000; %length of the simulation in timesteps
-
+	k_end=2000; %length of the simulation in timesteps
 	InitConnections= alpha ; %number of connections of the swarm at t=0
+
 	%CONSTANTS
 	nRobots=40; %number of robots
 	TA = 5; %number of timesteps to spend in the avoidance state
-	TC = 15; %number of timesteps to spend in the coherence state
+	TC = 15; %interval inbetween the connections update
 	dmax=nRobots-1;	%max number of connection possible
 
 	%*************************************%
@@ -41,7 +42,7 @@ for nalpha=alphaInit:alphaEnd
 		probability_generation(alpha, initialisationSteps);
 	end
 	%load the P variable regrouping probabilities generate before (if didn't exist)
-	load( [dataPath, '/probability-alpha-',num2str(alpha),'.mat'] )
+	load( [logsDirectory, '/probability-alpha-',num2str(alpha),'.mat'] )
 
 	Pa=P(:,1);
 	Pg=P(:,2);
@@ -263,6 +264,9 @@ for nalpha=alphaInit:alphaEnd
 	end
 	if ~showFigure
 		close
+	end
+	if saveFigureVariable
+		save([logsDirectory,'/macroscopic-alpha-',num2str(alpha),'.mat'], 'm_N_F', 'm_N_C', 'm_N_A', 'm_N_T');
 	end
 
 end
