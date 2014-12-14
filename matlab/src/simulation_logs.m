@@ -28,7 +28,7 @@ skipped = 10 * (nStates + 1);
 symbols = {'-x', '.-', '-v', '-.'};
 showErrorBars = 0;
 savePlot = 0;
-saveNumericalResults = 1;
+saveNumericalResults = 0;
 figurePath= '../../report/figures';
 
 for i=alphaInit:alphaEnd
@@ -81,7 +81,7 @@ for i=alphaInit:alphaEnd
           print('-dpdf', [figurePath, '/', filename, '.pdf']);
       end;
       if saveNumericalResults
-        save([logsDirectory, '/microscopic-', 'alpha-', num2str(alpha),'.mat'],'averaged', 'errors');
+        save([logsDirectory, '/submicroscopic-', 'alpha-', num2str(alpha),'.mat'],'averaged', 'errors');
       end
   else
       fprintf('No simulation results found for alpha = %d with %d robots.\n', alpha, nRobots);
